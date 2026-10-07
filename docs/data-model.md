@@ -38,11 +38,11 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
 | `open_points_ledger` | user_id, school_year_id, delta (int non nul, peut être négatif), reason, source (`auto`, `manual`), attendance_id (nullable), status (`pending`, `validated`, `rejected`, `exported`), decided_by, decided_at (validation **ou** refus), created_by | `reason` non vide si source = manual ; unique (attendance_id) ; decided_at renseigné ssi status ≠ pending |
-| `grade_period` | school_year_id, label, starts_on, ends_on, presence_weight, involvement_weight, scale_max | poids qui somment à 1 |
-| `member_grade` | membership_id, grade_period_id, presence_score, involvement_score, final_score, comment, status (`draft`, `submitted`, `validated`, `published`), proposed_by, validated_by | unique (membership_id, grade_period_id) |
+| `grade_period` | school_year_id, label, starts_on, ends_on, scale_max (20), points_per_presence | ends_on > starts_on |
+| `member_grade` | membership_id, grade_period_id, presence_points, involvement_points, final_score, comment, status (`draft`, `submitted`, `validated`, `published`), proposed_by, validated_by | unique (membership_id, grade_period_id) ; final = min(scale_max, presence + involvement) |
 
 Solde points open d'un étudiant = `sum(delta) where status in ('validated','exported')`.
-`presence_score` est **calculé** (présences / événements et réunions attendus sur la période), jamais saisi.
+`presence_points` est **calculé** (somme des points des présences pointées sur la période), jamais saisi. Un événement peut surcharger les points par présence (`event.member_points`).
 
 ### Gestion interne
 

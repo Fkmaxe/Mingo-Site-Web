@@ -43,12 +43,14 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Notation des membres
 
 - Les membres du BDE reçoivent une **note** attribuée par le bureau.
-- Deux composantes :
-  1. **Présence** aux événements et réunions — calculée automatiquement à partir des check-in.
-  2. **Implication dans le pôle** — saisie par le responsable de pôle.
-- Le responsable propose, le bureau valide, puis publie. Avant publication, le membre ne voit que ses présences.
-- Pondération et périodes (semestre / année) paramétrables. Valeurs par défaut : voir questions ouvertes.
-- Statuts d'une note : `draft` → `submitted` → `validated` → `published`.
+- La note est un **total de points plafonné**, pas une moyenne pondérée :
+  1. **Points de présence** : chaque événement ou réunion où le membre est pointé (participant, staff ou réunion) rapporte un nombre de points. Valeur par défaut fixée sur la période, modifiable événement par événement. Calculés automatiquement depuis les check-in, jamais saisis.
+  2. **Points du pôle** (implication) : proposés par le responsable de pôle, entre 0 et le barème.
+  - **Note = min(barème, points de présence + points du pôle).** On peut atteindre le maximum uniquement par la présence, uniquement par le pôle, ou par un mélange des deux.
+- **Tout est réglable par le bureau** : barème (20 par défaut), points par présence, périodes.
+- Périodes : **trimestrielles par défaut**, mais le bureau crée librement ses périodes (dates de début et de fin).
+- Le responsable propose, **n'importe quel membre du bureau** valide puis publie. Avant publication, le membre ne voit que ses présences.
+- Statuts d'une note : `draft` → `submitted` → `validated` → `published`. Une note publiée n'est modifiable que par le bureau, avec trace dans `audit_log`.
 
 ## Événements et inscriptions
 
@@ -98,7 +100,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [x] ~~La DSI autorise-t-elle une app tierce sur le tenant Microsoft myskolae.fr ?~~ Non, pas d'accès → email + mot de passe, adresse vérifiée par mail (octobre 2026).
 - [ ] Format exact attendu par l'école pour la remontée des points open.
 - [ ] Barème des points open : fixé par l'école ou libre par événement ?
-- [ ] Échelle et pondération de la note membre (ex. /20, 50 % présence / 50 % implication ?).
-- [ ] Qui valide les notes : tout le bureau ou le président seul ?
+- [x] ~~Échelle et pondération de la note membre~~ : total de points plafonné (présence + pôle), barème et points réglables par le bureau, périodes trimestrielles par défaut (octobre 2026).
+- [x] ~~Qui valide les notes~~ : tout le bureau (octobre 2026).
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
 - [ ] Paiements (soirées, goodies) dès cette année ?
