@@ -51,6 +51,8 @@ export const staffAssignment = pgTable(
       .references(() => membership.id, { onDelete: "cascade" }),
     status: staffAssignmentStatus().notNull().default("proposed"),
     decidedBy: uuid().references(() => user.id, { onDelete: "set null" }),
+    /** Set when the day-before reminder was sent (sent once). */
+    reminderSentAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

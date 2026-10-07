@@ -4,12 +4,15 @@ import type {
   StaffSlotDto,
   UpdateStaffSlotInput,
 } from "@bde/shared";
-import type { AuthedCtx, Ctx } from "../../core/context";
+import type { AuthedCtx, Ctx, Services } from "../../core/context";
 import { AppError } from "../../core/errors";
-import { inTransaction } from "../../core/tx";
+import { type Defer, inTransaction, inTransactionWithEffects } from "../../core/tx";
+import type { DbOrTx } from "../../db/client";
 import { eventAttendances, recordAttendance } from "../checkin";
 import { canManageEvent, type EventRow, findManageableEvent, findVisibleEvent } from "../events";
+import { staffReminderEmail, staffValidatedEmail } from "./staff.emails";
 import {
+  claimDueStaffReminders,
   countValidated,
   deleteAssignment,
   deleteSlot,
@@ -20,6 +23,7 @@ import {
   findSlot,
   findSlots,
   findUser,
+  findUserContact,
   insertAssignment,
   insertSlot,
   lockSlot,
@@ -27,6 +31,17 @@ import {
   updateAssignment,
   updateSlot as updateSlotRow,
 } from "./staff.repo";
+
+function notifyValidated(
+  defer: Defer,
+  services: Services,
+  person: { name: string; email: string },
+  slot: StaffSlotRow,
+  event: EventRow,
+) {
+  const url = `${services.webOrigin}/events/${event.slug}`;
+  defer(() => services.mailer.send(staffValidatedEmail(person, slot, event, url)));
+}
 
 const slotNotFound = () => new AppError("NOT_FOUND", 404, "Ce créneau n'existe pas.");
 
@@ -97,7 +112,7 @@ export async function listSlots(ctx: Ctx, eventId: string): Promise<StaffSlotDto
         ? ofSlot.map((a) => ({
             id: a.id,
             status: a.status,
-            user: a.user,
+            user: { id: a.user.id, name: a.user.name, promo: a.user.promo },
             pole: a.pole,
             checkedInAt: checkedIn.get(a.user.id) ?? null,
           }))
@@ -222,7 +237,7 @@ export async function decide(
   status: "validated" | "declined",
 ) {
   const { assignment, slot, event } = await manageableAssignment(ctx, assignmentId);
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockSlot(tx, slot.id);
     if (
       status === "validated" &&
@@ -232,6 +247,9 @@ export async function decide(
       throw slotFull(slot);
     }
     await updateAssignment(tx, assignment.id, { status, decidedBy: ctx.user.id });
+    if (status === "validated" && assignment.status !== "validated") {
+      notifyValidated(defer, ctx.services, assignment.user, slot, event);
+    }
   });
   return listSlots(ctx, event.id);
 }
@@ -244,7 +262,7 @@ export async function assign(ctx: AuthedCtx, slotId: string, userId: string) {
     userId,
     "Cette personne n'est pas membre du BDE cette année.",
   );
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockSlot(tx, slot.id);
     const existing = await findAssignmentOf(
       tx,
@@ -265,6 +283,8 @@ export async function assign(ctx: AuthedCtx, slotId: string, userId: string) {
         decidedBy: ctx.user.id,
       });
     }
+    const contact = await findUserContact(tx, userId);
+    if (contact) notifyValidated(defer, ctx.services, contact, slot, event);
   });
   return listSlots(ctx, event.id);
 }
@@ -282,4 +302,24 @@ export async function checkInStaff(ctx: AuthedCtx, assignmentId: string): Promis
   const person = await findUser(ctx.db, assignment.user.id);
   if (!person) throw new AppError("NOT_FOUND", 404, "Ce membre n'existe plus.");
   return recordAttendance(ctx, event, person, "staff");
+}
+
+/** Job: day-before reminders to validated staff, sent once. Returns the count. */
+export async function sendStaffReminders(
+  deps: { db: DbOrTx; services: Services },
+  now: Date = new Date(),
+): Promise<number> {
+  return inTransactionWithEffects(deps.db, async (tx, defer) => {
+    const due = await claimDueStaffReminders(
+      tx,
+      now,
+      new Date(now.getTime() + 24 * 3600 * 1000),
+      now,
+    );
+    for (const r of due) {
+      const url = `${deps.services.webOrigin}/events/${r.event.slug}`;
+      defer(() => deps.services.mailer.send(staffReminderEmail(r.user, r.slot, r.event, url)));
+    }
+    return due.length;
+  });
 }

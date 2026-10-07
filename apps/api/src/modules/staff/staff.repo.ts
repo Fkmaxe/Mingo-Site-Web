@@ -1,7 +1,15 @@
 import { and, asc, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { compact, type Patch } from "../../db/patch";
-import { membership, pole, schoolYear, staffAssignment, staffSlot, user } from "../../db/schema";
+import {
+  event,
+  membership,
+  pole,
+  schoolYear,
+  staffAssignment,
+  staffSlot,
+  user,
+} from "../../db/schema";
 
 export type StaffSlotRow = typeof staffSlot.$inferSelect;
 
@@ -46,7 +54,7 @@ const assignmentSelection = {
   slotId: staffAssignment.staffSlotId,
   status: staffAssignment.status,
   membershipId: staffAssignment.membershipId,
-  user: { id: user.id, name: user.name, promo: user.promo },
+  user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
   pole: pole.name,
 };
 
@@ -139,4 +147,51 @@ export async function updateAssignment(
 
 export async function deleteAssignment(db: DbOrTx, assignmentId: string) {
   await db.delete(staffAssignment).where(eq(staffAssignment.id, assignmentId));
+}
+
+/** Like the registration reminders: validated staff of slots starting in (from, to], once. */
+export async function claimDueStaffReminders(db: DbOrTx, from: Date, to: Date, now: Date) {
+  const due = await db
+    .select({ id: staffAssignment.id })
+    .from(staffAssignment)
+    .innerJoin(staffSlot, eq(staffSlot.id, staffAssignment.staffSlotId))
+    .innerJoin(event, eq(event.id, staffSlot.eventId))
+    .where(
+      and(
+        eq(staffAssignment.status, "validated"),
+        isNull(staffAssignment.reminderSentAt),
+        eq(event.status, "published"),
+        isNull(event.deletedAt),
+        sql`${staffSlot.startsAt} > ${from.toISOString()}::timestamptz`,
+        sql`${staffSlot.startsAt} <= ${to.toISOString()}::timestamptz`,
+      ),
+    )
+    .limit(500)
+    .for("update", { of: staffAssignment, skipLocked: true });
+  const ids = due.map((r) => r.id);
+  if (ids.length === 0) return [];
+  await db
+    .update(staffAssignment)
+    .set({ reminderSentAt: now })
+    .where(inArray(staffAssignment.id, ids));
+  return db
+    .select({
+      user: { name: user.name, email: user.email },
+      slot: { label: staffSlot.label, startsAt: staffSlot.startsAt, endsAt: staffSlot.endsAt },
+      event: { title: event.title, slug: event.slug, location: event.location },
+    })
+    .from(staffAssignment)
+    .innerJoin(staffSlot, eq(staffSlot.id, staffAssignment.staffSlotId))
+    .innerJoin(event, eq(event.id, staffSlot.eventId))
+    .innerJoin(membership, eq(membership.id, staffAssignment.membershipId))
+    .innerJoin(user, eq(user.id, membership.userId))
+    .where(inArray(staffAssignment.id, ids));
+}
+
+export async function findUserContact(db: DbOrTx, userId: string) {
+  const [row] = await db
+    .select({ name: user.name, email: user.email })
+    .from(user)
+    .where(eq(user.id, userId));
+  return row;
 }

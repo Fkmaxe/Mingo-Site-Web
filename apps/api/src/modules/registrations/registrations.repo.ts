@@ -274,3 +274,45 @@ export function findActiveRegistrantContacts(db: DbOrTx, eventId: string) {
     .innerJoin(user, eq(user.id, registration.userId))
     .where(and(eq(registration.eventId, eventId), ne(registration.status, "cancelled")));
 }
+
+/**
+ * Claims confirmed registrations of published events starting in (from, to] whose reminder
+ * was not sent: marks them as sent and returns what the mail needs. Rows locked by a
+ * concurrent run are skipped, so a reminder is never claimed twice.
+ */
+export async function claimDueReminders(db: DbOrTx, from: Date, to: Date, now: Date) {
+  const due = await db
+    .select({ id: registration.id })
+    .from(registration)
+    .innerJoin(event, eq(event.id, registration.eventId))
+    .where(
+      and(
+        eq(registration.status, "confirmed"),
+        sql`${registration.reminderSentAt} is null`,
+        eq(event.status, "published"),
+        sql`${event.deletedAt} is null`,
+        sql`${event.startsAt} > ${from.toISOString()}::timestamptz`,
+        sql`${event.startsAt} <= ${to.toISOString()}::timestamptz`,
+      ),
+    )
+    .limit(500)
+    .for("update", { of: registration, skipLocked: true });
+  const ids = due.map((r) => r.id);
+  if (ids.length === 0) return [];
+  await db.update(registration).set({ reminderSentAt: now }).where(inArray(registration.id, ids));
+  return db
+    .select({
+      id: registration.id,
+      user: { name: user.name, email: user.email },
+      event: {
+        title: event.title,
+        slug: event.slug,
+        startsAt: event.startsAt,
+        location: event.location,
+      },
+    })
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .innerJoin(event, eq(event.id, registration.eventId))
+    .where(inArray(registration.id, ids));
+}

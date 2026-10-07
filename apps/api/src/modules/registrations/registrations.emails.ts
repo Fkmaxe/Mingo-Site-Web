@@ -65,3 +65,17 @@ export function eventCancelledEmail(person: Person, event: EventInfo, eventUrl: 
     action: { label: "Voir les autres événements", url: eventUrl },
   });
 }
+
+export function reminderEmail(person: Person, event: EventInfo, ticketUrl: string): Mail {
+  return buildMail({
+    to: person.email,
+    subject: `C'est bientôt : ${event.title}`,
+    title: "Rendez-vous bientôt !",
+    paragraphs: [
+      `Salut ${person.name}, petit rappel : « ${event.title} » commence bientôt.`,
+      when(event),
+      "Garde ton billet QR sous la main pour l'entrée. Si tu ne peux plus venir, désinscris-toi pour libérer ta place.",
+    ],
+    action: { label: "Voir mon billet", url: ticketUrl },
+  });
+}

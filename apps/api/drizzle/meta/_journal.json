@@ -57,6 +57,13 @@
       "when": 1791401448258,
       "tag": "0007_grades",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791401888550,
+      "tag": "0008_reminders",
+      "breakpoints": true
     }
   ]
 }

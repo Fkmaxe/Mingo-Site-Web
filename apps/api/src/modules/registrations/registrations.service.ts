@@ -7,14 +7,21 @@ import {
   type TicketDto,
 } from "@bde/shared";
 import { z } from "zod";
-import type { AuthedCtx } from "../../core/context";
+import type { AuthedCtx, Services } from "../../core/context";
 import { AppError } from "../../core/errors";
 import type { DomainEvents } from "../../core/events";
 import { decodeCursor, type Page, PgTimestampText, toPage } from "../../core/http";
 import { inTransactionWithEffects } from "../../core/tx";
+import type { DbOrTx } from "../../db/client";
 import { findManageableEvent, findVisibleEvent } from "../events";
-import { confirmedEmail, eventCancelledEmail, waitlistedEmail } from "./registrations.emails";
 import {
+  confirmedEmail,
+  eventCancelledEmail,
+  reminderEmail,
+  waitlistedEmail,
+} from "./registrations.emails";
+import {
+  claimDueReminders,
   countConfirmed,
   findActiveRegistrantContacts,
   findAllRegistrants,
@@ -277,4 +284,22 @@ export async function onEventCancelled(payload: DomainEvents["event.cancelled"])
       payload.services.mailer.send(eventCancelledEmail(contact.user, payload.event, url)),
     );
   }
+}
+
+const DAY_MS = 24 * 3600 * 1000;
+
+/** Job: day-before reminders to confirmed participants, sent once. Returns the count. */
+export async function sendRegistrationReminders(
+  deps: { db: DbOrTx; services: Services },
+  now: Date = new Date(),
+): Promise<number> {
+  return inTransactionWithEffects(deps.db, async (tx, defer) => {
+    const due = await claimDueReminders(tx, now, new Date(now.getTime() + DAY_MS), now);
+    for (const r of due) {
+      defer(() =>
+        deps.services.mailer.send(reminderEmail(r.user, r.event, ticketUrl(deps.services, r.id))),
+      );
+    }
+    return due.length;
+  });
 }

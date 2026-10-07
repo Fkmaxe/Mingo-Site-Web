@@ -36,6 +36,8 @@ export const registration = pgTable(
     /** Answers to the event's custom fields, validated against them by the API. */
     answers: jsonb().$type<Answers>().notNull().default({}),
     cancelledAt: timestamp({ withTimezone: true }),
+    /** Set when the day-before reminder was sent (sent once). */
+    reminderSentAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

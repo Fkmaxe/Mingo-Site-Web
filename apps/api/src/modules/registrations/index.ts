@@ -12,4 +12,5 @@ export {
   participantByToken,
   participantOfEvent,
   searchParticipants,
+  sendRegistrationReminders,
 } from "./registrations.service";

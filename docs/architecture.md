@@ -123,6 +123,11 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 - Session en cookie httpOnly, partagé avec le web (même domaine parent en prod, proxy Next en dev).
 - Le middleware `requireAuth` charge l'utilisateur et ses permissions dans le contexte Hono.
 
+## Jobs planifiés
+
+- `apps/api/src/jobs/scheduler.ts` : planificateur dans le processus de l'API (une seule instance), lancé par `index.ts`.
+- Rappels J-1 toutes les 15 minutes : inscrits confirmés et staffs validés des événements / créneaux qui commencent dans les 24 h. Chaque rappel est « réservé » (`reminder_sent_at`, `FOR UPDATE SKIP LOCKED`) avant l'envoi, après le commit : jamais envoyé deux fois.
+
 ## Déploiement
 
 - Docker Compose : `db`, `mailpit` (dev), `api`, `web` (profil `full`) (+ `caddy` en prod pour TLS).
