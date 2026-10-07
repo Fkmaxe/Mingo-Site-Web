@@ -39,7 +39,7 @@ describe("manage entry", () => {
     render(<SideNav canManage />);
     expect(screen.getByRole("link", { name: MANAGE_NAV_ITEM.label })).toHaveAttribute(
       "href",
-      "/manage/events",
+      "/manage",
     );
   });
 });

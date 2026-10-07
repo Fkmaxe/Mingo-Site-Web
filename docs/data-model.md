@@ -14,7 +14,7 @@ Conventions SQL :
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `user` | email (unique, `@myskolae.fr`), name, promo, image | check sur le domaine de l'email |
+| `user` | email (unique, `@myskolae.fr`), name, promo, image, is_admin (admin technique) | check sur le domaine de l'email |
 | `session`, `account`, `verification` | gérées par Better Auth | ne pas modifier à la main |
 | `school_year` | label (`2026-2027`), starts_on, ends_on, is_current | un seul `is_current = true` |
 | `pole` | slug, name, description | slug unique |
@@ -28,7 +28,7 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
 | `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité), registration_deadline, open_points_value, custom_fields_schema (jsonb), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at |
-| `registration` | event_id, user_id, status (`confirmed`, `waitlisted`, `cancelled`), waitlist_position, answers (jsonb), qr_token (unique), cancelled_at | unique (event_id, user_id) |
+| `registration` | event_id, user_id, status (`confirmed`, `waitlisted`, `cancelled`), waitlist_position, answers (jsonb, Lot 2), qr_token (unique), cancelled_at | unique (event_id, user_id) ; cancelled_at ssi cancelled ; waitlist_position ssi waitlisted |
 | `staff_slot` | event_id, label, starts_at, ends_at, capacity | |
 | `staff_assignment` | staff_slot_id, membership_id, status (`proposed`, `validated`, `declined`) | unique (staff_slot_id, membership_id) |
 | `attendance` | event_id, user_id, kind (`participant`, `staff`, `meeting`), checked_in_at, checked_in_by | unique (event_id, user_id, kind) |
@@ -37,7 +37,7 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `open_points_ledger` | user_id, school_year_id, delta (int, peut être négatif), reason, source (`auto`, `manual`), attendance_id (nullable), status (`pending`, `validated`, `rejected`, `exported`), validated_by, validated_at | `reason` non vide si source = manual ; unique (attendance_id) |
+| `open_points_ledger` | user_id, school_year_id, delta (int non nul, peut être négatif), reason, source (`auto`, `manual`), attendance_id (nullable), status (`pending`, `validated`, `rejected`, `exported`), decided_by, decided_at (validation **ou** refus), created_by | `reason` non vide si source = manual ; unique (attendance_id) ; decided_at renseigné ssi status ≠ pending |
 | `grade_period` | school_year_id, label, starts_on, ends_on, presence_weight, involvement_weight, scale_max | poids qui somment à 1 |
 | `member_grade` | membership_id, grade_period_id, presence_score, involvement_score, final_score, comment, status (`draft`, `submitted`, `validated`, `published`), proposed_by, validated_by | unique (membership_id, grade_period_id) |
 

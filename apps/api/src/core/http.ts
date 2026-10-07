@@ -40,3 +40,11 @@ export function toPage<Row, Item>(
     nextCursor: rows.length > limit && last ? encodeCursor(cursorOf(last)) : null,
   };
 }
+
+/**
+ * Postgres timestamptz rendered as text (`col::text`), e.g. "2026-10-07 14:32:11.123456+00".
+ * Keyset cursors on `created_at` keep this exact value: JS dates stop at milliseconds.
+ */
+export const PgTimestampText = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?[+-]\d{2}(:\d{2})?$/);

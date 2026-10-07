@@ -11,7 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 /** Shown to pole leads and the board. */
 export const MANAGE_NAV_ITEM: NavItem = {
-  href: "/manage/events",
+  href: "/manage",
   label: "Gestion",
   icon: Settings2,
 };

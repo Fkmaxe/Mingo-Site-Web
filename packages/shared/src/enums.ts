@@ -29,3 +29,9 @@ export type RegistrationState = (typeof REGISTRATION_STATES)[number];
 
 export const ATTENDANCE_KINDS = ["participant", "staff", "meeting"] as const;
 export type AttendanceKind = (typeof ATTENDANCE_KINDS)[number];
+
+export const OPEN_POINTS_STATUSES = ["pending", "validated", "rejected", "exported"] as const;
+export type OpenPointsStatus = (typeof OPEN_POINTS_STATUSES)[number];
+
+export const OPEN_POINTS_SOURCES = ["auto", "manual"] as const;
+export type OpenPointsSource = (typeof OPEN_POINTS_SOURCES)[number];

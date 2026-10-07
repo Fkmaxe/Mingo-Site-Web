@@ -2,7 +2,7 @@ import type { RegistrantDto, RegistrationStatus, TicketDto } from "@bde/shared";
 import { z } from "zod";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
-import { decodeCursor, type Page, toPage } from "../../core/http";
+import { decodeCursor, type Page, PgTimestampText, toPage } from "../../core/http";
 import { inTransaction } from "../../core/tx";
 import { findManageableEvent, findVisibleEvent } from "../events";
 import {
@@ -117,11 +117,7 @@ export async function listMyTickets(
   return (await findUserTickets(ctx.db, ctx.user.id, scope, now)).map(toTicket);
 }
 
-// Postgres timestamptz text, e.g. "2026-10-07 14:32:11.123456+00".
-const PgTimestamp = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?[+-]\d{2}(:\d{2})?$/);
-const RegistrantCursor = z.object({ c: PgTimestamp, id: z.uuid() });
+const RegistrantCursor = z.object({ c: PgTimestampText, id: z.uuid() });
 
 export async function listRegistrants(
   ctx: AuthedCtx,

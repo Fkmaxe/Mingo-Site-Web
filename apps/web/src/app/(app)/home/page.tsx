@@ -2,16 +2,40 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
+import { formatPoints } from "@/features/open-points/labels";
+import { getMyOpenPoints } from "@/features/open-points/queries";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Accueil" };
 
 export default async function HomePage() {
-  const [me, upcoming] = await Promise.all([requireMe(), listEvents({ limit: 3 })]);
+  const [me, upcoming, points] = await Promise.all([
+    requireMe(),
+    listEvents({ limit: 3 }),
+    getMyOpenPoints(),
+  ]);
   const firstName = me.name.split(" ")[0];
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-semibold text-2xl">Salut {firstName} 👋</h1>
+      {points.isMember ? null : (
+        <Link
+          href="/points"
+          className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+        >
+          <span className="flex flex-col">
+            <span className="text-muted-foreground text-sm">Mes points open</span>
+            <span className="font-bold text-2xl text-primary tabular-nums">
+              {formatPoints(points.balance)}
+            </span>
+          </span>
+          {points.pending !== 0 ? (
+            <span className="text-muted-foreground text-xs">
+              + {formatPoints(points.pending)} en attente
+            </span>
+          ) : null}
+        </Link>
+      )}
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
           <h2 className="font-semibold text-lg">Prochains événements</h2>

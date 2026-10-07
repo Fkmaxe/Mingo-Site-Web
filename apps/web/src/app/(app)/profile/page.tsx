@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
@@ -40,6 +41,10 @@ export default async function ProfilePage() {
           </ul>
         ) : null}
       </Card>
+
+      <Link href="/points" className="text-primary underline-offset-4 hover:underline">
+        Mes points open
+      </Link>
 
       <SignOutButton />
     </div>
