@@ -46,6 +46,9 @@ export function authOptions({ env, db, mailer }: AuthDeps) {
     advanced: {
       // Ids come from the database (gen_random_uuid()).
       database: { generateId: false as const },
+      // The API is only reachable through the web proxy (and Caddy in production), which
+      // sets this header. Never expose the API port directly, or the header can be spoofed.
+      ipAddress: { ipAddressHeaders: ["x-forwarded-for"] },
     },
     user: {
       additionalFields: {

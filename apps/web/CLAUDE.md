@@ -8,7 +8,7 @@ Le web est une **interface**, pas un backend : aucune logique métier, aucun acc
 pnpm dev            # next dev, port 3000
 pnpm build
 pnpm test           # vitest + testing-library pour les composants avec logique
-pnpm api:types      # régénère les types du client depuis http://localhost:3001/v1/openapi.json
+pnpm api:types      # exporte l'OpenAPI de l'API (sans la lancer) puis régénère src/lib/api-schema.d.ts
 ```
 
 ## Structure
@@ -28,6 +28,8 @@ pnpm api:types      # régénère les types du client depuis http://localhost:30
 4. **Erreurs API** : afficher `error.message` (déjà en français) ; brancher sur `error.code` pour les cas spéciaux (ex. `EVENT_FULL` → afficher « liste d'attente »).
 5. **Permissions** : l'UI masque ce que l'utilisateur ne peut pas faire (via `/v1/me`), mais ne s'y fie jamais pour la sécurité.
 6. Pas de `useEffect` pour charger des données.
+7. **Exception auth** : inscription, connexion, déconnexion et mot de passe passent par le client Better Auth (`src/lib/auth-client.ts`) depuis le navigateur, via le proxy `/api/auth/*` de `next.config.ts`. Les codes d'erreur Better Auth sont traduits dans `features/auth/auth-errors.ts`.
+8. Les composants client ne reçoivent jamais de fonctions en props depuis un Server Component (icônes comprises) : ils les importent eux-mêmes.
 
 ## Design
 

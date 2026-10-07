@@ -11,6 +11,7 @@ pnpm db:generate    # drizzle-kit generate après une modif dans src/db/schema
 pnpm db:migrate     # applique les migrations
 pnpm db:seed
 pnpm db:studio      # explorer la base
+pnpm openapi:export # écrit openapi.json (commité) ; le web en génère ses types
 ```
 
 ## Couches (respecter strictement)

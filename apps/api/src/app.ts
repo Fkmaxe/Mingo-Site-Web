@@ -9,6 +9,11 @@ import { createMeRouter } from "./modules/me";
 
 export type AppDeps = AuthDeps;
 
+export const OPENAPI_CONFIG = {
+  openapi: "3.1.0",
+  info: { title: "API BDE Mingo", version: "1.0.0" },
+};
+
 export function createApp(deps: AppDeps) {
   const { env, db } = deps;
   const auth = createAuth(deps);
@@ -24,10 +29,7 @@ export function createApp(deps: AppDeps) {
   app.use("/v1/*", loadContext(auth, db));
   app.route("/v1", createMeRouter());
 
-  app.doc31("/v1/openapi.json", {
-    openapi: "3.1.0",
-    info: { title: "API BDE Mingo", version: "1.0.0" },
-  });
+  app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {
     app.get("/v1/docs", Scalar({ url: "/v1/openapi.json", pageTitle: "API BDE Mingo" }));
   }

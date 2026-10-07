@@ -126,5 +126,6 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 ## Déploiement
 
 - Docker Compose : `db`, `api`, `web` (+ `caddy` en prod pour TLS).
+- Seul Caddy est exposé. Il doit poser `X-Forwarded-For` (comportement par défaut de `reverse_proxy`) : le proxy Next le transmet à l'API, qui s'en sert pour le rate limiting de l'auth. Le port de l'API ne doit jamais être public, sinon cet en-tête peut être falsifié. En dev, sans Caddy, Better Auth avertit qu'il ne trouve pas l'IP : sans conséquence.
 - Migrations appliquées au démarrage du conteneur API.
 - Sauvegarde quotidienne de la base (`pg_dump` vers un stockage externe).
