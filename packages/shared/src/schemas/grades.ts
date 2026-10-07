@@ -63,7 +63,9 @@ export type GradePeriodDto = z.infer<typeof GradePeriodDto>;
 
 export const PresenceDto = z
   .object({
-    eventId: z.uuid(),
+    /** Event or meeting id. */
+    id: z.uuid(),
+    kind: z.enum(["event", "meeting"]),
     title: z.string(),
     startsAt: z.iso.datetime(),
     points: z.number(),

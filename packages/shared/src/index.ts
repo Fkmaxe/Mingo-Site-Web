@@ -8,6 +8,7 @@ export * from "./schemas/custom-fields";
 export * from "./schemas/events";
 export * from "./schemas/grades";
 export * from "./schemas/me";
+export * from "./schemas/meetings";
 export * from "./schemas/open-points";
 export * from "./schemas/poles";
 export * from "./schemas/registrations";

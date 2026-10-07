@@ -18,6 +18,7 @@ import {
   findGradedMemberships,
   findGrades,
   findGradesByIds,
+  findMeetingPresences,
   findMembership,
   findPeriod,
   findPeriods,
@@ -140,9 +141,39 @@ function gradablePoles(ctx: Ctx, poleId: string | undefined): "all" | string[] {
   return ctx.memberships.flatMap((m) => (m.role === "pole_lead" && m.poleId ? [m.poleId] : []));
 }
 
-type PresenceRow = Awaited<ReturnType<typeof findPresences>>[number];
+type Presence = {
+  userId: string;
+  id: string;
+  kind: "event" | "meeting";
+  title: string;
+  startsAt: Date;
+  points: number;
+};
 
-function presenceTotals(presences: PresenceRow[]) {
+/** Presences of the period: events (participant / staff) and meetings. */
+async function findAllPresences(
+  db: Parameters<typeof findPresences>[0],
+  period: GradePeriodRow,
+  userIds: string[],
+): Promise<Presence[]> {
+  const [events, meetings] = await Promise.all([
+    findPresences(db, period, userIds),
+    findMeetingPresences(db, period, userIds),
+  ]);
+  return [
+    ...events.map((e) => ({ ...e, id: e.eventId, kind: "event" as const })),
+    ...meetings.map((m) => ({
+      userId: m.userId,
+      id: m.meetingId,
+      kind: "meeting" as const,
+      title: m.title,
+      startsAt: m.startsAt,
+      points: period.pointsPerPresence,
+    })),
+  ];
+}
+
+function presenceTotals(presences: Presence[]) {
   const byUser = new Map<string, { points: number; count: number }>();
   for (const p of presences) {
     const total = byUser.get(p.userId) ?? { points: 0, count: 0 };
@@ -169,7 +200,7 @@ export async function listGrades(
     gradablePoles(ctx, poleId),
   );
   const [presences, grades] = await Promise.all([
-    findPresences(
+    findAllPresences(
       ctx.db,
       period,
       memberships.map((m) => m.user.id),
@@ -303,7 +334,7 @@ export async function validateGrades(ctx: AuthedCtx, ids: string[]) {
       const period = await requirePeriod({ db: tx }, grade.gradePeriodId);
       const membership = await findMembership(tx, grade.membershipId);
       const presence = membership
-        ? (presenceTotals(await findPresences(tx, period, [membership.userId])).get(
+        ? (presenceTotals(await findAllPresences(tx, period, [membership.userId])).get(
             membership.userId,
           )?.points ?? 0)
         : 0;
@@ -358,13 +389,14 @@ export async function getMyGrades(ctx: AuthedCtx): Promise<MyGradesDto> {
   );
   const result: MyGradesDto["periods"] = [];
   for (const period of periods) {
-    const presences = await findPresences(ctx.db, period, [ctx.user.id]);
+    const presences = await findAllPresences(ctx.db, period, [ctx.user.id]);
     const grade = published.find((g) => g.periodId === period.id);
     result.push({
       period: toPeriodDto(period),
       presences: presences
         .map((p) => ({
-          eventId: p.eventId,
+          id: p.id,
+          kind: p.kind,
           title: p.title,
           startsAt: p.startsAt.toISOString(),
           points: p.points,

@@ -12,6 +12,7 @@ export const PERMISSIONS = [
   "checkin:scan",
   "members:manage",
   "tasks:manage",
+  "meetings:manage",
   "grades:propose",
   "grades:validate",
   "grades:publish",
@@ -48,6 +49,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "checkin:scan",
     "members:manage",
     "tasks:manage",
+    "meetings:manage",
     "grades:propose",
   ],
   board: [
@@ -58,6 +60,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "checkin:scan",
     "members:manage",
     "tasks:manage",
+    "meetings:manage",
     "grades:propose",
     "grades:validate",
     "grades:publish",

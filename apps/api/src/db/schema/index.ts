@@ -3,6 +3,7 @@ export * from "./audit";
 export * from "./auth";
 export * from "./events";
 export * from "./grades";
+export * from "./meetings";
 export * from "./open-points";
 export * from "./organization";
 export * from "./registrations";

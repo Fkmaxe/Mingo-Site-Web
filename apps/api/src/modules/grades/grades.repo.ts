@@ -6,6 +6,8 @@ import {
   attendance,
   event,
   gradePeriod,
+  meeting,
+  meetingAttendance,
   memberGrade,
   membership,
   pole,
@@ -116,6 +118,28 @@ export function findPresences(db: DbOrTx, period: GradePeriodRow, userIds: strin
       ),
     )
     .orderBy(attendance.userId, event.id);
+}
+
+/** Presences at meetings of the period (not deleted), worth the period's default points. */
+export function findMeetingPresences(db: DbOrTx, period: GradePeriodRow, userIds: string[]) {
+  if (userIds.length === 0) return Promise.resolve([]);
+  const parisDay = sql`(${meeting.startsAt} at time zone 'Europe/Paris')::date`;
+  return db
+    .select({
+      userId: meetingAttendance.userId,
+      meetingId: meeting.id,
+      title: meeting.title,
+      startsAt: meeting.startsAt,
+    })
+    .from(meetingAttendance)
+    .innerJoin(meeting, eq(meeting.id, meetingAttendance.meetingId))
+    .where(
+      and(
+        inArray(meetingAttendance.userId, userIds),
+        isNull(meeting.deletedAt),
+        sql`${parisDay} between ${period.startsOn} and ${period.endsOn}`,
+      ),
+    );
 }
 
 export type GradeRow = typeof memberGrade.$inferSelect;

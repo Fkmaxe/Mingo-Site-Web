@@ -26,6 +26,15 @@ export default async function HomePage() {
           <span className="font-medium">Mes tâches</span>
           <span className="text-muted-foreground text-sm">Voir le tableau du pôle</span>
         </Link>
+      ) : null}
+      {points.isMember ? (
+        <Link
+          href="/meetings"
+          className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+        >
+          <span className="font-medium">Réunions</span>
+          <span className="text-muted-foreground text-sm">Ordres du jour, comptes rendus</span>
+        </Link>
       ) : (
         <Link
           href="/points"

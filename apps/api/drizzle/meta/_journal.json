@@ -71,6 +71,20 @@
       "when": 1791403040490,
       "tag": "0009_tasks",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791403379995,
+      "tag": "0010_meetings",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791403380496,
+      "tag": "0011_meetings_permission",
+      "breakpoints": true
     }
   ]
 }

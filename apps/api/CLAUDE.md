@@ -48,7 +48,7 @@ Pour une transaction, le service crée la `tx` et la passe aux repos via `{ ...c
 - Liste dans `packages/shared/src/permissions.ts`, mapping par défaut `DEFAULT_ROLE_PERMISSIONS` (inséré au premier `db:migrate` uniquement, table vide).
 - Rôles cumulatifs calculés à chaque requête (`core/permissions/roles.ts`) : `student` toujours, `member`/`pole_lead`/`board` selon les memberships actifs de l'année courante, `treasurer` via `board_position`, `admin` via `user.is_admin`.
 - Route : `middleware: [requirePermission("events:create")] as const`. Action limitée à un pôle : `assertPoleAccess(ctx, poleId)` dans le service (`poles:all` ou responsable du pôle).
-- **Ajouter une permission** = l'ajouter à la constante **et** écrire une migration SQL (`pnpm drizzle-kit generate --custom`) qui l'insère dans `role_permission` pour les rôles concernés.
+- **Ajouter une permission** = l'ajouter à la constante **et** écrire une migration SQL (`pnpm drizzle-kit generate --custom`) qui l'insère dans `role_permission` pour les rôles concernés, **seulement si la table n'est pas vide** (`WHERE EXISTS (SELECT 1 FROM role_permission)`) : sur une installation neuve, le mapping par défaut complet est inséré après les migrations, à condition que la table soit vide. Exemple : `drizzle/0011_meetings_permission.sql`.
 
 ## Tests
 

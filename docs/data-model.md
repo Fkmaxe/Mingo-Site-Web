@@ -48,8 +48,9 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 
 | Table | Colonnes clés |
 | --- | --- |
-| `task` | pole_id, title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on |
-| `meeting` | pole_id (nullable = réunion générale), title, starts_at, agenda, minutes |
+| `task` | pole_id, title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on, deleted_at |
+| `meeting` | pole_id (nullable = réunion générale), title, starts_at, location, agenda, minutes, deleted_at |
+| `meeting_attendance` | meeting_id, user_id, marked_by — une ligne par présent, comptée dans la note |
 | `application` | user_id, school_year_id, wished_pole_id, motivation, status (`new`, `interview`, `accepted`, `rejected`) |
 | `partner` | name, website, contact_name, contact_email, status (`prospect`, `contacted`, `negotiating`, `active`, `ended`), benefits, notes, owner_membership_id |
 | `transaction` | event_id (nullable), school_year_id, label, amount_cents (int, signé), occurred_on, receipt_url, created_by |

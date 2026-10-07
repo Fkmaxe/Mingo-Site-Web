@@ -3295,6 +3295,413 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    scope?: "upcoming" | "past";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Réunions visibles */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Meeting"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateMeetingInput"];
+                };
+            };
+            responses: {
+                /** @description Réunion créée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Meeting"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/meetings/{meetingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    meetingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Réunion (présences pour l'organisateur) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Meeting"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    meetingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Réunion supprimée */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    meetingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateMeetingInput"];
+                };
+            };
+            responses: {
+                /** @description Réunion modifiée */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Meeting"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/v1/meetings/{meetingId}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    meetingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SetAttendanceInput"];
+                };
+            };
+            responses: {
+                /** @description Présence enregistrée */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Meeting"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Personne non attendue */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3315,7 +3722,7 @@ export interface components {
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
             roles: ("student" | "member" | "pole_lead" | "board" | "treasurer" | "admin")[];
-            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
+            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
         };
         Membership: {
             /** Format: uuid */
@@ -3774,7 +4181,9 @@ export interface components {
         };
         Presence: {
             /** Format: uuid */
-            eventId: string;
+            id: string;
+            /** @enum {string} */
+            kind: "event" | "meeting";
             title: string;
             /** Format: date-time */
             startsAt: string;
@@ -3839,6 +4248,57 @@ export interface components {
             assigneeMembershipId?: string | null;
             /** Format: date */
             dueOn?: string | null;
+        };
+        Meeting: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            location: string;
+            agenda: string;
+            minutes: string;
+            pole: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
+            canManage: boolean;
+            present: boolean;
+            attendees: components["schemas"]["MeetingAttendee"][];
+        };
+        MeetingAttendee: {
+            user: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                promo: string | null;
+            };
+            present: boolean;
+        };
+        CreateMeetingInput: {
+            /** Format: uuid */
+            poleId: string | null;
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** @default  */
+            location: string;
+            /** @default  */
+            agenda: string;
+        };
+        UpdateMeetingInput: {
+            title?: string;
+            /** Format: date-time */
+            startsAt?: string;
+            location?: string;
+            agenda?: string;
+            minutes?: string;
+        };
+        SetAttendanceInput: {
+            /** Format: uuid */
+            userId: string;
+            present: boolean;
         };
     };
     responses: never;

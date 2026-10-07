@@ -54,8 +54,9 @@ export default async function MyGradesPage() {
             ) : (
               <ul className="flex flex-col gap-1 text-sm">
                 {presences.map((p) => (
-                  <li key={p.eventId} className="flex justify-between gap-3">
+                  <li key={`${p.kind}-${p.id}`} className="flex justify-between gap-3">
                     <span>
+                      {p.kind === "meeting" ? "Réunion · " : ""}
                       {p.title}{" "}
                       <span className="text-muted-foreground text-xs first-letter:uppercase">
                         {formatShortDay(p.startsAt)}

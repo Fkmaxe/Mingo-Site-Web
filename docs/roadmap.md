@@ -32,7 +32,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 ## Lot 3 — V2
 
 - [x] Tâches par pôle (kanban)
-- [ ] Réunions + présences
+- [x] Réunions + présences
 - [ ] Recrutement
 - [ ] Partenaires
 - [ ] Synchro Sheets nocturne
