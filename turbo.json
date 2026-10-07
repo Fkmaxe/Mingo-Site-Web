@@ -3,15 +3,19 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["API_URL"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "typecheck": {},
+    "typecheck": {
+      "env": ["API_URL"]
+    },
     "test": {
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["DATABASE_URL_TEST"]
     }
   }
 }
