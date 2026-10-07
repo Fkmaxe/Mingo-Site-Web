@@ -1,0 +1,70 @@
+# Modèle de données
+
+Conventions SQL :
+- Tables et colonnes en `snake_case`, tables au singulier (`event`, `registration`).
+- Clé primaire `id uuid default gen_random_uuid()` (UUID v7 généré côté app si besoin d'ordre).
+- `created_at timestamptz not null default now()`, `updated_at timestamptz` mis à jour par le repo.
+- Suppression logique (`deleted_at`) uniquement là où l'historique compte (event, membership, partner).
+- Enums Postgres pour les statuts, déclarés dans `packages/shared` puis dans le schéma Drizzle.
+- Toute FK a un index. Toute contrainte métier exprimable en SQL l'est (unique, check).
+
+## Entités
+
+### Identité et organisation
+
+| Table | Colonnes clés | Contraintes |
+| --- | --- | --- |
+| `user` | email (unique, `@myskolae.fr`), name, promo, image | check sur le domaine de l'email |
+| `session`, `account`, `verification` | gérées par Better Auth | ne pas modifier à la main |
+| `school_year` | label (`2026-2027`), starts_on, ends_on, is_current | un seul `is_current = true` |
+| `pole` | slug, name, description | slug unique |
+| `membership` | user_id, pole_id (nullable pour le bureau), school_year_id, role (`member`, `pole_lead`, `board`), board_position (`president`, `vice_president`, `secretary`, `treasurer`, null), is_active | unique (user_id, pole_id, school_year_id) |
+| `role_permission` | role, permission | unique (role, permission) |
+
+Un utilisateur sans `membership` actif sur l'année courante est un **étudiant**.
+
+### Événements
+
+| Table | Colonnes clés | Contraintes |
+| --- | --- | --- |
+| `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité), registration_deadline, open_points_value, custom_fields_schema (jsonb), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at |
+| `registration` | event_id, user_id, status (`confirmed`, `waitlisted`, `cancelled`), waitlist_position, answers (jsonb), qr_token (unique), cancelled_at | unique (event_id, user_id) |
+| `staff_slot` | event_id, label, starts_at, ends_at, capacity | |
+| `staff_assignment` | staff_slot_id, membership_id, status (`proposed`, `validated`, `declined`) | unique (staff_slot_id, membership_id) |
+| `attendance` | event_id, user_id, kind (`participant`, `staff`, `meeting`), checked_in_at, checked_in_by | unique (event_id, user_id, kind) |
+
+### Points open et notes
+
+| Table | Colonnes clés | Contraintes |
+| --- | --- | --- |
+| `open_points_ledger` | user_id, school_year_id, delta (int, peut être négatif), reason, source (`auto`, `manual`), attendance_id (nullable), status (`pending`, `validated`, `rejected`, `exported`), validated_by, validated_at | `reason` non vide si source = manual ; unique (attendance_id) |
+| `grade_period` | school_year_id, label, starts_on, ends_on, presence_weight, involvement_weight, scale_max | poids qui somment à 1 |
+| `member_grade` | membership_id, grade_period_id, presence_score, involvement_score, final_score, comment, status (`draft`, `submitted`, `validated`, `published`), proposed_by, validated_by | unique (membership_id, grade_period_id) |
+
+Solde points open d'un étudiant = `sum(delta) where status in ('validated','exported')`.
+`presence_score` est **calculé** (présences / événements et réunions attendus sur la période), jamais saisi.
+
+### Gestion interne
+
+| Table | Colonnes clés |
+| --- | --- |
+| `task` | pole_id, title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on |
+| `meeting` | pole_id (nullable = réunion générale), title, starts_at, agenda, minutes |
+| `application` | user_id, school_year_id, wished_pole_id, motivation, status (`new`, `interview`, `accepted`, `rejected`) |
+| `partner` | name, website, contact_name, contact_email, status (`prospect`, `contacted`, `negotiating`, `active`, `ended`), benefits, notes, owner_membership_id |
+| `transaction` | event_id (nullable), school_year_id, label, amount_cents (int, signé), occurred_on, receipt_url, created_by |
+| `export_target` | kind (`registrations`, `attendance`, `open_points`, `grades`, `members`, `budget`), spreadsheet_id, sheet_name, auto_sync, last_synced_at |
+| `audit_log` | actor_user_id, action, entity, entity_id, payload (jsonb), created_at |
+
+Montants toujours en **centimes entiers**, jamais en float.
+
+## Règles d'intégrité à tester
+
+1. Impossible de s'inscrire après `registration_deadline` ou à un événement `draft`/`cancelled`.
+2. Si `confirmed` atteint `capacity`, les nouvelles inscriptions passent `waitlisted` avec la position suivante.
+3. Une annulation libère une place → le premier `waitlisted` passe `confirmed`, dans la même transaction.
+4. Un check-in participant d'un non-membre crée exactement un mouvement `pending` (unique sur attendance_id).
+5. Un membre actif de l'année ne reçoit jamais de points open automatiques.
+6. Un ajustement manuel sans motif est refusé.
+7. Une note `published` n'est plus modifiable sauf par le bureau, avec entrée dans `audit_log`.
+8. Un email hors `@myskolae.fr` ne peut pas créer de compte.
