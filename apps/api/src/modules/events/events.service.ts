@@ -76,6 +76,7 @@ function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: 
     registrationDeadline: row.registrationDeadline?.toISOString() ?? null,
     openPointsValue: row.openPointsValue,
     posterUrl: row.posterUrl,
+    customFields: row.customFieldsSchema,
     pole: row.pole,
     canManage: canManage(ctx, row.poleId),
     confirmedCount: summary.confirmedCount,
@@ -148,8 +149,10 @@ export async function createEvent(ctx: AuthedCtx, input: CreateEventData): Promi
   await getPole(ctx, input.poleId);
   const eventId = await inTransaction(ctx.db, async (tx) => {
     const slug = await uniqueSlug(slugify(input.title), (s) => slugExists(tx, s));
+    const { customFields, ...fields } = input;
     const id = await insertEvent(tx, {
-      ...input,
+      ...fields,
+      customFieldsSchema: customFields,
       slug,
       startsAt: new Date(input.startsAt),
       endsAt: new Date(input.endsAt),
@@ -202,10 +205,11 @@ export async function updateEvent(
     });
   }
 
-  const { startsAt, endsAt, registrationDeadline, ...rest } = input;
+  const { startsAt, endsAt, registrationDeadline, customFields, ...rest } = input;
   await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await updateEventRow(tx, existing.id, {
       ...rest,
+      customFieldsSchema: customFields,
       ...(startsAt ? { startsAt: new Date(startsAt) } : {}),
       ...(endsAt ? { endsAt: new Date(endsAt) } : {}),
       ...(registrationDeadline !== undefined

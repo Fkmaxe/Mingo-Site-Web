@@ -1,6 +1,16 @@
-import { EVENT_STATUSES, EVENT_VISIBILITIES } from "@bde/shared";
+import { type CustomFieldDef, EVENT_STATUSES, EVENT_VISIBILITIES } from "@bde/shared";
 import { sql } from "drizzle-orm";
-import { check, index, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { createdAt, id, updatedAt } from "./columns";
 import { pole } from "./organization";
@@ -29,6 +39,7 @@ export const event = pgTable(
     registrationDeadline: timestamp({ withTimezone: true }),
     openPointsValue: integer().notNull().default(0),
     status: eventStatus().notNull().default("draft"),
+    customFieldsSchema: jsonb().$type<CustomFieldDef[]>().notNull().default([]),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

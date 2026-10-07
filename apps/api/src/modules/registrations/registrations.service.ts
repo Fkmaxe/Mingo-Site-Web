@@ -1,4 +1,11 @@
-import type { RegistrantDto, RegistrationStatus, TicketDto } from "@bde/shared";
+import {
+  type Answers,
+  answersSchema,
+  formatAnswer,
+  type RegistrantDto,
+  type RegistrationStatus,
+  type TicketDto,
+} from "@bde/shared";
 import { z } from "zod";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
@@ -36,6 +43,11 @@ function toTicket(row: TicketRow, waitlistRank: number | null): TicketDto {
     waitlistPosition: row.status === "waitlisted" ? waitlistRank : null,
     createdAt: row.createdAt.toISOString(),
     cancelledAt: row.cancelledAt?.toISOString() ?? null,
+    answers: row.answers,
+    questions: row.event.customFields.map((field) => ({
+      label: field.label,
+      answer: formatAnswer(row.answers[field.key]),
+    })),
     event: {
       id: row.event.id,
       slug: row.event.slug,
@@ -72,9 +84,18 @@ async function findOwnTicket(ctx: AuthedCtx, registrationId: string): Promise<Ti
 export async function register(
   ctx: AuthedCtx,
   eventId: string,
+  input: { answers: Record<string, unknown> } = { answers: {} },
   now: Date = new Date(),
 ): Promise<TicketDto> {
   const event = await findVisibleEvent(ctx, eventId);
+  const parsed = answersSchema(event.customFieldsSchema).safeParse(input.answers);
+  if (!parsed.success) {
+    throw new AppError("VALIDATION_ERROR", 400, "Certaines réponses sont invalides.", {
+      issues: parsed.error.issues.map((i) => ({ ...i, path: ["answers", ...i.path] })),
+    });
+  }
+  // The schema built from the fields only admits strings, numbers and booleans.
+  const answers = parsed.data as Answers;
   const registrationId = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockEventRegistrations(tx, event.id);
     const existing = await findRegistration(tx, event.id, ctx.user.id);
@@ -105,6 +126,7 @@ export async function register(
       status: waitlisted ? ("waitlisted" as const) : ("confirmed" as const),
       waitlistPosition: waitlisted ? (await maxWaitlistPosition(tx, event.id)) + 1 : null,
       cancelledAt: null,
+      answers,
     };
     // Re-registration after a cancellation: same row (unique per event and user), same token.
     let id: string;

@@ -83,8 +83,10 @@ const ticketSelection = {
     endsAt: event.endsAt,
     status: event.status,
     capacity: event.capacity,
+    customFields: event.customFieldsSchema,
   },
   waitlistPosition: registration.waitlistPosition,
+  answers: registration.answers,
 };
 
 export type TicketRow = NonNullable<Awaited<ReturnType<typeof findTicket>>>;
@@ -137,6 +139,7 @@ export function findRegistrants(
       id: registration.id,
       status: registration.status,
       createdAt: registration.createdAt,
+      answers: registration.answers,
       // JS dates stop at milliseconds: the cursor keeps Postgres' full precision.
       createdAtKey: sql<string>`${registration.createdAt}::text`,
       user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
@@ -197,6 +200,7 @@ export function findAllRegistrants(db: DbOrTx, eventId: string) {
       id: registration.id,
       status: registration.status,
       createdAt: registration.createdAt,
+      answers: registration.answers,
       user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
     })
     .from(registration)

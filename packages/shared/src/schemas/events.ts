@@ -5,6 +5,7 @@ import {
   REGISTRATION_STATES,
   REGISTRATION_STATUSES,
 } from "../enums";
+import { CustomFieldDef, CustomFieldsSchema } from "./custom-fields";
 
 const IsoDateTime = z.iso.datetime({ offset: true, message: "Date invalide" });
 
@@ -33,6 +34,8 @@ const EventFields = z.object({
     .min(0, "Les points open ne peuvent pas être négatifs")
     .max(100, "Trop de points open (100 max)"),
   posterUrl: z.url("Adresse d'affiche invalide").nullable(),
+  /** Extra questions asked at registration (t-shirt size, diet…). */
+  customFields: CustomFieldsSchema,
 });
 
 type DateFields = {
@@ -74,6 +77,7 @@ export const CreateEventInput = EventFields.extend({
   registrationDeadline: EventFields.shape.registrationDeadline.default(null),
   openPointsValue: EventFields.shape.openPointsValue.default(0),
   posterUrl: EventFields.shape.posterUrl.default(null),
+  customFields: EventFields.shape.customFields.default([]),
 })
   .superRefine(checkDates)
   .meta({ id: "CreateEventInput" });
@@ -114,6 +118,7 @@ export const EventDto = z
     registrationDeadline: z.iso.datetime().nullable(),
     openPointsValue: z.int(),
     posterUrl: z.string().nullable(),
+    customFields: z.array(CustomFieldDef),
     pole: z.object({ id: z.uuid(), slug: z.string(), name: z.string() }),
     /** Whether the current user may edit, publish or cancel it. */
     canManage: z.boolean(),

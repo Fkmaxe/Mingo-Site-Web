@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/action-result";
 import { EVENT_VISIBILITY_LABELS } from "@/lib/labels";
 import { createEventAction, updateEventAction } from "./actions";
+import { CustomFieldsEditor } from "./custom-fields-editor";
 import { type EventFormValues, eventFormResolver, formToInput } from "./event-form-values";
 import type { Pole } from "./types";
 
@@ -24,6 +25,7 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
   const [result, setResult] = useState<ActionResult | null>(null);
   const {
     register,
+    control,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
@@ -40,7 +42,9 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
     setResult(outcome);
     if (!outcome.ok) {
       for (const [field, message] of Object.entries(outcome.fieldErrors)) {
-        if (field in defaultValues) setError(field as FieldPath<EventFormValues>, { message });
+        if (field in defaultValues) {
+          setError(field as FieldPath<EventFormValues>, { message });
+        }
       }
     }
   });
@@ -139,6 +143,12 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
         hint="Vide : inscriptions ouvertes jusqu'à la fin de l'événement"
         error={errors.registrationDeadline?.message}
         {...register("registrationDeadline")}
+      />
+
+      <CustomFieldsEditor
+        control={control}
+        register={register}
+        error={errors.customFields?.message ?? errors.customFields?.root?.message}
       />
 
       <Button type="submit" size="lg" disabled={isSubmitting}>

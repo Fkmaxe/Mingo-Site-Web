@@ -314,6 +314,12 @@
               "null"
             ]
           },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            }
+          },
           "pole": {
             "type": "object",
             "properties": {
@@ -397,12 +403,54 @@
           "registrationDeadline",
           "openPointsValue",
           "posterUrl",
+          "customFields",
           "pole",
           "canManage",
           "confirmedCount",
           "waitlistCount",
           "registrationState",
           "myRegistration"
+        ]
+      },
+      "CustomField": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,39}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "select",
+              "checkbox"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "required"
         ]
       },
       "CreateEventInput": {
@@ -473,6 +521,14 @@
             ],
             "format": "uri",
             "default": null
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "maxItems": 10,
+            "default": []
           }
         },
         "required": [
@@ -547,6 +603,13 @@
               "null"
             ],
             "format": "uri"
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "maxItems": 10
           }
         }
       },
@@ -584,6 +647,40 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "answer": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "answer"
+              ]
+            }
           },
           "event": {
             "type": "object",
@@ -637,8 +734,20 @@
           "waitlistPosition",
           "createdAt",
           "cancelledAt",
+          "answers",
+          "questions",
           "event"
         ]
+      },
+      "RegisterInput": {
+        "type": "object",
+        "properties": {
+          "answers": {
+            "type": "object",
+            "additionalProperties": {},
+            "default": {}
+          }
+        }
       },
       "Registrant": {
         "type": "object",
@@ -658,6 +767,22 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
           },
           "user": {
             "type": "object",
@@ -691,6 +816,7 @@
           "id",
           "status",
           "createdAt",
+          "answers",
           "user"
         ]
       },
@@ -1697,6 +1823,16 @@
             "in": "path"
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInput"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Inscription confirmée, billet créé",

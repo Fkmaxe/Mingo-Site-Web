@@ -6,6 +6,16 @@ import { redirect } from "next/navigation";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
 
+/** Drops absent optional keys: the generated API types forbid explicit `undefined`. */
+function toBody(input: CreateEventData) {
+  return {
+    ...input,
+    customFields: input.customFields.map(({ options, ...field }) =>
+      options ? { ...field, options } : field,
+    ),
+  };
+}
+
 function revalidateEvents() {
   revalidatePath("/events", "layout");
   revalidatePath("/manage/events", "layout");
@@ -14,7 +24,7 @@ function revalidateEvents() {
 
 /** `input` is the form data already parsed by the shared schema (defaults applied). */
 export async function createEventAction(input: CreateEventData): Promise<ActionResult> {
-  const { data, error } = await (await api()).POST("/v1/events", { body: input });
+  const { data, error } = await (await api()).POST("/v1/events", { body: toBody(input) });
   if (error) return fromApiError(error);
   revalidateEvents();
   redirect(`/manage/events/${data.id}?created=1`);
@@ -26,7 +36,7 @@ export async function updateEventAction(
 ): Promise<ActionResult> {
   const { error } = await (await api()).PATCH("/v1/events/{eventId}", {
     params: { path: { eventId } },
-    body: input,
+    body: toBody(input),
   });
   if (error) return fromApiError(error);
   revalidateEvents();

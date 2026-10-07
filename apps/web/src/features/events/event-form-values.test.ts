@@ -33,3 +33,29 @@ describe("event form", () => {
     expect(errors.poleId?.message).toBe("Choisis un pôle");
   });
 });
+
+describe("custom fields in the event form", () => {
+  it("keeps existing keys, derives unique keys for new fields, splits choices", () => {
+    const input = formToInput({
+      ...filled,
+      customFields: [
+        { key: "taille", label: "Taille", type: "select", required: true, options: "S\n M \n\nL" },
+        { key: "", label: "Régime", type: "text", required: false, options: "" },
+        { key: "", label: "Régime", type: "text", required: false, options: "ignored" },
+      ],
+    });
+    expect(input.customFields).toEqual([
+      { key: "taille", label: "Taille", type: "select", required: true, options: ["S", "M", "L"] },
+      { key: "regime", label: "Régime", type: "text", required: false },
+      { key: "regime_2", label: "Régime", type: "text", required: false },
+    ]);
+  });
+
+  it("reports a select without enough choices", () => {
+    const { errors } = eventFormResolver({
+      ...filled,
+      customFields: [{ key: "", label: "Taille", type: "select", required: true, options: "S" }],
+    });
+    expect(errors.customFields?.message).toBe("Champ 1 : Indique au moins 2 choix");
+  });
+});

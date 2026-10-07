@@ -1,4 +1,4 @@
-import type { OpenPointsStatus, RegistrationStatus } from "@bde/shared";
+import { formatAnswer, type OpenPointsStatus, type RegistrationStatus } from "@bde/shared";
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx } from "../../core/context";
 import { parisDateTime } from "../../core/time";
@@ -45,8 +45,9 @@ export async function exportRegistrations(ctx: AuthedCtx, eventId: string): Prom
   const entered = new Map(
     attendances.filter((a) => a.kind === "participant").map((a) => [a.user.id, a.checkedInAt]),
   );
+  const fields = event.customFieldsSchema;
   const content = toCsv(
-    ["Nom", "Email", "Promo", "Statut", "Inscrit le", "Entrée"],
+    ["Nom", "Email", "Promo", "Statut", "Inscrit le", "Entrée", ...fields.map((f) => f.label)],
     registrants.map((r) => {
       const at = entered.get(r.user.id);
       return [
@@ -56,6 +57,7 @@ export async function exportRegistrations(ctx: AuthedCtx, eventId: string): Prom
         REGISTRATION_LABELS[r.status],
         parisDateTime(r.createdAt),
         at ? parisDateTime(at) : "",
+        ...fields.map((f) => formatAnswer(r.answers[f.key])),
       ];
     }),
   );

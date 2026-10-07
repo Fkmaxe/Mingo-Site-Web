@@ -1,4 +1,4 @@
-import { CreateEventInput, eventDateIssues } from "@bde/shared";
+import { CreateEventInput, type CustomFieldType, eventDateIssues, fieldKey } from "@bde/shared";
 import type { FieldErrors, ResolverResult } from "react-hook-form";
 import { isoToParisInput, parisInputToIso } from "@/lib/paris-time";
 import type { Event } from "./types";
@@ -15,7 +15,51 @@ export type EventFormValues = {
   visibility: string;
   capacity: string;
   openPointsValue: string;
+  customFields: CustomFieldFormValues[];
 };
+
+export type CustomFieldFormValues = {
+  /** Kept for existing fields (answers are stored under it); empty for new ones. */
+  key: string;
+  label: string;
+  type: CustomFieldType;
+  required: boolean;
+  /** Choices of a select, one per line. */
+  options: string;
+};
+
+export const emptyCustomField = (): CustomFieldFormValues => ({
+  key: "",
+  label: "",
+  type: "text",
+  required: false,
+  options: "",
+});
+
+/** Existing keys are kept; new fields get a key from their label, made unique. */
+function toCustomFields(rows: CustomFieldFormValues[]) {
+  const used = new Set(rows.map((r) => r.key).filter(Boolean));
+  return rows.map((row) => {
+    let key = row.key;
+    if (!key) {
+      const base = fieldKey(row.label || "champ");
+      key = base;
+      for (let n = 2; used.has(key); n++) key = `${base.slice(0, 36)}_${n}`;
+      used.add(key);
+    }
+    const options = row.options
+      .split("\n")
+      .map((o) => o.trim())
+      .filter(Boolean);
+    return {
+      key,
+      label: row.label,
+      type: row.type,
+      required: row.required,
+      ...(row.type === "select" ? { options } : {}),
+    };
+  });
+}
 
 export function emptyEventForm(poleId = ""): EventFormValues {
   return {
@@ -29,6 +73,7 @@ export function emptyEventForm(poleId = ""): EventFormValues {
     visibility: "students",
     capacity: "",
     openPointsValue: "0",
+    customFields: [],
   };
 }
 
@@ -46,6 +91,13 @@ export function eventToForm(event: Event): EventFormValues {
     visibility: event.visibility,
     capacity: event.capacity === null ? "" : String(event.capacity),
     openPointsValue: String(event.openPointsValue),
+    customFields: event.customFields.map((f) => ({
+      key: f.key,
+      label: f.label,
+      type: f.type,
+      required: f.required,
+      options: (f.options ?? []).join("\n"),
+    })),
   };
 }
 
@@ -64,6 +116,7 @@ export function formToInput(values: EventFormValues) {
     capacity: values.capacity.trim() === "" ? null : Number(values.capacity),
     openPointsValue: values.openPointsValue.trim() === "" ? 0 : Number(values.openPointsValue),
     posterUrl: null,
+    customFields: toCustomFields(values.customFields),
   };
 }
 
@@ -78,7 +131,18 @@ export function eventFormResolver(values: EventFormValues): ResolverResult<Event
   };
   for (const issue of result.error.issues) {
     const field = issue.path[0] as keyof EventFormValues | undefined;
-    if (field) add(field, issue.code, issue.message);
+    if (field === "customFields") {
+      const index = issue.path[1];
+      if (!errors.customFields) {
+        errors.customFields = {
+          type: issue.code,
+          message:
+            typeof index === "number" ? `Champ ${index + 1} : ${issue.message}` : issue.message,
+        };
+      }
+    } else if (field) {
+      add(field, issue.code, issue.message);
+    }
   }
   // Zod skips refinements while other fields are invalid: report date issues at once.
   const validDate = (iso: string | null) =>

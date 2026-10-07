@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/action-result";
 import type { Event } from "../events/types";
 import { cancelRegistrationAction, registerAction } from "./actions";
+import { AnswersForm } from "./answers-form";
 import { placesLabel } from "./places";
 
 type Props = { event: Event; signedIn: boolean };
@@ -18,6 +19,8 @@ export function RegistrationPanel({ event, signedIn }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
   const mine = event.myRegistration?.status === "confirmed" ? event.myRegistration : null;
   const waiting = event.myRegistration?.status === "waitlisted" ? event.myRegistration : null;
@@ -26,7 +29,20 @@ export function RegistrationPanel({ event, signedIn }: Props) {
     startTransition(async () => {
       setError(null);
       const result = await action();
-      if (!result.ok) setError(result.message);
+      if (result.ok) {
+        setAsking(false);
+        setAnswerErrors({});
+      } else {
+        setError(result.message);
+        // Server-side answer errors come as "answers.<key>".
+        setAnswerErrors(
+          Object.fromEntries(
+            Object.entries(result.fieldErrors).flatMap(([path, message]) =>
+              path.startsWith("answers.") ? [[path.slice("answers.".length), message]] : [],
+            ),
+          ),
+        );
+      }
       setConfirmLeave(false);
       router.refresh();
     });
@@ -88,15 +104,30 @@ export function RegistrationPanel({ event, signedIn }: Props) {
   } else if (event.registrationState === "open" || event.registrationState === "full") {
     const label =
       event.registrationState === "full" ? "Rejoindre la liste d'attente" : "S'inscrire";
-    content = signedIn ? (
-      <Button size="lg" disabled={pending} onClick={() => run(() => registerAction(event.id))}>
-        {pending ? "Un instant…" : label}
-      </Button>
-    ) : (
+    content = !signedIn ? (
       <Button asChild size="lg">
         <Link href={`/login?next=${encodeURIComponent(`/events/${event.slug}`)}`}>
           Se connecter pour s'inscrire
         </Link>
+      </Button>
+    ) : asking ? (
+      <AnswersForm
+        fields={event.customFields}
+        submitLabel={label}
+        pending={pending}
+        serverErrors={answerErrors}
+        onCancel={() => setAsking(false)}
+        onSubmit={(answers) => run(() => registerAction(event.id, answers))}
+      />
+    ) : (
+      <Button
+        size="lg"
+        disabled={pending}
+        onClick={() =>
+          event.customFields.length > 0 ? setAsking(true) : run(() => registerAction(event.id))
+        }
+      >
+        {pending ? "Un instant…" : label}
       </Button>
     );
   } else {

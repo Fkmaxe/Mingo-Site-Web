@@ -11,6 +11,14 @@ const EventSummary = z.object({
   status: z.enum(["draft", "published", "cancelled", "done"]),
 });
 
+const AnswersDto = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
+
+/** Answers to the event's custom fields; checked by the API against the event's definition. */
+export const RegisterInput = z
+  .object({ answers: z.record(z.string(), z.unknown()).default({}) })
+  .meta({ id: "RegisterInput" });
+export type RegisterInput = z.input<typeof RegisterInput>;
+
 /** A user's own registration: the ticket, with its QR token. */
 export const TicketDto = z
   .object({
@@ -22,6 +30,9 @@ export const TicketDto = z
     waitlistPosition: z.int().nullable(),
     createdAt: z.iso.datetime(),
     cancelledAt: z.iso.datetime().nullable(),
+    answers: AnswersDto,
+    /** The answers with the questions' labels, in the event's order, ready to display. */
+    questions: z.array(z.object({ label: z.string(), answer: z.string() })),
     event: EventSummary,
   })
   .meta({ id: "Ticket" });
@@ -37,6 +48,7 @@ export const RegistrantDto = z
     id: z.uuid(),
     status: z.enum(REGISTRATION_STATUSES),
     createdAt: z.iso.datetime(),
+    answers: AnswersDto,
     user: z.object({
       id: z.uuid(),
       name: z.string(),

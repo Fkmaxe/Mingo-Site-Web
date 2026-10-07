@@ -73,7 +73,7 @@ export default async function ManageEventPage({
               {event.capacity === null ? "" : ` / ${event.capacity}`})
             </span>
           </h2>
-          <RegistrantsList registrants={registrants} />
+          <RegistrantsList registrants={registrants} fields={event.customFields} />
           {me.permissions.includes("exports:run") ? (
             <div className="flex flex-wrap gap-2">
               <DownloadLink href={`/manage/events/${event.id}/export/registrations`}>

@@ -25,6 +25,17 @@ describe("fromApiError", () => {
     });
   });
 
+  it("keys nested issues by their full path", () => {
+    const result = fromApiError({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Certaines réponses sont invalides.",
+        details: { issues: [{ path: ["answers", "taille"], message: "Choix invalide" }] },
+      },
+    });
+    expect(result.ok ? null : result.fieldErrors).toEqual({ "answers.taille": "Choix invalide" });
+  });
+
   it("keeps business errors without details", () => {
     expect(fromApiError({ error: { code: "FORBIDDEN", message: "Non." } })).toMatchObject({
       code: "FORBIDDEN",

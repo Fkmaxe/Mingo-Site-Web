@@ -4,6 +4,7 @@ export * from "./env";
 export * from "./errors";
 export * from "./permissions";
 export * from "./schemas/checkin";
+export * from "./schemas/custom-fields";
 export * from "./schemas/events";
 export * from "./schemas/me";
 export * from "./schemas/open-points";

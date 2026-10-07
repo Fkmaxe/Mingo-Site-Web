@@ -582,7 +582,11 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["RegisterInput"];
+                };
+            };
             responses: {
                 /** @description Inscription confirmée, billet créé */
                 201: {
@@ -1540,6 +1544,7 @@ export interface components {
             registrationDeadline: string | null;
             openPointsValue: number;
             posterUrl: string | null;
+            customFields: components["schemas"]["CustomField"][];
             pole: {
                 /** Format: uuid */
                 id: string;
@@ -1558,6 +1563,14 @@ export interface components {
                 status: "confirmed" | "waitlisted" | "cancelled";
                 waitlistPosition: number | null;
             } | null;
+        };
+        CustomField: {
+            key: string;
+            label: string;
+            /** @enum {string} */
+            type: "text" | "number" | "select" | "checkbox";
+            required: boolean;
+            options?: string[];
         };
         CreateEventInput: {
             /** Format: uuid */
@@ -1586,6 +1599,8 @@ export interface components {
              * @default null
              */
             posterUrl: string | null;
+            /** @default [] */
+            customFields: components["schemas"]["CustomField"][];
         };
         UpdateEventInput: {
             /** Format: uuid */
@@ -1605,6 +1620,7 @@ export interface components {
             openPointsValue?: number;
             /** Format: uri */
             posterUrl?: string | null;
+            customFields?: components["schemas"]["CustomField"][];
         };
         Ticket: {
             /** Format: uuid */
@@ -1617,6 +1633,13 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             cancelledAt: string | null;
+            answers: {
+                [key: string]: string | number | boolean;
+            };
+            questions: {
+                label: string;
+                answer: string;
+            }[];
             event: {
                 /** Format: uuid */
                 id: string;
@@ -1631,6 +1654,12 @@ export interface components {
                 status: "draft" | "published" | "cancelled" | "done";
             };
         };
+        RegisterInput: {
+            /** @default {} */
+            answers: {
+                [key: string]: unknown;
+            };
+        };
         Registrant: {
             /** Format: uuid */
             id: string;
@@ -1638,6 +1667,9 @@ export interface components {
             status: "confirmed" | "waitlisted" | "cancelled";
             /** Format: date-time */
             createdAt: string;
+            answers: {
+                [key: string]: string | number | boolean;
+            };
             user: {
                 /** Format: uuid */
                 id: string;

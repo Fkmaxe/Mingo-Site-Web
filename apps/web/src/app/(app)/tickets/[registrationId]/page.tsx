@@ -58,6 +58,16 @@ export default async function TicketPage({
           {ticket.event.location}
         </li>
       </ul>
+      {ticket.questions.length > 0 ? (
+        <dl className="flex flex-col gap-2 rounded-xl border bg-card p-4 text-sm">
+          {ticket.questions.map(({ label, answer }) => (
+            <div key={label} className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">{label}</dt>
+              <dd className="text-right font-medium">{answer || "—"}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
       <Link
         href={`/events/${ticket.event.slug}`}
         className="text-center text-primary text-sm underline-offset-4 hover:underline"

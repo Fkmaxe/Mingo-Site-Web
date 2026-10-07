@@ -12,9 +12,11 @@ function revalidateRegistrations() {
 
 export async function registerAction(
   eventId: string,
+  answers: Record<string, string | number | boolean> = {},
 ): Promise<ActionResult & { registrationId?: string }> {
   const { data, error } = await (await api()).POST("/v1/events/{eventId}/registrations", {
     params: { path: { eventId } },
+    body: { answers },
   });
   if (error) return fromApiError(error);
   revalidateRegistrations();

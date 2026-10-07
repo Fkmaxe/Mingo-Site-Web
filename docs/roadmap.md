@@ -24,7 +24,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 ## Lot 2 — V1
 
 - [x] Liste d'attente + promotion automatique + mail
-- [ ] Champs d'inscription personnalisés
+- [x] Champs d'inscription personnalisés
 - [ ] Créneaux staff et affectations
 - [ ] Notation des membres (périodes, calcul présence, proposition, validation, publication)
 - [ ] Mails transactionnels et rappels J-1

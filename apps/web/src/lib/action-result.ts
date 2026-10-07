@@ -2,7 +2,10 @@ import type { components } from "./api-schema";
 
 type ApiError = components["schemas"]["ApiError"];
 
-/** What a server action returns to its form. Success usually redirects instead. */
+/**
+ * What a server action returns to its form. Success usually redirects instead.
+ * `fieldErrors` is keyed by the issue path joined with dots: "title", "answers.size".
+ */
 export type ActionResult =
   | { ok: true }
   | { ok: false; code: string; message: string; fieldErrors: Record<string, string> };
@@ -18,9 +21,9 @@ export function fromApiError(error: ApiError): ActionResult {
     Array.isArray(details.issues)
   ) {
     for (const issue of details.issues) {
-      const field = issue?.path?.[0];
-      if (typeof field === "string" && typeof issue.message === "string" && !fieldErrors[field]) {
-        fieldErrors[field] = issue.message;
+      const path = Array.isArray(issue?.path) ? issue.path.map(String).join(".") : "";
+      if (path && typeof issue.message === "string" && !fieldErrors[path]) {
+        fieldErrors[path] = issue.message;
       }
     }
   }

@@ -1,4 +1,10 @@
-import { ListRegistrantsQuery, ListTicketsQuery, RegistrantDto, TicketDto } from "@bde/shared";
+import {
+  ListRegistrantsQuery,
+  ListTicketsQuery,
+  RegisterInput,
+  RegistrantDto,
+  TicketDto,
+} from "@bde/shared";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
@@ -25,7 +31,13 @@ const registerRoute = createRoute({
   path: "/events/{eventId}/registrations",
   tags: ["registrations"],
   middleware: [requirePermission("events:register")] as const,
-  request: { params: EventIdParams },
+  request: {
+    params: EventIdParams,
+    body: {
+      content: { "application/json": { schema: RegisterInput } },
+      required: false,
+    },
+  },
   responses: {
     201: json(TicketDto, "Inscription confirmée, billet créé"),
     401: errorResponse("Pas de session"),
@@ -89,7 +101,14 @@ const cancelRoute = createRoute({
 export function createRegistrationsRouter() {
   return new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError })
     .openapi(registerRoute, async (c) =>
-      c.json(await register(authedCtx(c.get("ctx")), c.req.valid("param").eventId), 201),
+      c.json(
+        await register(
+          authedCtx(c.get("ctx")),
+          c.req.valid("param").eventId,
+          RegisterInput.parse(c.req.valid("json") ?? {}),
+        ),
+        201,
+      ),
     )
     .openapi(registrantsRoute, async (c) =>
       c.json(

@@ -1,9 +1,10 @@
-import { REGISTRATION_STATUSES } from "@bde/shared";
+import { type Answers, REGISTRATION_STATUSES } from "@bde/shared";
 import { sql } from "drizzle-orm";
 import {
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -32,6 +33,8 @@ export const registration = pgTable(
     waitlistPosition: integer(),
     /** 32 random bytes, base64url. Never derived from an id. */
     qrToken: text().notNull().unique("registration_qr_token_unique"),
+    /** Answers to the event's custom fields, validated against them by the API. */
+    answers: jsonb().$type<Answers>().notNull().default({}),
     cancelledAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
