@@ -4,7 +4,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, VisibilityBadge } from "@/features/events/event-badges";
 import { getEventOr404 } from "@/features/events/queries";
+import { RegistrationPanel } from "@/features/registrations/registration-panel";
 import { formatDateTime, formatEventRange } from "@/lib/paris-time";
+import { getMe } from "@/lib/session";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function EventPage({ params }: Props) {
-  const event = await getEventOr404((await params).slug);
+  const [event, me] = await Promise.all([getEventOr404((await params).slug), getMe()]);
   return (
     <article className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
@@ -65,6 +67,8 @@ export default async function EventPage({ params }: Props) {
       {event.description ? (
         <p className="whitespace-pre-line leading-relaxed">{event.description}</p>
       ) : null}
+
+      {event.status !== "draft" ? <RegistrationPanel event={event} signedIn={me !== null} /> : null}
 
       {event.canManage ? (
         <Button asChild variant="outline" size="lg">

@@ -8,6 +8,7 @@ import { createEventsRouter } from "./modules/events";
 import { createHealthRouter } from "./modules/health";
 import { createMeRouter } from "./modules/me";
 import { createPolesRouter } from "./modules/poles";
+import { createRegistrationsRouter } from "./modules/registrations";
 
 export type AppDeps = AuthDeps;
 
@@ -32,6 +33,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createMeRouter());
   app.route("/v1", createPolesRouter());
   app.route("/v1", createEventsRouter());
+  app.route("/v1", createRegistrationsRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

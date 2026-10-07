@@ -6,3 +6,4 @@ export * from "./permissions";
 export * from "./schemas/events";
 export * from "./schemas/me";
 export * from "./schemas/poles";
+export * from "./schemas/registrations";

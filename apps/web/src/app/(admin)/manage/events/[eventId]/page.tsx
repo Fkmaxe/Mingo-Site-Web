@@ -9,6 +9,8 @@ import { eventToForm } from "@/features/events/event-form-values";
 import { EventManageActions } from "@/features/events/event-manage-actions";
 import { manageablePoles } from "@/features/events/manageable-poles";
 import { getEventOr404, listPoles } from "@/features/events/queries";
+import { listAllRegistrants } from "@/features/registrations/queries";
+import { RegistrantsList } from "@/features/registrations/registrants-table";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gérer l'événement" };
@@ -23,6 +25,7 @@ export default async function ManageEventPage({
   const [{ eventId }, { created }] = await Promise.all([params, searchParams]);
   const [me, event, poles] = await Promise.all([requireMe(), getEventOr404(eventId), listPoles()]);
   if (!event.canManage) notFound();
+  const registrants = event.status === "draft" ? [] : await listAllRegistrants(event.id);
   const editable = event.status === "draft" || event.status === "published";
   // The current pole stays selectable even when the user cannot create events for it.
   const options = manageablePoles(me, poles);
@@ -49,6 +52,19 @@ export default async function ManageEventPage({
       ) : null}
 
       <EventManageActions event={event} />
+
+      {event.status !== "draft" ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">
+            Inscrits{" "}
+            <span className="font-normal text-muted-foreground">
+              ({event.confirmedCount}
+              {event.capacity === null ? "" : ` / ${event.capacity}`})
+            </span>
+          </h2>
+          <RegistrantsList registrants={registrants} />
+        </section>
+      ) : null}
 
       {editable ? (
         <section className="flex flex-col gap-4">

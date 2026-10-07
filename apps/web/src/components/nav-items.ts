@@ -1,10 +1,11 @@
-import { CalendarDays, House, type LucideIcon, Settings2, UserRound } from "lucide-react";
+import { CalendarDays, House, type LucideIcon, Settings2, Ticket, UserRound } from "lucide-react";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/home", label: "Accueil", icon: House },
   { href: "/events", label: "Événements", icon: CalendarDays },
+  { href: "/tickets", label: "Billets", icon: Ticket },
   { href: "/profile", label: "Profil", icon: UserRound },
 ];
 

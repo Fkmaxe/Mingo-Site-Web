@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
+import { safeNextPath } from "@/features/auth/safe-next";
 import { SignInForm } from "@/features/auth/sign-in-form";
 import { getMe } from "@/lib/session";
 
@@ -11,10 +12,10 @@ export const metadata: Metadata = { title: "Connexion" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ reset?: string }>;
+  searchParams: Promise<{ reset?: string; next?: string }>;
 }) {
-  if (await getMe()) redirect("/home");
-  const { reset } = await searchParams;
+  const { reset, next } = await searchParams;
+  if (await getMe()) redirect(safeNextPath(next));
   return (
     <AuthCard
       title="Connexion"
@@ -34,7 +35,7 @@ export default async function LoginPage({
       {reset ? (
         <FormAlert tone="success">Mot de passe changé. Tu peux te connecter.</FormAlert>
       ) : null}
-      <SignInForm />
+      <SignInForm next={next} />
     </AuthCard>
   );
 }

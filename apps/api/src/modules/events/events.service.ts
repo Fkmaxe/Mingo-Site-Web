@@ -15,6 +15,8 @@ import { decodeCursor, type Page, toPage } from "../../core/http";
 import { assertPoleAccess } from "../../core/permissions";
 import { inTransaction } from "../../core/tx";
 import { getPole } from "../poles";
+import { registrationState } from "../registrations/rules";
+import { type RegistrationSummary, registrationSummaries } from "../registrations/summary";
 import {
   type EventRow,
   type EventVisibilityFilter,
@@ -58,7 +60,7 @@ function visibilityFilter(ctx: AuthzCtx): EventVisibilityFilter {
   return { visibilities: visibleVisibilities(ctx), draftPoles: manageablePoles(ctx) };
 }
 
-function toDto(ctx: AuthzCtx, row: EventRow): EventDto {
+function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: Date): EventDto {
   return {
     id: row.id,
     slug: row.slug,
@@ -75,7 +77,19 @@ function toDto(ctx: AuthzCtx, row: EventRow): EventDto {
     posterUrl: row.posterUrl,
     pole: row.pole,
     canManage: canManage(ctx, row.poleId),
+    confirmedCount: summary.confirmedCount,
+    registrationState: registrationState(row, summary.confirmedCount, now),
+    myRegistration: summary.mine,
   };
+}
+
+async function toDtos(ctx: Ctx, rows: EventRow[], now: Date): Promise<EventDto[]> {
+  const summaryOf = await registrationSummaries(
+    ctx.db,
+    rows.map((r) => r.id),
+    ctx.user?.id ?? null,
+  );
+  return rows.map((row) => toDto(ctx, row, summaryOf(row.id), now));
 }
 
 const notFound = () => new AppError("NOT_FOUND", 404, "Cet événement n'existe pas.");
@@ -95,16 +109,17 @@ export async function listEvents(
     after: after ? { startsAt: new Date(after.s), id: after.id } : null,
     limit: query.limit,
   });
-  return toPage(
+  const page = toPage(
     rows,
     query.limit,
-    (row) => toDto(ctx, row),
+    (row) => row,
     (row) => ({ s: row.startsAt.toISOString(), id: row.id }),
   );
+  return { items: await toDtos(ctx, page.items, now), nextCursor: page.nextCursor };
 }
 
 /** Finds a visible event by id or slug (404 otherwise, so hidden events are not revealed). */
-async function findVisible(ctx: Ctx, ref: string): Promise<EventRow> {
+export async function findVisibleEvent(ctx: Ctx, ref: string): Promise<EventRow> {
   const row = await findEventByRef(
     ctx.db,
     UUID.safeParse(ref).success ? { id: ref } : { slug: ref },
@@ -113,13 +128,15 @@ async function findVisible(ctx: Ctx, ref: string): Promise<EventRow> {
   return row;
 }
 
-export async function getEvent(ctx: Ctx, ref: string): Promise<EventDto> {
-  return toDto(ctx, await findVisible(ctx, ref));
+export async function getEvent(ctx: Ctx, ref: string, now: Date = new Date()): Promise<EventDto> {
+  const [dto] = await toDtos(ctx, [await findVisibleEvent(ctx, ref)], now);
+  if (!dto) throw notFound();
+  return dto;
 }
 
 /** Loads an event the user must manage: 404 if invisible, 403 if visible but not theirs. */
-async function findManageable(ctx: AuthedCtx, eventId: string): Promise<EventRow> {
-  const row = await findVisible(ctx, eventId);
+export async function findManageableEvent(ctx: AuthedCtx, eventId: string): Promise<EventRow> {
+  const row = await findVisibleEvent(ctx, eventId);
   assertPoleAccess(ctx, row.poleId);
   return row;
 }
@@ -156,7 +173,7 @@ export async function updateEvent(
   eventId: string,
   input: UpdateEventData,
 ): Promise<EventDto> {
-  const existing = await findManageable(ctx, eventId);
+  const existing = await findManageableEvent(ctx, eventId);
   if (existing.status === "cancelled" || existing.status === "done") {
     throw new AppError(
       "INVALID_STATUS_TRANSITION",
@@ -214,7 +231,7 @@ async function transition(
     refusal: string;
   },
 ): Promise<EventDto> {
-  const existing = await findManageable(ctx, eventId);
+  const existing = await findManageableEvent(ctx, eventId);
   if (!change.from.includes(existing.status)) {
     throw new AppError("INVALID_STATUS_TRANSITION", 409, change.refusal);
   }
@@ -250,7 +267,7 @@ export function cancelEvent(ctx: AuthedCtx, eventId: string) {
 }
 
 export async function deleteEvent(ctx: AuthedCtx, eventId: string): Promise<void> {
-  const existing = await findManageable(ctx, eventId);
+  const existing = await findManageableEvent(ctx, eventId);
   if (existing.status !== "draft") {
     throw new AppError(
       "INVALID_STATUS_TRANSITION",

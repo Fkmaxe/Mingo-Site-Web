@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { EVENT_STATUSES, EVENT_VISIBILITIES } from "../enums";
+import {
+  EVENT_STATUSES,
+  EVENT_VISIBILITIES,
+  REGISTRATION_STATES,
+  REGISTRATION_STATUSES,
+} from "../enums";
 
 const IsoDateTime = z.iso.datetime({ offset: true, message: "Date invalide" });
 
@@ -112,6 +117,10 @@ export const EventDto = z
     pole: z.object({ id: z.uuid(), slug: z.string(), name: z.string() }),
     /** Whether the current user may edit, publish or cancel it. */
     canManage: z.boolean(),
+    confirmedCount: z.int(),
+    registrationState: z.enum(REGISTRATION_STATES),
+    /** The current user's registration, cancelled ones included. */
+    myRegistration: z.object({ id: z.uuid(), status: z.enum(REGISTRATION_STATUSES) }).nullable(),
   })
   .meta({ id: "Event" });
 export type EventDto = z.infer<typeof EventDto>;

@@ -19,3 +19,10 @@ export type EventVisibility = (typeof EVENT_VISIBILITIES)[number];
 
 export const EVENT_STATUSES = ["draft", "published", "cancelled", "done"] as const;
 export type EventStatus = (typeof EVENT_STATUSES)[number];
+
+export const REGISTRATION_STATUSES = ["confirmed", "waitlisted", "cancelled"] as const;
+export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
+
+/** Whether a user can register now. Computed by the API from the event and its registrations. */
+export const REGISTRATION_STATES = ["open", "full", "closed"] as const;
+export type RegistrationState = (typeof REGISTRATION_STATES)[number];

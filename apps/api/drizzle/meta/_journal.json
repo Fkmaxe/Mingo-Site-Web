@@ -15,6 +15,13 @@
       "when": 1791380986229,
       "tag": "0001_events",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791381605677,
+      "tag": "0002_registrations",
+      "breakpoints": true
     }
   ]
 }

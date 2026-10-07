@@ -10,8 +10,10 @@ import { FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
+import { safeNextPath } from "./safe-next";
 
-export function SignInForm() {
+export function SignInForm({ next }: { next?: string | undefined }) {
+  const destination = safeNextPath(next);
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const {
@@ -24,13 +26,13 @@ export function SignInForm() {
     setError(null);
     const result = await authClient.signIn.email({
       ...values,
-      callbackURL: "/home",
+      callbackURL: destination,
     });
     if (result.error) {
       setError(authErrorMessage(result.error));
       return;
     }
-    router.push("/home");
+    router.push(destination);
     router.refresh();
   });
 

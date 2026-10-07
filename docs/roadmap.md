@@ -16,7 +16,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 ## Lot 1 — MVP (boucle complète d'un événement)
 
 - [x] Événements : CRUD, visibilité, liste + détail mobile
-- [ ] Inscriptions participants : inscription / désinscription, QR code, page « Mes billets »
+- [x] Inscriptions participants : inscription / désinscription, QR code, page « Mes billets »
 - [ ] Check-in : scanner QR (BarcodeDetector + repli), recherche manuelle, idempotence
 - [ ] Points open : mouvement auto au check-in, validation par le bureau, ajustement manuel, solde étudiant
 - [ ] Export Google Sheets manuel (inscrits, présences, points open) + CSV
