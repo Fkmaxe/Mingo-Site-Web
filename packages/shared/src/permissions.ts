@@ -1,0 +1,71 @@
+import type { AppRole } from "./enums";
+
+/** Every permission of the platform, `resource:action` (docs/api-conventions.md). */
+export const PERMISSIONS = [
+  "events:register",
+  "staff:register",
+  "members:read",
+  "events:create",
+  "events:update",
+  "events:delete",
+  "registrations:read",
+  "checkin:scan",
+  "members:manage",
+  "tasks:manage",
+  "grades:propose",
+  "grades:validate",
+  "grades:publish",
+  "open-points:validate",
+  "open-points:adjust",
+  "exports:run",
+  "budget:manage",
+  /** Acts on every pole. Without it, pole-scoped actions require leading that pole. */
+  "poles:all",
+  "roles:manage",
+  "settings:manage",
+  "audit:read",
+] as const;
+
+export type Permission = (typeof PERMISSIONS)[number];
+
+export function isPermission(value: string): value is Permission {
+  return (PERMISSIONS as readonly string[]).includes(value);
+}
+
+/**
+ * Default role -> permissions mapping, inserted on first install. Roles are cumulative
+ * (a pole lead is also a member and a student), so each role lists only what it adds.
+ * The live mapping is the `role_permission` table.
+ */
+export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = {
+  student: ["events:register"],
+  member: ["staff:register", "members:read"],
+  pole_lead: [
+    "events:create",
+    "events:update",
+    "events:delete",
+    "registrations:read",
+    "checkin:scan",
+    "members:manage",
+    "tasks:manage",
+    "grades:propose",
+  ],
+  board: [
+    "events:create",
+    "events:update",
+    "events:delete",
+    "registrations:read",
+    "checkin:scan",
+    "members:manage",
+    "tasks:manage",
+    "grades:propose",
+    "grades:validate",
+    "grades:publish",
+    "open-points:validate",
+    "open-points:adjust",
+    "exports:run",
+    "poles:all",
+  ],
+  treasurer: ["budget:manage"],
+  admin: ["roles:manage", "settings:manage", "audit:read"],
+};

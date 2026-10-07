@@ -20,5 +20,7 @@ export async function getMe(ctx: AuthedCtx): Promise<MeDto> {
           ? { id: m.poleId, slug: m.poleSlug, name: m.poleName }
           : null,
     })),
+    roles: ctx.roles,
+    permissions: [...ctx.permissions].sort(),
   };
 }

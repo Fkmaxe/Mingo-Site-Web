@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { BOARD_POSITIONS, MEMBERSHIP_ROLES } from "../enums";
+import { APP_ROLES, BOARD_POSITIONS, MEMBERSHIP_ROLES } from "../enums";
+import { PERMISSIONS } from "../permissions";
 
 export const MembershipDto = z
   .object({
@@ -21,6 +22,9 @@ export const MeDto = z
     isAdmin: z.boolean(),
     /** Active memberships of the current school year. Empty for a student. */
     memberships: z.array(MembershipDto),
+    /** Effective roles and permissions, used by the web to adapt the UI (never for security). */
+    roles: z.array(z.enum(APP_ROLES)),
+    permissions: z.array(z.enum(PERMISSIONS)),
   })
   .meta({ id: "Me" });
 export type MeDto = z.infer<typeof MeDto>;

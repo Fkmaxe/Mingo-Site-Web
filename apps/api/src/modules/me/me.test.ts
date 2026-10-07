@@ -24,6 +24,8 @@ describe("GET /v1/me", () => {
       image: null,
       isAdmin: false,
       memberships: [],
+      roles: ["student"],
+      permissions: ["events:register"],
     });
   });
 
@@ -63,5 +65,8 @@ describe("GET /v1/me", () => {
         pole: { id: sport.id, slug: "sport", name: "Sport" },
       },
     ]);
+    expect(me.roles).toEqual(["student", "member", "pole_lead"]);
+    expect(me.permissions).toContain("checkin:scan");
+    expect(me.permissions).not.toContain("poles:all");
   });
 });

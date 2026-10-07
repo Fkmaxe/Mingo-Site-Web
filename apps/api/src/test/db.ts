@@ -1,5 +1,6 @@
 import { getTableName, is, sql } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
+import { ensureDefaultRolePermissions } from "../core/permissions/defaults";
 import { createDb } from "../db/client";
 import * as schema from "../db/schema";
 
@@ -25,6 +26,9 @@ const tableNames = Object.values(schema).flatMap((value) =>
   is(value, PgTable) ? [`"${getTableName(value)}"`] : [],
 );
 
+/** Empties every table, then restores reference data (default role permissions). */
 export async function resetDb() {
-  await getTestDb().execute(sql.raw(`truncate table ${tableNames.join(", ")} cascade`));
+  const db = getTestDb();
+  await db.execute(sql.raw(`truncate table ${tableNames.join(", ")} cascade`));
+  await ensureDefaultRolePermissions(db);
 }

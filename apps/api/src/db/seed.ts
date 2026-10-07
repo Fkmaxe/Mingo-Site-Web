@@ -1,5 +1,6 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull } from "drizzle-orm";
+import { ensureDefaultRolePermissions } from "../core/permissions/defaults";
 import type { DbOrTx } from "./client";
 import { account, membership, pole, schoolYear, user } from "./schema";
 
@@ -63,6 +64,7 @@ export const SEED_USERS: SeedUser[] = [
 
 /** Idempotent: running it twice leaves the database unchanged. */
 export async function seed(db: DbOrTx) {
+  await ensureDefaultRolePermissions(db);
   await db
     .insert(schoolYear)
     .values({ ...SEED_SCHOOL_YEAR, isCurrent: true })
