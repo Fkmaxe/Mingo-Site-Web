@@ -4,14 +4,14 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 ## Lot 0 — Socle
 
-- [ ] Monorepo pnpm + Turborepo, Biome, TypeScript strict
-- [ ] Docker Compose (Postgres) + `.env` validé par Zod dans chaque app
-- [ ] API Hono : app, handler d'erreurs, OpenAPI, healthcheck `/health`
-- [ ] Drizzle : client, premier schéma (`user`, `school_year`, `pole`, `membership`, `role_permission`, `audit_log`), seed
-- [ ] Better Auth email + mot de passe (adresse vérifiée par mail), refus des domaines ≠ `@myskolae.fr`, route `/v1/me`
-- [ ] RBAC : constantes de permissions, `requirePermission`, `assertPoleAccess`
-- [ ] Web Next : layout mobile (nav en bas), login, page profil, client API typé
-- [ ] CI GitHub Actions : lint, typecheck, tests (avec service Postgres)
+- [x] Monorepo pnpm + Turborepo, Biome, TypeScript strict
+- [x] Docker Compose (Postgres) + `.env` validé par Zod dans chaque app
+- [x] API Hono : app, handler d'erreurs, OpenAPI, healthcheck `/health`
+- [x] Drizzle : client, premier schéma (`user`, `school_year`, `pole`, `membership`, `role_permission`, `audit_log`), seed
+- [x] Better Auth email + mot de passe (adresse vérifiée par mail), refus des domaines ≠ `@myskolae.fr`, route `/v1/me`
+- [x] RBAC : constantes de permissions, `requirePermission`, `assertPoleAccess`
+- [x] Web Next : layout mobile (nav en bas), login, page profil, client API typé
+- [x] CI GitHub Actions : lint, typecheck, tests (avec service Postgres)
 
 ## Lot 1 — MVP (boucle complète d'un événement)
 
