@@ -14,6 +14,10 @@
   },
   "dependencies": {
     "@bde/shared": "workspace:*",
+    "@hono/node-server": "^2.1.3",
+    "@hono/zod-openapi": "^1.6.3",
+    "@scalar/hono-api-reference": "^0.12.10",
+    "hono": "^4.13.13",
     "zod": "^4.6.5"
   }
 }
