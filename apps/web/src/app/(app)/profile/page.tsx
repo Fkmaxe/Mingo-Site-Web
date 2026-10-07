@@ -42,9 +42,15 @@ export default async function ProfilePage() {
         ) : null}
       </Card>
 
-      <Link href="/points" className="text-primary underline-offset-4 hover:underline">
-        Mes points open
-      </Link>
+      {me.roles.includes("member") ? (
+        <Link href="/grades" className="text-primary underline-offset-4 hover:underline">
+          Ma note et mes présences
+        </Link>
+      ) : (
+        <Link href="/points" className="text-primary underline-offset-4 hover:underline">
+          Mes points open
+        </Link>
+      )}
 
       <SignOutButton />
     </div>

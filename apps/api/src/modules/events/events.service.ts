@@ -77,6 +77,7 @@ function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: 
     openPointsValue: row.openPointsValue,
     posterUrl: row.posterUrl,
     customFields: row.customFieldsSchema,
+    memberPoints: row.memberPoints,
     pole: row.pole,
     canManage: canManage(ctx, row.poleId),
     confirmedCount: summary.confirmedCount,

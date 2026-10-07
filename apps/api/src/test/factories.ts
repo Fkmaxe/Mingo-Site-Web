@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { BoardPosition, MembershipRole } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "../db/client";
-import { event, membership, pole, schoolYear, user } from "../db/schema";
+import { attendance, event, membership, pole, schoolYear, user } from "../db/schema";
 import { getTestDb } from "./db";
 
 function first<T>(rows: T[]): T {
@@ -139,6 +139,18 @@ export async function createEvent(
         status: "published",
         ...overrides,
       })
+      .returning(),
+  );
+}
+
+export async function createAttendance(
+  input: { eventId: string; userId: string; kind?: "participant" | "staff" | "meeting" },
+  db: DbOrTx = getTestDb(),
+) {
+  return first(
+    await db
+      .insert(attendance)
+      .values({ kind: "participant", ...input })
       .returning(),
   );
 }

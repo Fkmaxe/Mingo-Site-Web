@@ -87,3 +87,8 @@ export function formatDateTime(iso: string): string {
   const date = new Date(iso);
   return `${dayFormatter.format(date)} à ${timeFormatter.format(date)}`;
 }
+
+/** "sam. 12 déc." (Paris time). */
+export function formatShortDay(iso: string): string {
+  return shortDayFormatter.format(new Date(iso));
+}

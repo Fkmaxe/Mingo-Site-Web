@@ -198,6 +198,7 @@
                   "STAFF_SLOT_FULL",
                   "ALREADY_VOLUNTEERED",
                   "NOT_A_MEMBER",
+                  "GRADE_LOCKED",
                   "REGISTRATION_CLOSED",
                   "DEADLINE_PASSED",
                   "ALREADY_CHECKED_IN",
@@ -323,6 +324,12 @@
               "$ref": "#/components/schemas/CustomField"
             }
           },
+          "memberPoints": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "pole": {
             "type": "object",
             "properties": {
@@ -407,6 +414,7 @@
           "openPointsValue",
           "posterUrl",
           "customFields",
+          "memberPoints",
           "pole",
           "canManage",
           "confirmedCount",
@@ -532,6 +540,15 @@
             },
             "maxItems": 10,
             "default": []
+          },
+          "memberPoints": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "default": null
           }
         },
         "required": [
@@ -613,6 +630,14 @@
               "$ref": "#/components/schemas/CustomField"
             },
             "maxItems": 10
+          },
+          "memberPoints": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
           }
         }
       },
@@ -1479,6 +1504,340 @@
         },
         "required": [
           "userId"
+        ]
+      },
+      "GradePeriod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "startsOn": {
+            "type": "string"
+          },
+          "endsOn": {
+            "type": "string"
+          },
+          "scaleMax": {
+            "type": "integer"
+          },
+          "pointsPerPresence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "startsOn",
+          "endsOn",
+          "scaleMax",
+          "pointsPerPresence"
+        ]
+      },
+      "CreateGradePeriodInput": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "startsOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "endsOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "scaleMax": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          },
+          "pointsPerPresence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000,
+            "default": 1
+          }
+        },
+        "required": [
+          "label",
+          "startsOn",
+          "endsOn"
+        ]
+      },
+      "UpdateGradePeriodInput": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "startsOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "endsOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "scaleMax": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "pointsPerPresence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          }
+        }
+      },
+      "MemberGrade": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "promo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "promo"
+            ]
+          },
+          "pole": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "validated",
+              "published"
+            ]
+          },
+          "presencePoints": {
+            "type": "number"
+          },
+          "presenceCount": {
+            "type": "integer"
+          },
+          "involvementPoints": {
+            "type": "number"
+          },
+          "finalScore": {
+            "type": "number"
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "membershipId",
+          "user",
+          "pole",
+          "status",
+          "presencePoints",
+          "presenceCount",
+          "involvementPoints",
+          "finalScore",
+          "comment"
+        ]
+      },
+      "SaveGradeInput": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "involvementPoints": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 1000,
+            "default": ""
+          }
+        },
+        "required": [
+          "membershipId",
+          "involvementPoints"
+        ]
+      },
+      "BatchResult": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "updated",
+          "skipped"
+        ]
+      },
+      "SubmitGradesInput": {
+        "type": "object",
+        "properties": {
+          "poleId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "poleId"
+        ]
+      },
+      "GradeIdsInput": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "MyGrades": {
+        "type": "object",
+        "properties": {
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "period": {
+                  "$ref": "#/components/schemas/GradePeriod"
+                },
+                "presences": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Presence"
+                  }
+                },
+                "presencePoints": {
+                  "type": "number"
+                },
+                "grade": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "involvementPoints": {
+                      "type": "number"
+                    },
+                    "finalScore": {
+                      "type": "number"
+                    },
+                    "comment": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "involvementPoints",
+                    "finalScore",
+                    "comment"
+                  ]
+                }
+              },
+              "required": [
+                "period",
+                "presences",
+                "presencePoints",
+                "grade"
+              ]
+            }
+          }
+        },
+        "required": [
+          "periods"
+        ]
+      },
+      "Presence": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "eventId",
+          "title",
+          "startsAt",
+          "points"
         ]
       }
     },
@@ -3669,6 +4028,769 @@
           },
           "409": {
             "description": "Conflit (créneau complet, déjà positionné…)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grade-periods": {
+      "get": {
+        "tags": [
+          "grades"
+        ],
+        "responses": {
+          "200": {
+            "description": "Périodes de l'année en cours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GradePeriod"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "grades"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGradePeriodInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Période créée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradePeriod"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grade-periods/generate-quarters": {
+      "post": {
+        "tags": [
+          "grades"
+        ],
+        "responses": {
+          "201": {
+            "description": "Trois trimestres créés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GradePeriod"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grade-periods/{periodId}": {
+      "patch": {
+        "tags": [
+          "grades"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "periodId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGradePeriodInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Période modifiée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradePeriod"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "grades"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "periodId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Période supprimée"
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grade-periods/{periodId}/grades": {
+      "get": {
+        "tags": [
+          "grades"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "periodId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "poleId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notes des membres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberGrade"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "grades"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "periodId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveGradeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Note enregistrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberGrade"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grade-periods/{periodId}/submit": {
+      "post": {
+        "tags": [
+          "grades"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "periodId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitGradesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Brouillons du pôle soumis au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grades/validate": {
+      "post": {
+        "tags": [
+          "grades"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeIdsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notes validées (figées)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grades/publish": {
+      "post": {
+        "tags": [
+          "grades"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeIdsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notes publiées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/grades": {
+      "get": {
+        "tags": [
+          "grades"
+        ],
+        "responses": {
+          "200": {
+            "description": "Mes présences et mes notes publiées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyGrades"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Note verrouillée ou conflit",
             "content": {
               "application/json": {
                 "schema": {

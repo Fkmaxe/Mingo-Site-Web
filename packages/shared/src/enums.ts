@@ -38,3 +38,6 @@ export type OpenPointsSource = (typeof OPEN_POINTS_SOURCES)[number];
 
 export const STAFF_ASSIGNMENT_STATUSES = ["proposed", "validated", "declined"] as const;
 export type StaffAssignmentStatus = (typeof STAFF_ASSIGNMENT_STATUSES)[number];
+
+export const GRADE_STATUSES = ["draft", "submitted", "validated", "published"] as const;
+export type GradeStatus = (typeof GRADE_STATUSES)[number];

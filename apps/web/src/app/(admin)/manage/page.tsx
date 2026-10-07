@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronRight, Sparkles } from "lucide-react";
+import { CalendarDays, ChevronRight, GraduationCap, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireMe } from "@/lib/session";
@@ -21,6 +21,13 @@ export default async function ManagePage() {
       description: "Valider les points, ajuster un solde",
       icon: Sparkles,
       show: me.permissions.includes("open-points:validate"),
+    },
+    {
+      href: "/manage/grades",
+      title: "Notes des membres",
+      description: "Points du pôle, validation et publication",
+      icon: GraduationCap,
+      show: me.permissions.includes("grades:propose"),
     },
   ].filter((link) => link.show);
 

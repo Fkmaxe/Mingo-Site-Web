@@ -15,6 +15,8 @@ export type EventFormValues = {
   visibility: string;
   capacity: string;
   openPointsValue: string;
+  /** Empty: the grade period's default. */
+  memberPoints: string;
   customFields: CustomFieldFormValues[];
 };
 
@@ -73,6 +75,7 @@ export function emptyEventForm(poleId = ""): EventFormValues {
     visibility: "students",
     capacity: "",
     openPointsValue: "0",
+    memberPoints: "",
     customFields: [],
   };
 }
@@ -91,6 +94,7 @@ export function eventToForm(event: Event): EventFormValues {
     visibility: event.visibility,
     capacity: event.capacity === null ? "" : String(event.capacity),
     openPointsValue: String(event.openPointsValue),
+    memberPoints: event.memberPoints === null ? "" : String(event.memberPoints),
     customFields: event.customFields.map((f) => ({
       key: f.key,
       label: f.label,
@@ -116,6 +120,8 @@ export function formToInput(values: EventFormValues) {
     capacity: values.capacity.trim() === "" ? null : Number(values.capacity),
     openPointsValue: values.openPointsValue.trim() === "" ? 0 : Number(values.openPointsValue),
     posterUrl: null,
+    memberPoints:
+      values.memberPoints.trim() === "" ? null : Number(values.memberPoints.replace(",", ".")),
     customFields: toCustomFields(values.customFields),
   };
 }

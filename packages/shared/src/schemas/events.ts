@@ -36,6 +36,12 @@ const EventFields = z.object({
   posterUrl: z.url("Adresse d'affiche invalide").nullable(),
   /** Extra questions asked at registration (t-shirt size, diet…). */
   customFields: CustomFieldsSchema,
+  /** Grade points of a member's presence; null: the grade period's default. */
+  memberPoints: z
+    .number("Indique un nombre")
+    .min(0, "Pas de points négatifs")
+    .max(100, "Trop de points")
+    .nullable(),
 });
 
 type DateFields = {
@@ -78,6 +84,7 @@ export const CreateEventInput = EventFields.extend({
   openPointsValue: EventFields.shape.openPointsValue.default(0),
   posterUrl: EventFields.shape.posterUrl.default(null),
   customFields: EventFields.shape.customFields.default([]),
+  memberPoints: EventFields.shape.memberPoints.default(null),
 })
   .superRefine(checkDates)
   .meta({ id: "CreateEventInput" });
@@ -119,6 +126,7 @@ export const EventDto = z
     openPointsValue: z.int(),
     posterUrl: z.string().nullable(),
     customFields: z.array(CustomFieldDef),
+    memberPoints: z.number().nullable(),
     pole: z.object({ id: z.uuid(), slug: z.string(), name: z.string() }),
     /** Whether the current user may edit, publish or cancel it. */
     canManage: z.boolean(),

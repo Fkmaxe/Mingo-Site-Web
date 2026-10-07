@@ -5,6 +5,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -40,6 +41,8 @@ export const event = pgTable(
     openPointsValue: integer().notNull().default(0),
     status: eventStatus().notNull().default("draft"),
     customFieldsSchema: jsonb().$type<CustomFieldDef[]>().notNull().default([]),
+    /** Grade points of a member's presence; null: the grade period's default. */
+    memberPoints: numeric({ precision: 7, scale: 2, mode: "number" }),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -56,5 +59,6 @@ export const event = pgTable(
     ),
     check("event_capacity_check", sql`${t.capacity} is null or ${t.capacity} > 0`),
     check("event_open_points_check", sql`${t.openPointsValue} >= 0`),
+    check("event_member_points_check", sql`${t.memberPoints} is null or ${t.memberPoints} >= 0`),
   ],
 );

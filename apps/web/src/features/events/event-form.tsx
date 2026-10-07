@@ -137,6 +137,15 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
       </div>
 
       <FormField
+        id="memberPoints"
+        label="Points de note par présence de membre"
+        inputMode="decimal"
+        hint="Vide : la valeur de la période de notation"
+        error={errors.memberPoints?.message}
+        {...register("memberPoints")}
+      />
+
+      <FormField
         id="registrationDeadline"
         label="Date limite d'inscription"
         type="datetime-local"

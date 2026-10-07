@@ -2136,6 +2136,773 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/grade-periods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Périodes de l'année en cours */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GradePeriod"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateGradePeriodInput"];
+                };
+            };
+            responses: {
+                /** @description Période créée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GradePeriod"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grade-periods/generate-quarters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Trois trimestres créés */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GradePeriod"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grade-periods/{periodId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    periodId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Période supprimée */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    periodId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateGradePeriodInput"];
+                };
+            };
+            responses: {
+                /** @description Période modifiée */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GradePeriod"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/v1/grade-periods/{periodId}/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    poleId?: string;
+                };
+                header?: never;
+                path: {
+                    periodId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Notes des membres */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MemberGrade"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    periodId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SaveGradeInput"];
+                };
+            };
+            responses: {
+                /** @description Note enregistrée */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MemberGrade"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grade-periods/{periodId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    periodId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SubmitGradesInput"];
+                };
+            };
+            responses: {
+                /** @description Brouillons du pôle soumis au bureau */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BatchResult"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grades/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["GradeIdsInput"];
+                };
+            };
+            responses: {
+                /** @description Notes validées (figées) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BatchResult"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grades/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["GradeIdsInput"];
+                };
+            };
+            responses: {
+                /** @description Notes publiées */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BatchResult"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mes présences et mes notes publiées */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MyGrades"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Note verrouillée ou conflit */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2175,7 +2942,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -2208,6 +2975,7 @@ export interface components {
             openPointsValue: number;
             posterUrl: string | null;
             customFields: components["schemas"]["CustomField"][];
+            memberPoints: number | null;
             pole: {
                 /** Format: uuid */
                 id: string;
@@ -2264,6 +3032,8 @@ export interface components {
             posterUrl: string | null;
             /** @default [] */
             customFields: components["schemas"]["CustomField"][];
+            /** @default null */
+            memberPoints: number | null;
         };
         UpdateEventInput: {
             /** Format: uuid */
@@ -2284,6 +3054,7 @@ export interface components {
             /** Format: uri */
             posterUrl?: string | null;
             customFields?: components["schemas"]["CustomField"][];
+            memberPoints?: number | null;
         };
         Ticket: {
             /** Format: uuid */
@@ -2513,6 +3284,97 @@ export interface components {
         AssignStaffInput: {
             /** Format: uuid */
             userId: string;
+        };
+        GradePeriod: {
+            /** Format: uuid */
+            id: string;
+            label: string;
+            startsOn: string;
+            endsOn: string;
+            scaleMax: number;
+            pointsPerPresence: number;
+        };
+        CreateGradePeriodInput: {
+            label: string;
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            /** @default 20 */
+            scaleMax: number;
+            /** @default 1 */
+            pointsPerPresence: number;
+        };
+        UpdateGradePeriodInput: {
+            label?: string;
+            /** Format: date */
+            startsOn?: string;
+            /** Format: date */
+            endsOn?: string;
+            scaleMax?: number;
+            pointsPerPresence?: number;
+        };
+        MemberGrade: {
+            /** Format: uuid */
+            id: string | null;
+            /** Format: uuid */
+            membershipId: string;
+            user: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                promo: string | null;
+            };
+            pole: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            /** @enum {string} */
+            status: "draft" | "submitted" | "validated" | "published";
+            presencePoints: number;
+            presenceCount: number;
+            involvementPoints: number;
+            finalScore: number;
+            comment: string;
+        };
+        SaveGradeInput: {
+            /** Format: uuid */
+            membershipId: string;
+            involvementPoints: number;
+            /** @default  */
+            comment: string;
+        };
+        BatchResult: {
+            updated: number;
+            skipped: number;
+        };
+        SubmitGradesInput: {
+            /** Format: uuid */
+            poleId: string;
+        };
+        GradeIdsInput: {
+            ids: string[];
+        };
+        MyGrades: {
+            periods: {
+                period: components["schemas"]["GradePeriod"];
+                presences: components["schemas"]["Presence"][];
+                presencePoints: number;
+                grade: {
+                    involvementPoints: number;
+                    finalScore: number;
+                    comment: string;
+                } | null;
+            }[];
+        };
+        Presence: {
+            /** Format: uuid */
+            eventId: string;
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            points: number;
         };
     };
     responses: never;
