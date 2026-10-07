@@ -92,6 +92,20 @@
       "when": 1791403687695,
       "tag": "0012_applications",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791403982849,
+      "tag": "0013_partners",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791403983356,
+      "tag": "0014_partners_permission",
+      "breakpoints": true
     }
   ]
 }

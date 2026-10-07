@@ -11,6 +11,7 @@ export * from "./schemas/grades";
 export * from "./schemas/me";
 export * from "./schemas/meetings";
 export * from "./schemas/open-points";
+export * from "./schemas/partners";
 export * from "./schemas/poles";
 export * from "./schemas/registrations";
 export * from "./schemas/staff";

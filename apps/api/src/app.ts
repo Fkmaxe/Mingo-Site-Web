@@ -12,7 +12,9 @@ import { createGradesRouter } from "./modules/grades";
 import { createHealthRouter } from "./modules/health";
 import { createMeRouter } from "./modules/me";
 import { createMeetingsRouter } from "./modules/meetings";
+import { createMembersRouter } from "./modules/members";
 import { createOpenPointsRouter } from "./modules/open-points";
+import { createPartnersRouter } from "./modules/partners";
 import { createPolesRouter } from "./modules/poles";
 import { createRegistrationsRouter } from "./modules/registrations";
 import { createStaffRouter } from "./modules/staff";
@@ -50,6 +52,8 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createTasksRouter());
   app.route("/v1", createMeetingsRouter());
   app.route("/v1", createApplicationsRouter());
+  app.route("/v1", createMembersRouter());
+  app.route("/v1", createPartnersRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

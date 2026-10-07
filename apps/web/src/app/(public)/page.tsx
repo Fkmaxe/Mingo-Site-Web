@@ -21,6 +21,14 @@ export default async function LandingPage() {
         <Button asChild size="lg" variant="outline">
           <Link href="/signup">Créer un compte</Link>
         </Button>
+        <div className="flex justify-center gap-4 text-sm">
+          <Link href="/events" className="text-primary underline-offset-4 hover:underline">
+            Les événements
+          </Link>
+          <Link href="/partners" className="text-primary underline-offset-4 hover:underline">
+            Nos partenaires
+          </Link>
+        </div>
       </div>
     </main>
   );

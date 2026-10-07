@@ -78,7 +78,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Tâches par pôle (à faire / en cours / fait, responsable, échéance).
 - Réunions : ordre du jour, compte rendu, présences.
 - Recrutement : candidatures, affectation à un pôle.
-- Partenariats : fiches partenaires, contacts, statut, contreparties.
+- Partenariats : fiches partenaires, contacts, statut, contreparties. Gérées par le bureau ; le membre référent d'un partenaire peut modifier sa fiche. Les partenaires actifs (nom, site, avantages) sont affichés publiquement.
 - Trésorerie simple : budget par événement, dépenses / recettes, justificatifs.
 
 ## Exports

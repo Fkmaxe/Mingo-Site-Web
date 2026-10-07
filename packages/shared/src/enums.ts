@@ -47,3 +47,12 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 export const APPLICATION_STATUSES = ["new", "interview", "accepted", "rejected"] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+export const PARTNER_STATUSES = [
+  "prospect",
+  "contacted",
+  "negotiating",
+  "active",
+  "ended",
+] as const;
+export type PartnerStatus = (typeof PARTNER_STATUSES)[number];
