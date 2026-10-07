@@ -1,4 +1,10 @@
-import type { AppRole, BoardPosition, MembershipRole } from "@bde/shared";
+import type {
+  AppRole,
+  BoardPosition,
+  EventStatus,
+  EventVisibility,
+  MembershipRole,
+} from "@bde/shared";
 
 export const ROLE_LABELS: Record<AppRole, string> = {
   student: "Étudiant",
@@ -20,4 +26,17 @@ export const BOARD_POSITION_LABELS: Record<BoardPosition, string> = {
   vice_president: "Vice-président·e",
   secretary: "Secrétaire",
   treasurer: "Trésorier·e",
+};
+
+export const EVENT_STATUS_LABELS: Record<EventStatus, string> = {
+  draft: "Brouillon",
+  published: "Publié",
+  cancelled: "Annulé",
+  done: "Terminé",
+};
+
+export const EVENT_VISIBILITY_LABELS: Record<EventVisibility, string> = {
+  public: "Public",
+  students: "Élèves connectés",
+  members: "Membres du BDE",
 };

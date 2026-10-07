@@ -2,7 +2,7 @@ import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { ensureDefaultRolePermissions } from "../core/permissions/defaults";
 import type { DbOrTx } from "./client";
-import { account, membership, pole, schoolYear, user } from "./schema";
+import { account, event, membership, pole, schoolYear, user } from "./schema";
 
 export const SEED_SCHOOL_YEAR = {
   label: "2026-2027",
@@ -62,8 +62,78 @@ export const SEED_USERS: SeedUser[] = [
   { email: "admin@myskolae.fr", name: "Admin Technique", isAdmin: true },
 ];
 
+const DAY = 24 * 3600 * 1000;
+
+/** Demo events relative to the seeding date, so there is always something upcoming. */
+function seedEvents(poleIdBySlug: Map<string, string>, now: number) {
+  const at = (days: number, hour: number) => {
+    const date = new Date(now + days * DAY);
+    date.setUTCHours(hour, 0, 0, 0);
+    return date;
+  };
+  const poleId = (slug: string) => {
+    const id = poleIdBySlug.get(slug);
+    if (!id) throw new Error(`Seed: pôle ${slug} introuvable`);
+    return id;
+  };
+  return [
+    {
+      slug: "soiree-d-integration",
+      title: "Soirée d'intégration",
+      poleId: poleId("evenementiel"),
+      description: "La soirée de rentrée du BDE : DJ, quiz et surprises. Tenue correcte exigée.",
+      location: "Le Petit Bain, Paris 13e",
+      startsAt: at(7, 19),
+      endsAt: at(8, 1),
+      visibility: "students" as const,
+      capacity: 150,
+      openPointsValue: 2,
+      status: "published" as const,
+    },
+    {
+      slug: "tournoi-de-foot",
+      title: "Tournoi de foot à 5",
+      poleId: poleId("sport"),
+      description: "Équipes de 5, inscription individuelle, on compose les équipes sur place.",
+      location: "UrbanSoccer Porte d'Ivry",
+      startsAt: at(14, 17),
+      endsAt: at(14, 20),
+      visibility: "public" as const,
+      capacity: 40,
+      openPointsValue: 3,
+      status: "published" as const,
+    },
+    {
+      slug: "reunion-generale",
+      title: "Réunion générale du BDE",
+      poleId: poleId("communication"),
+      description: "Bilan du mois et préparation des prochains événements.",
+      location: "ESGI Paris, salle B12",
+      startsAt: at(3, 17),
+      endsAt: at(3, 19),
+      visibility: "members" as const,
+      capacity: null,
+      openPointsValue: 0,
+      status: "published" as const,
+    },
+    {
+      slug: "afterwork-sport",
+      title: "Afterwork sport (brouillon)",
+      poleId: poleId("sport"),
+      description: "",
+      location: "À définir",
+      startsAt: at(21, 18),
+      endsAt: at(21, 21),
+      visibility: "students" as const,
+      capacity: 30,
+      openPointsValue: 1,
+      status: "draft" as const,
+    },
+  ];
+}
+
 /** Idempotent: running it twice leaves the database unchanged. */
-export async function seed(db: DbOrTx) {
+export async function seed(db: DbOrTx, now: number = Date.now()) {
   await ensureDefaultRolePermissions(db);
   await db
     .insert(schoolYear)
@@ -134,4 +204,6 @@ export async function seed(db: DbOrTx) {
       boardPosition: m.role === "board" ? m.boardPosition : null,
     });
   }
+
+  await db.insert(event).values(seedEvents(poleIdBySlug, now)).onConflictDoNothing();
 }

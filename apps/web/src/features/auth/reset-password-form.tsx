@@ -5,10 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
-import { FormAlert, FormField } from "./form-field";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();

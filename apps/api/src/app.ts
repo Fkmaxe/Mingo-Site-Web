@@ -4,8 +4,10 @@ import { cors } from "hono/cors";
 import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { onError, onNotFound, throwOnValidationError } from "./core/errors";
+import { createEventsRouter } from "./modules/events";
 import { createHealthRouter } from "./modules/health";
 import { createMeRouter } from "./modules/me";
+import { createPolesRouter } from "./modules/poles";
 
 export type AppDeps = AuthDeps;
 
@@ -28,6 +30,8 @@ export function createApp(deps: AppDeps) {
 
   app.use("/v1/*", loadContext(auth, db));
   app.route("/v1", createMeRouter());
+  app.route("/v1", createPolesRouter());
+  app.route("/v1", createEventsRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

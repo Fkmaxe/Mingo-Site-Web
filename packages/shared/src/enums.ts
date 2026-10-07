@@ -13,3 +13,9 @@ export type BoardPosition = (typeof BOARD_POSITIONS)[number];
  */
 export const APP_ROLES = ["student", "member", "pole_lead", "board", "treasurer", "admin"] as const;
 export type AppRole = (typeof APP_ROLES)[number];
+
+export const EVENT_VISIBILITIES = ["public", "students", "members"] as const;
+export type EventVisibility = (typeof EVENT_VISIBILITIES)[number];
+
+export const EVENT_STATUSES = ["draft", "published", "cancelled", "done"] as const;
+export type EventStatus = (typeof EVENT_STATUSES)[number];

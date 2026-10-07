@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
-import { FormAlert } from "@/features/auth/form-field";
 import { ResetPasswordForm } from "@/features/auth/reset-password-form";
 
 export const metadata: Metadata = { title: "Nouveau mot de passe" };

@@ -7,6 +7,7 @@ export const ERROR_CODES = [
   "FORBIDDEN",
   "DOMAIN_NOT_ALLOWED",
   "NOT_FOUND",
+  "INVALID_STATUS_TRANSITION",
   "INTERNAL_ERROR",
 ] as const;
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
-import { FormAlert } from "@/features/auth/form-field";
 import { SignInForm } from "@/features/auth/sign-in-form";
 import { getMe } from "@/lib/session";
 

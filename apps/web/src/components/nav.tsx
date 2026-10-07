@@ -1,20 +1,21 @@
 "use client";
 
-// Items (with their icon components) are imported here: functions cannot cross the
-// server -> client boundary as props.
+// Items (with their icon components) are built here from a boolean: functions cannot cross
+// the server -> client boundary as props.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, type NavItem } from "./nav-items";
+import { type NavItem, navItems } from "./nav-items";
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /** Mobile: fixed bar at the bottom, within thumb reach. Hidden from md up. */
-export function BottomNav({ items = NAV_ITEMS }: { items?: NavItem[] }) {
+export function BottomNav({ canManage = false }: { canManage?: boolean }) {
   const pathname = usePathname();
+  const items: NavItem[] = navItems(canManage);
   return (
     <nav
       aria-label="Navigation principale"
@@ -45,8 +46,9 @@ export function BottomNav({ items = NAV_ITEMS }: { items?: NavItem[] }) {
 }
 
 /** Desktop: sidebar. Hidden below md. */
-export function SideNav({ items = NAV_ITEMS }: { items?: NavItem[] }) {
+export function SideNav({ canManage = false }: { canManage?: boolean }) {
   const pathname = usePathname();
+  const items: NavItem[] = navItems(canManage);
   return (
     <nav aria-label="Navigation principale" className="hidden md:block">
       <ul className="flex flex-col gap-1">
