@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { onError, onNotFound, throwOnValidationError } from "./core/errors";
+import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
 import { createEventsRouter } from "./modules/events";
 import { createExportsRouter } from "./modules/exports";
@@ -48,6 +49,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createGradesRouter());
   app.route("/v1", createTasksRouter());
   app.route("/v1", createMeetingsRouter());
+  app.route("/v1", createApplicationsRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

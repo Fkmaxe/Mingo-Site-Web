@@ -37,6 +37,15 @@ export default async function HomePage() {
         </Link>
       ) : (
         <Link
+          href="/join"
+          className="flex items-center justify-between rounded-xl border border-primary/40 bg-card p-4 transition-colors hover:bg-accent/40"
+        >
+          <span className="font-medium">Rejoindre le BDE</span>
+          <span className="text-muted-foreground text-sm">Candidater à un pôle</span>
+        </Link>
+      )}
+      {points.isMember ? null : (
+        <Link
           href="/points"
           className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
         >

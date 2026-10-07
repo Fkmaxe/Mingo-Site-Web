@@ -44,3 +44,6 @@ export type GradeStatus = (typeof GRADE_STATUSES)[number];
 
 export const TASK_STATUSES = ["todo", "doing", "done"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const APPLICATION_STATUSES = ["new", "interview", "accepted", "rejected"] as const;
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];

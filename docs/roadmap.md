@@ -33,7 +33,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 - [x] Tâches par pôle (kanban)
 - [x] Réunions + présences
-- [ ] Recrutement
+- [x] Recrutement
 - [ ] Partenaires
 - [ ] Synchro Sheets nocturne
 - [ ] PWA installable + file de check-in hors ligne
