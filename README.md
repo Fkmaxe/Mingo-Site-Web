@@ -4,7 +4,7 @@ Plateforme de gestion du BDE Mingo (ESGI Paris) : événements, inscriptions, ch
 
 Stack : **Hono** (API) · **Next.js + Tailwind** (web) · **PostgreSQL + Drizzle** · monorepo **pnpm + Turborepo**. Détails dans [`CLAUDE.md`](./CLAUDE.md) et [`docs/`](./docs).
 
-## Démarrer
+## Démarrer (développement)
 
 ```bash
 cp .env.example .env
@@ -13,6 +13,19 @@ docker compose up -d db mailpit   # Postgres + Mailpit (mails de dev sur http://
 pnpm db:migrate && pnpm db:seed
 pnpm dev     # web http://localhost:3000 · api http://localhost:3001 · doc API http://localhost:3001/v1/docs
 ```
+
+## Tout lancer dans Docker
+
+```bash
+cp .env.example .env                        # puis adapter SMTP_* si besoin
+docker compose --profile full up -d --build # db + mailpit + api + web
+```
+
+- Web : http://localhost:3000 · API : http://localhost:3001 (doc `/v1/docs` désactivée en production).
+- Les migrations sont appliquées au démarrage du conteneur API.
+- Données de démo (une seule fois, depuis ta machine) : `pnpm db:seed`.
+- Dans Docker, Mailpit s'appelle `mailpit` : pour l'utiliser, `SMTP_HOST=mailpit` et `SMTP_PORT=1025`.
+- `docker compose --profile full down` pour tout arrêter (le volume de la base est conservé).
 
 ## Ce dossier est prêt pour Claude Code
 

@@ -39,6 +39,7 @@ pnpm test                        # tous les tests
 pnpm --filter api test           # tests d'une seule app
 pnpm lint && pnpm typecheck      # à lancer avant de déclarer une tâche finie
 pnpm db:generate                 # génère une migration après modif du schéma Drizzle
+docker compose --profile full up -d --build   # toute l'appli en conteneurs (web :3000, api :3001)
 ```
 
 ## Règles non négociables

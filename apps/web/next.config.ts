@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import type { NextConfig } from "next";
 import { loadEnv } from "./src/env";
 
@@ -8,6 +9,9 @@ const env = loadEnv();
 
 const config: NextConfig = {
   transpilePackages: ["@bde/shared"],
+  // Docker image: self-contained server; tracing starts at the monorepo root (pnpm workspace).
+  output: "standalone",
+  outputFileTracingRoot: resolve(process.cwd(), "../.."),
   // Biome lints the whole monorepo.
   eslint: { ignoreDuringBuilds: true },
   async rewrites() {

@@ -31,7 +31,9 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     env_file: .env
+    restart: unless-stopped
     environment:
+      NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER:-bde}:${POSTGRES_PASSWORD:-bde}@db:5432/${POSTGRES_DB:-bde_mingo}
     depends_on:
       db:
@@ -44,11 +46,15 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
     env_file: .env
     environment:
+      # .env's PORT is the API's.
+      PORT: "3000"
       API_URL: http://api:3001
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     ports:
       - "3000:3000"
 
