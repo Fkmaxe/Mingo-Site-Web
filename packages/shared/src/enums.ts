@@ -26,3 +26,6 @@ export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
 /** Whether a user can register now. Computed by the API from the event and its registrations. */
 export const REGISTRATION_STATES = ["open", "full", "closed"] as const;
 export type RegistrationState = (typeof REGISTRATION_STATES)[number];
+
+export const ATTENDANCE_KINDS = ["participant", "staff", "meeting"] as const;
+export type AttendanceKind = (typeof ATTENDANCE_KINDS)[number];

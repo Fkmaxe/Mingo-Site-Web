@@ -7,12 +7,15 @@ import { inTransaction } from "../../core/tx";
 import { findManageableEvent, findVisibleEvent } from "../events";
 import {
   countConfirmed,
+  findParticipant,
+  findParticipantByToken,
   findRegistrants,
   findRegistration,
   findTicket,
   findUserTickets,
   insertRegistration,
   lockEventRegistrations,
+  searchConfirmedParticipants,
   type TicketRow,
   updateRegistration,
 } from "./registrations.repo";
@@ -139,4 +142,24 @@ export async function listRegistrants(
     ({ createdAtKey: _, ...row }) => ({ ...row, createdAt: row.createdAt.toISOString() }),
     (row) => ({ c: row.createdAtKey, id: row.id }),
   );
+}
+
+// --- Read access for other modules (check-in). No authorization here: callers check it. ---
+
+export type Participant = NonNullable<Awaited<ReturnType<typeof findParticipantByToken>>>;
+
+export function participantByToken(ctx: Pick<AuthedCtx, "db">, qrToken: string) {
+  return findParticipantByToken(ctx.db, qrToken);
+}
+
+export function participantOfEvent(ctx: Pick<AuthedCtx, "db">, eventId: string, userId: string) {
+  return findParticipant(ctx.db, eventId, userId);
+}
+
+export function searchParticipants(ctx: Pick<AuthedCtx, "db">, eventId: string, query: string) {
+  return searchConfirmedParticipants(ctx.db, eventId, query);
+}
+
+export function confirmedCount(ctx: Pick<AuthedCtx, "db">, eventId: string) {
+  return countConfirmed(ctx.db, eventId);
 }

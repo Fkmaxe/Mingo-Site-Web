@@ -1,8 +1,9 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ScanLine } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FormAlert } from "@/components/form-field";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/events/event-badges";
 import { EventForm } from "@/features/events/event-form";
 import { eventToForm } from "@/features/events/event-form-values";
@@ -49,6 +50,15 @@ export default async function ManageEventPage({
       </div>
       {created ? (
         <FormAlert tone="success">Brouillon créé. Publie-le quand il est prêt.</FormAlert>
+      ) : null}
+
+      {event.status === "published" ? (
+        <Button asChild size="lg">
+          <Link href={`/manage/events/${event.id}/checkin`}>
+            <ScanLine aria-hidden />
+            Pointer les entrées
+          </Link>
+        </Button>
       ) : null}
 
       <EventManageActions event={event} />

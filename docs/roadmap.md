@@ -17,7 +17,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 - [x] Événements : CRUD, visibilité, liste + détail mobile
 - [x] Inscriptions participants : inscription / désinscription, QR code, page « Mes billets »
-- [ ] Check-in : scanner QR (BarcodeDetector + repli), recherche manuelle, idempotence
+- [x] Check-in : scanner QR (BarcodeDetector + repli), recherche manuelle, idempotence
 - [ ] Points open : mouvement auto au check-in, validation par le bureau, ajustement manuel, solde étudiant
 - [ ] Export Google Sheets manuel (inscrits, présences, points open) + CSV
 

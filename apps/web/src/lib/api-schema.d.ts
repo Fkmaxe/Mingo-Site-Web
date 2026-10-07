@@ -793,6 +793,186 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/events/{eventId}/checkin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CheckinInput"];
+                };
+            };
+            responses: {
+                /** @description Entrée enregistrée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Checkin"];
+                    };
+                };
+                /** @description Pas le droit de pointer cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description ALREADY_CHECKED_IN (détails : heure du premier pointage) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TICKET_NOT_VALID : billet inconnu, d'un autre événement ou annulé */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Trop de scans */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/checkin/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    q: string;
+                };
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Inscrits correspondant à la recherche */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CheckinCandidate"][];
+                    };
+                };
+                /** @description Pas le droit de pointer cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/checkin/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Inscrits et entrées */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CheckinStats"];
+                    };
+                };
+                /** @description Pas le droit de pointer cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -832,7 +1012,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "EVENT_FULL" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "EVENT_FULL" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -966,6 +1146,43 @@ export interface components {
                 email: string;
                 promo: string | null;
             };
+        };
+        Checkin: {
+            /** Format: uuid */
+            attendanceId: string;
+            /** @enum {string} */
+            kind: "participant" | "staff" | "meeting";
+            /** Format: date-time */
+            checkedInAt: string;
+            user: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                promo: string | null;
+            };
+        };
+        CheckinInput: {
+            qrToken: string;
+        } | {
+            /** Format: uuid */
+            userId: string;
+        };
+        CheckinCandidate: {
+            /** Format: uuid */
+            registrationId: string;
+            user: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                email: string;
+                promo: string | null;
+            };
+            /** Format: date-time */
+            checkedInAt: string | null;
+        };
+        CheckinStats: {
+            confirmedCount: number;
+            checkedInCount: number;
         };
     };
     responses: never;

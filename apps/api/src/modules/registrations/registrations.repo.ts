@@ -1,5 +1,19 @@
 import type { RegistrationStatus } from "@bde/shared";
-import { and, asc, count, desc, eq, gte, inArray, lt, ne, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lt,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { compact, type Patch } from "../../db/patch";
 import { event, registration, user } from "../../db/schema";
@@ -130,4 +144,47 @@ export function findRegistrants(
     .where(and(...conditions))
     .orderBy(asc(registration.createdAt), asc(registration.id))
     .limit(params.limit + 1);
+}
+
+const participantSelection = {
+  id: registration.id,
+  eventId: registration.eventId,
+  status: registration.status,
+  user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+};
+
+export async function findParticipantByToken(db: DbOrTx, qrToken: string) {
+  const [row] = await db
+    .select(participantSelection)
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(eq(registration.qrToken, qrToken));
+  return row;
+}
+
+export async function findParticipant(db: DbOrTx, eventId: string, userId: string) {
+  const [row] = await db
+    .select(participantSelection)
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(and(eq(registration.eventId, eventId), eq(registration.userId, userId)));
+  return row;
+}
+
+/** Confirmed registrants whose name or email contains `query` (case-insensitive, wildcards escaped). */
+export function searchConfirmedParticipants(db: DbOrTx, eventId: string, query: string) {
+  const pattern = `%${query.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  return db
+    .select(participantSelection)
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(
+      and(
+        eq(registration.eventId, eventId),
+        eq(registration.status, "confirmed"),
+        or(ilike(user.name, pattern), ilike(user.email, pattern)),
+      ),
+    )
+    .orderBy(asc(user.name))
+    .limit(20);
 }

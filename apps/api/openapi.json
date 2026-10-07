@@ -197,6 +197,9 @@
                   "EVENT_FULL",
                   "REGISTRATION_CLOSED",
                   "DEADLINE_PASSED",
+                  "ALREADY_CHECKED_IN",
+                  "TICKET_NOT_VALID",
+                  "RATE_LIMITED",
                   "INTERNAL_ERROR"
                 ]
               },
@@ -668,6 +671,148 @@
           "status",
           "createdAt",
           "user"
+        ]
+      },
+      "Checkin": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "participant",
+              "staff",
+              "meeting"
+            ]
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "promo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "promo"
+            ]
+          }
+        },
+        "required": [
+          "attendanceId",
+          "kind",
+          "checkedInAt",
+          "user"
+        ]
+      },
+      "CheckinInput": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "qrToken": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "qrToken"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "userId"
+            ]
+          }
+        ]
+      },
+      "CheckinCandidate": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "promo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "email",
+              "promo"
+            ]
+          },
+          "checkedInAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "registrationId",
+          "user",
+          "checkedInAt"
+        ]
+      },
+      "CheckinStats": {
+        "type": "object",
+        "properties": {
+          "confirmedCount": {
+            "type": "integer"
+          },
+          "checkedInCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confirmedCount",
+          "checkedInCount"
         ]
       }
     },
@@ -1493,6 +1638,188 @@
           },
           "409": {
             "description": "L'événement a commencé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/checkin": {
+      "post": {
+        "tags": [
+          "checkin"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckinInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Entrée enregistrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Checkin"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit de pointer cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_CHECKED_IN (détails : heure du premier pointage)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "TICKET_NOT_VALID : billet inconnu, d'un autre événement ou annulé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Trop de scans",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/checkin/search": {
+      "get": {
+        "tags": [
+          "checkin"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100
+            },
+            "required": true,
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inscrits correspondant à la recherche",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CheckinCandidate"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit de pointer cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/checkin/stats": {
+      "get": {
+        "tags": [
+          "checkin"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inscrits et entrées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinStats"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit de pointer cet événement",
             "content": {
               "application/json": {
                 "schema": {
