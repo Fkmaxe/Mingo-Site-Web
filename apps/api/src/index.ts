@@ -1,9 +1,11 @@
 import { serve } from "@hono/node-server";
 import { createApp } from "./app";
+import { createDb } from "./db/client";
 import { loadEnv } from "./env";
 
 const env = loadEnv();
-const app = createApp({ env });
+const { db } = createDb(env.DATABASE_URL);
+const app = createApp({ env, db });
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   console.log(`API BDE Mingo sur http://localhost:${info.port}`);
