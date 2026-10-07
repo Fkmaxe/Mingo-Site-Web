@@ -19,12 +19,13 @@ Chaque app a son propre `CLAUDE.md` (`apps/api`, `apps/web`, `packages/shared`) 
 | Monorepo | pnpm workspaces + Turborepo |
 | API | Hono sur Node 22, TypeScript strict, `@hono/zod-openapi` |
 | Base | PostgreSQL 16 + Drizzle ORM (migrations SQL versionnées) |
-| Auth | Better Auth, fournisseur Microsoft Entra ID, domaine `@myskolae.fr` uniquement |
+| Auth | Better Auth, email + mot de passe, adresse `@myskolae.fr` vérifiée par mail uniquement |
 | Web | Next.js 15 (App Router), Tailwind CSS v4, shadcn/ui |
 | Validation partagée | Zod, dans `packages/shared` |
 | Tests | Vitest (unitaires + intégration API sur une vraie base Postgres) |
 | Lint / format | Biome |
-| Infra | Docker Compose (postgres, api, web) |
+| Mails | nodemailer (SMTP du BDE en prod, Mailpit en dev) |
+| Infra | Docker Compose (postgres, mailpit, api, web) |
 
 ## Commandes
 

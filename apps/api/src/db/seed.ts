@@ -1,6 +1,7 @@
+import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import type { DbOrTx } from "./client";
-import { membership, pole, schoolYear, user } from "./schema";
+import { account, membership, pole, schoolYear, user } from "./schema";
 
 export const SEED_SCHOOL_YEAR = {
   label: "2026-2027",
@@ -26,6 +27,9 @@ type SeedUser = {
   isAdmin?: boolean;
   membership?: SeedMembership;
 };
+
+/** Password of every demo account. Dev data only, never seeded in production. */
+export const SEED_PASSWORD = "mingo-demo-2026";
 
 /** Fictitious demo accounts, one per role. */
 export const SEED_USERS: SeedUser[] = [
@@ -76,6 +80,8 @@ export async function seed(db: DbOrTx) {
   const poles = await db.select({ id: pole.id, slug: pole.slug }).from(pole);
   const poleIdBySlug = new Map(poles.map((p) => [p.slug, p.id]));
 
+  const passwordHash = await hashPassword(SEED_PASSWORD);
+
   for (const seedUser of SEED_USERS) {
     await db
       .insert(user)
@@ -88,7 +94,22 @@ export async function seed(db: DbOrTx) {
       })
       .onConflictDoNothing();
     const [row] = await db.select({ id: user.id }).from(user).where(eq(user.email, seedUser.email));
-    if (!row || !seedUser.membership) continue;
+    if (!row) continue;
+
+    const [credential] = await db
+      .select({ id: account.id })
+      .from(account)
+      .where(and(eq(account.userId, row.id), eq(account.providerId, "credential")));
+    if (!credential) {
+      await db.insert(account).values({
+        userId: row.id,
+        accountId: row.id,
+        providerId: "credential",
+        password: passwordHash,
+      });
+    }
+
+    if (!seedUser.membership) continue;
 
     const m = seedUser.membership;
     const poleId = m.role === "board" ? null : (poleIdBySlug.get(m.pole) ?? null);

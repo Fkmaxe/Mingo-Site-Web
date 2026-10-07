@@ -1,25 +1,28 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
+import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
+import { type AppEnv, loadContext } from "./core/context";
 import { onError, onNotFound, throwOnValidationError } from "./core/errors";
-import type { Db } from "./db/client";
-import type { Env } from "./env";
 import { createHealthRouter } from "./modules/health";
+import { createMeRouter } from "./modules/me";
 
-export type AppDeps = {
-  env: Pick<Env, "NODE_ENV" | "WEB_ORIGIN">;
-  db: Db;
-};
+export type AppDeps = AuthDeps;
 
 export function createApp(deps: AppDeps) {
   const { env, db } = deps;
-  const app = new OpenAPIHono({ defaultHook: throwOnValidationError });
+  const auth = createAuth(deps);
+  const app = new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError });
 
   app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }));
   app.onError(onError);
   app.notFound(onNotFound);
 
   app.route("/", createHealthRouter(db));
+  app.on(["GET", "POST"], `${AUTH_BASE_PATH}/*`, (c) => auth.handler(c.req.raw));
+
+  app.use("/v1/*", loadContext(auth, db));
+  app.route("/v1", createMeRouter());
 
   app.doc31("/v1/openapi.json", {
     openapi: "3.1.0",

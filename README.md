@@ -35,5 +35,6 @@ Ensuite, une fonctionnalité à la fois : `/new-module events`, `/new-module reg
 
 ## Avant de commencer
 
-- Créer l'app dans **Microsoft Entra ID** (portail Azure de l'école ou demande à la DSI) et renseigner `MICROSOFT_*` dans `.env`. Redirect URI dev : `http://localhost:3001/api/auth/callback/microsoft`.
+- En dev, les mails (vérification d'adresse, mot de passe oublié) arrivent dans **Mailpit** : http://localhost:8025. Comptes de démo créés par `pnpm db:seed` : `etudiant@`, `membre.sport@`, `resp.sport@`, `president@`, `tresorier@`, `admin@myskolae.fr`, mot de passe `mingo-demo-2026`.
+- En prod, renseigner le SMTP du BDE (`SMTP_*`, `MAIL_FROM`) dans `.env`.
 - Créer un **compte de service Google** au nom du BDE pour les exports Sheets.

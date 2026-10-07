@@ -12,9 +12,10 @@ BDE de l'ESGI Paris (anciennement BDE Sigma). Organisation :
 
 ## Utilisateurs et connexion
 
-- Tout le monde se connecte avec son compte Microsoft école **@myskolae.fr** (élèves et membres). Aucun autre domaine n'est accepté.
-- Au premier login, le compte est créé avec le rôle **Étudiant**. Le bureau promeut ensuite les membres dans leur pôle.
-- Pas de mot de passe géré par l'application.
+- Tout le monde se connecte avec son adresse école **@myskolae.fr** (élèves et membres) et un **mot de passe** choisi à l'inscription. Aucun autre domaine n'est accepté.
+- L'adresse est **confirmée par mail** avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Mot de passe oublié → lien de réinitialisation par mail.
+- Pas de connexion Microsoft (Entra ID) : le BDE n'a pas accès au tenant de l'école.
+- À l'inscription, le compte est créé avec le rôle **Étudiant**. Le bureau promeut ensuite les membres dans leur pôle.
 
 ## Rôles
 
@@ -94,7 +95,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 ## Questions ouvertes
 
-- [ ] La DSI autorise-t-elle une app tierce sur le tenant Microsoft myskolae.fr (consentement admin) ? Sinon : lien magique par mail @myskolae.fr.
+- [x] ~~La DSI autorise-t-elle une app tierce sur le tenant Microsoft myskolae.fr ?~~ Non, pas d'accès → email + mot de passe, adresse vérifiée par mail (octobre 2026).
 - [ ] Format exact attendu par l'école pour la remontée des points open.
 - [ ] Barème des points open : fixé par l'école ou libre par événement ?
 - [ ] Échelle et pondération de la note membre (ex. /20, 50 % présence / 50 % implication ?).

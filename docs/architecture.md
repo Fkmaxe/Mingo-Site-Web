@@ -14,9 +14,8 @@ apps/api  ── Hono (Node) ── logique métier, permissions, auth
         ▼
 PostgreSQL
 
-apps/api ──► Microsoft Entra ID (OAuth, domaine myskolae.fr)
 apps/api ──► Google Sheets API (compte de service BDE)
-apps/api ──► SMTP (mails : billets, rappels, liste d'attente)
+apps/api ──► SMTP (mails : vérification d'adresse, mot de passe, billets, rappels, liste d'attente)
 apps/api ──► jobs planifiés (synchro Sheets, rappels J-1)
 ```
 
@@ -116,8 +115,11 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 
 ## Auth
 
-- Better Auth monté sur `/api/auth/*` dans l'API, fournisseur `microsoft` (Entra ID).
-- Hook de création de compte : refus si l'email ne finit pas par `@myskolae.fr`.
+- Better Auth monté sur `/api/auth/*` dans l'API, **email + mot de passe** (hash scrypt).
+- Adresse vérifiée par mail obligatoire avant toute connexion ; réinitialisation du mot de passe par mail.
+- Domaine `@myskolae.fr` vérifié trois fois : hook avant l'inscription (`403 DOMAIN_NOT_ALLOWED`), hook de création d'utilisateur, contrainte SQL `check` sur `user.email`.
+- Rate limiting sur la connexion, l'inscription et la demande de réinitialisation.
+- `BETTER_AUTH_URL` est l'URL **du web** : le web proxifie `/api/auth/*` vers l'API, donc cookies et liens des mails sont sur l'origine du web.
 - Session en cookie httpOnly, partagé avec le web (même domaine parent en prod, proxy Next en dev).
 - Le middleware `requireAuth` charge l'utilisateur et ses permissions dans le contexte Hono.
 

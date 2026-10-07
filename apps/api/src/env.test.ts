@@ -18,7 +18,6 @@ describe("loadEnv", () => {
     expect(env.SMTP_PORT).toBe(1025);
     expect(env.SMTP_SECURE).toBe(false);
     expect(env.NODE_ENV).toBe("development");
-    expect(env.ALLOWED_EMAIL_DOMAIN).toBe("myskolae.fr");
   });
 
   it("parses SMTP_SECURE as a boolean", () => {

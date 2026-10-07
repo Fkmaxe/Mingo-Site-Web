@@ -8,7 +8,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [ ] Docker Compose (Postgres) + `.env` validé par Zod dans chaque app
 - [ ] API Hono : app, handler d'erreurs, OpenAPI, healthcheck `/health`
 - [ ] Drizzle : client, premier schéma (`user`, `school_year`, `pole`, `membership`, `role_permission`, `audit_log`), seed
-- [ ] Better Auth + Microsoft Entra ID, refus des domaines ≠ `@myskolae.fr`, route `/v1/me`
+- [ ] Better Auth email + mot de passe (adresse vérifiée par mail), refus des domaines ≠ `@myskolae.fr`, route `/v1/me`
 - [ ] RBAC : constantes de permissions, `requirePermission`, `assertPoleAccess`
 - [ ] Web Next : layout mobile (nav en bas), login, page profil, client API typé
 - [ ] CI GitHub Actions : lint, typecheck, tests (avec service Postgres)

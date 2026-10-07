@@ -9,7 +9,6 @@ const EnvSchema = z.object({
   WEB_ORIGIN: z.url(),
   BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET doit faire au moins 32 caractères"),
   BETTER_AUTH_URL: z.url(),
-  ALLOWED_EMAIL_DOMAIN: z.string().min(1).default("myskolae.fr"),
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_SECURE: z.stringbool().default(false),
