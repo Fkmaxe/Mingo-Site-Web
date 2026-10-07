@@ -30,7 +30,7 @@ Chaque app a son propre `CLAUDE.md` (`apps/api`, `apps/web`, `packages/shared`) 
 
 ```bash
 pnpm install
-docker compose up -d db          # Postgres local sur :5432
+docker compose up -d db mailpit  # Postgres :5432 + Mailpit (mails de dev) :8025
 pnpm db:migrate                  # applique les migrations
 pnpm db:seed                     # données de démo (pôles, événements, comptes fictifs)
 pnpm dev                         # api :3001 + web :3000

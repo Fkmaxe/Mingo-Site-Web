@@ -3,5 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "scripts": {}
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bde/shared": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5"
+  }
 }

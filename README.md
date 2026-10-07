@@ -9,7 +9,7 @@ Stack : **Hono** (API) · **Next.js + Tailwind** (web) · **PostgreSQL + Drizzle
 ```bash
 cp .env.example .env
 pnpm install
-docker compose up -d db
+docker compose up -d db mailpit   # Postgres + Mailpit (mails de dev sur http://localhost:8025)
 pnpm db:migrate && pnpm db:seed
 pnpm dev     # web http://localhost:3000 · api http://localhost:3001 · doc API http://localhost:3001/v1/docs
 ```

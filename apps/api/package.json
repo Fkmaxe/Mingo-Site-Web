@@ -4,10 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5"
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "@bde/shared": "workspace:*",
+    "zod": "^4.6.5"
   }
 }
