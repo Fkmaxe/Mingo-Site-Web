@@ -1,7 +1,7 @@
 import type { AttendanceKind } from "@bde/shared";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, asc, count, eq, inArray } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
-import { attendance } from "../../db/schema";
+import { attendance, user } from "../../db/schema";
 
 export async function findAttendance(
   db: DbOrTx,
@@ -53,4 +53,17 @@ export async function findAttendancesOfUsers(
         inArray(attendance.userId, userIds),
       ),
     );
+}
+
+export function findEventAttendances(db: DbOrTx, eventId: string) {
+  return db
+    .select({
+      kind: attendance.kind,
+      checkedInAt: attendance.checkedInAt,
+      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+    })
+    .from(attendance)
+    .innerJoin(user, eq(user.id, attendance.userId))
+    .where(eq(attendance.eventId, eventId))
+    .orderBy(asc(attendance.checkedInAt));
 }

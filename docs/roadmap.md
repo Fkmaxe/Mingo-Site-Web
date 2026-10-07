@@ -19,7 +19,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [x] Inscriptions participants : inscription / désinscription, QR code, page « Mes billets »
 - [x] Check-in : scanner QR (BarcodeDetector + repli), recherche manuelle, idempotence
 - [x] Points open : mouvement auto au check-in, validation par le bureau, ajustement manuel, solde étudiant
-- [ ] Export Google Sheets manuel (inscrits, présences, points open) + CSV
+- [ ] Export Google Sheets manuel (inscrits, présences, points open) + CSV — CSV fait ; Sheets en attente du compte de service Google du BDE
 
 ## Lot 2 — V1
 

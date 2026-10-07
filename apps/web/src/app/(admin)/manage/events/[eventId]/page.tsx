@@ -2,6 +2,7 @@ import { ExternalLink, ScanLine } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DownloadLink } from "@/components/download-link";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/events/event-badges";
@@ -73,6 +74,16 @@ export default async function ManageEventPage({
             </span>
           </h2>
           <RegistrantsList registrants={registrants} />
+          {me.permissions.includes("exports:run") ? (
+            <div className="flex flex-wrap gap-2">
+              <DownloadLink href={`/manage/events/${event.id}/export/registrations`}>
+                Inscrits (CSV)
+              </DownloadLink>
+              <DownloadLink href={`/manage/events/${event.id}/export/attendance`}>
+                Présences (CSV)
+              </DownloadLink>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

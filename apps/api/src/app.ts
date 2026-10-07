@@ -6,6 +6,7 @@ import { type AppEnv, loadContext } from "./core/context";
 import { onError, onNotFound, throwOnValidationError } from "./core/errors";
 import { createCheckinRouter } from "./modules/checkin";
 import { createEventsRouter } from "./modules/events";
+import { createExportsRouter } from "./modules/exports";
 import { createHealthRouter } from "./modules/health";
 import { createMeRouter } from "./modules/me";
 import { createOpenPointsRouter } from "./modules/open-points";
@@ -38,6 +39,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createRegistrationsRouter());
   app.route("/v1", createCheckinRouter());
   app.route("/v1", createOpenPointsRouter());
+  app.route("/v1", createExportsRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

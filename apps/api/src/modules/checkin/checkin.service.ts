@@ -16,6 +16,7 @@ import {
   countAttendances,
   findAttendance,
   findAttendancesOfUsers,
+  findEventAttendances,
   insertAttendance,
 } from "./checkin.repo";
 
@@ -124,4 +125,10 @@ export async function checkinStats(ctx: AuthedCtx, eventId: string): Promise<Che
     countAttendances(ctx.db, event.id, KIND),
   ]);
   return { confirmedCount: confirmed, checkedInCount: checkedIn };
+}
+
+// --- Read access for other modules (exports). No authorization here: callers check it. ---
+
+export function eventAttendances(ctx: Pick<AuthedCtx, "db">, eventId: string) {
+  return findEventAttendances(ctx.db, eventId);
 }

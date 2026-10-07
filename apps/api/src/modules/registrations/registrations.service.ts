@@ -7,6 +7,7 @@ import { inTransaction } from "../../core/tx";
 import { findManageableEvent, findVisibleEvent } from "../events";
 import {
   countConfirmed,
+  findAllRegistrants,
   findParticipant,
   findParticipantByToken,
   findRegistrants,
@@ -158,4 +159,8 @@ export function searchParticipants(ctx: Pick<AuthedCtx, "db">, eventId: string, 
 
 export function confirmedCount(ctx: Pick<AuthedCtx, "db">, eventId: string) {
   return countConfirmed(ctx.db, eventId);
+}
+
+export function allRegistrants(ctx: Pick<AuthedCtx, "db">, eventId: string) {
+  return findAllRegistrants(ctx.db, eventId);
 }

@@ -21,6 +21,7 @@ import {
   findTotals,
   findUserById,
   findUserMovements,
+  findYearLedger,
   insertMovement,
   type MovementRow,
   searchUsers,
@@ -208,4 +209,10 @@ export async function searchAccounts(
     isMember: members.has(u.id),
     ...(totals.get(u.id) ?? { balance: 0, pending: 0 }),
   }));
+}
+
+// --- Read access for other modules (exports). No authorization here: callers check it. ---
+
+export function yearLedger(ctx: Pick<AuthedCtx, "db">, schoolYearId: string) {
+  return findYearLedger(ctx.db, schoolYearId);
 }

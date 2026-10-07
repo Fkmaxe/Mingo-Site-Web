@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DownloadLink } from "@/components/download-link";
 import { Button } from "@/components/ui/button";
 import { PendingReview } from "@/features/open-points/pending-review";
 import { listAllPending } from "@/features/open-points/queries";
@@ -25,6 +26,16 @@ export default async function ManageOpenPointsPage() {
       <p className="text-muted-foreground text-sm">
         Points gagnés aux événements, en attente de validation avant transmission à l'école.
       </p>
+      {me.permissions.includes("exports:run") ? (
+        <div className="flex flex-wrap gap-2">
+          <DownloadLink href="/manage/open-points/export?view=summary">
+            Total par étudiant (CSV)
+          </DownloadLink>
+          <DownloadLink href="/manage/open-points/export?view=detail">
+            Tous les mouvements (CSV)
+          </DownloadLink>
+        </div>
+      ) : null}
       <PendingReview key={pending.map((p) => p.id).join()} entries={pending} />
     </div>
   );

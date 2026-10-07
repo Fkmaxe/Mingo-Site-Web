@@ -52,8 +52,8 @@ Pour une transaction, le service crée la `tx` et la passe aux repos via `{ ...c
 
 ## Tests
 
-- Vitest + vraie base Postgres (pas de mock de Drizzle). Chaque fichier de test tourne dans une transaction annulée à la fin, ou sur une base remise à zéro.
-- Helpers dans `src/test/` : `createTestUser({ role, pole })`, `authedRequest(user)`, `factories` pour event, registration…
+- Vitest + vraie base Postgres (pas de mock de Drizzle). La base de test est reconstruite depuis les migrations au lancement, puis vidée avant chaque test (`src/test/setup.ts`).
+- Helpers dans `src/test/` : `createPersona("pole_lead", { poleId })` et autres `factories` (user, pôle, année, événement), `call(method, path, userId, body)` pour une requête authentifiée, `readJson`/`readError` pour lire une réponse avec un schéma Zod.
 - Par route : cas nominal, 401, 403, validation 400, et chaque `409`/`422` métier.
 - Les services externes (`lib/mailer`, `lib/google-sheets`) sont remplacés par des faux en mémoire injectés, jamais appelés réellement en test.
 

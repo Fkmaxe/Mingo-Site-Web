@@ -147,3 +147,17 @@ export function searchUsers(db: DbOrTx, query: string) {
     .orderBy(asc(user.name))
     .limit(20);
 }
+
+export function findYearLedger(db: DbOrTx, schoolYearId: string) {
+  return db
+    .select({
+      ...movementSelection,
+      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+    })
+    .from(openPointsLedger)
+    .innerJoin(user, eq(user.id, openPointsLedger.userId))
+    .leftJoin(attendance, eq(attendance.id, openPointsLedger.attendanceId))
+    .leftJoin(event, eq(event.id, attendance.eventId))
+    .where(eq(openPointsLedger.schoolYearId, schoolYearId))
+    .orderBy(asc(user.name), asc(openPointsLedger.createdAt));
+}

@@ -188,3 +188,17 @@ export function searchConfirmedParticipants(db: DbOrTx, eventId: string, query: 
     .orderBy(asc(user.name))
     .limit(20);
 }
+
+export function findAllRegistrants(db: DbOrTx, eventId: string) {
+  return db
+    .select({
+      id: registration.id,
+      status: registration.status,
+      createdAt: registration.createdAt,
+      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+    })
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(eq(registration.eventId, eventId))
+    .orderBy(asc(user.name));
+}
