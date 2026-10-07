@@ -7,3 +7,4 @@ export * from "./open-points";
 export * from "./organization";
 export * from "./registrations";
 export * from "./staff";
+export * from "./tasks";

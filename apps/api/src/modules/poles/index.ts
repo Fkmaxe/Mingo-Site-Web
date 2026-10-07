@@ -1,2 +1,2 @@
 export { createPolesRouter } from "./poles.routes";
-export { getPole, listPoles } from "./poles.service";
+export { getPole, listPoleMembers, listPoles } from "./poles.service";

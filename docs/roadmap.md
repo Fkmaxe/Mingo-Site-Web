@@ -31,7 +31,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 ## Lot 3 — V2
 
-- [ ] Tâches par pôle (kanban)
+- [x] Tâches par pôle (kanban)
 - [ ] Réunions + présences
 - [ ] Recrutement
 - [ ] Partenaires

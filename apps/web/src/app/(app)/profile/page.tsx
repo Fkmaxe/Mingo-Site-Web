@@ -43,9 +43,14 @@ export default async function ProfilePage() {
       </Card>
 
       {me.roles.includes("member") ? (
-        <Link href="/grades" className="text-primary underline-offset-4 hover:underline">
-          Ma note et mes présences
-        </Link>
+        <div className="flex flex-col gap-2">
+          <Link href="/grades" className="text-primary underline-offset-4 hover:underline">
+            Ma note et mes présences
+          </Link>
+          <Link href="/tasks" className="text-primary underline-offset-4 hover:underline">
+            Mes tâches
+          </Link>
+        </div>
       ) : (
         <Link href="/points" className="text-primary underline-offset-4 hover:underline">
           Mes points open

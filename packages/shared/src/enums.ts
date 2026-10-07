@@ -41,3 +41,6 @@ export type StaffAssignmentStatus = (typeof STAFF_ASSIGNMENT_STATUSES)[number];
 
 export const GRADE_STATUSES = ["draft", "submitted", "validated", "published"] as const;
 export type GradeStatus = (typeof GRADE_STATUSES)[number];
+
+export const TASK_STATUSES = ["todo", "doing", "done"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];

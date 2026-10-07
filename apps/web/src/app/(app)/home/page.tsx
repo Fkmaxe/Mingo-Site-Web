@@ -18,7 +18,15 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-semibold text-2xl">Salut {firstName} 👋</h1>
-      {points.isMember ? null : (
+      {points.isMember ? (
+        <Link
+          href="/tasks"
+          className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+        >
+          <span className="font-medium">Mes tâches</span>
+          <span className="text-muted-foreground text-sm">Voir le tableau du pôle</span>
+        </Link>
+      ) : (
         <Link
           href="/points"
           className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"

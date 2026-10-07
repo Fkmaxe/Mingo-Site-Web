@@ -12,3 +12,4 @@ export * from "./schemas/open-points";
 export * from "./schemas/poles";
 export * from "./schemas/registrations";
 export * from "./schemas/staff";
+export * from "./schemas/tasks";
