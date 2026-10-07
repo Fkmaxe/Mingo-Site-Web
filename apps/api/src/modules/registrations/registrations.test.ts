@@ -1,10 +1,14 @@
 import { EventDto, RegistrantDto, TicketDto } from "@bde/shared";
-import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { registration } from "../../db/schema";
-import { getTestDb } from "../../test/db";
-import { createEvent, createPersona, createPole, createSchoolYear } from "../../test/factories";
+import { testMailer } from "../../test/env";
+import {
+  createEvent,
+  createPersona,
+  createPole,
+  createSchoolYear,
+  createUser,
+} from "../../test/factories";
 import { readError, readJson } from "../../test/http";
 import { call } from "../../test/request";
 
@@ -55,27 +59,55 @@ describe("POST /v1/events/:id/registrations", () => {
     expect((await readError(res)).code).toBe("ALREADY_REGISTERED");
   });
 
-  it("refuses when the event is full", async () => {
+  it("waitlists registrations once the event is full", async () => {
     const event = await createEvent({ poleId: sport.id, capacity: 1 });
-    const [a, b] = await Promise.all([createPersona("student"), createPersona("student")]);
-    expect((await registerAs(a.id, event.id)).status).toBe(201);
-    const res = await registerAs(b.id, event.id);
-    expect(res.status).toBe(409);
-    expect((await readError(res)).code).toBe("EVENT_FULL");
-    const dto = await readJson(await call("GET", `/v1/events/${event.id}`, b.id), EventDto);
-    expect(dto.registrationState).toBe("full");
+    const a = await createPersona("student");
+    const b = await createPersona("student");
+    const c = await createPersona("student");
+    expect((await readJson(await registerAs(a.id, event.id), TicketDto)).status).toBe("confirmed");
+    const second = await readJson(await registerAs(b.id, event.id), TicketDto);
+    const third = await readJson(await registerAs(c.id, event.id), TicketDto);
+    expect([second.status, second.waitlistPosition]).toEqual(["waitlisted", 1]);
+    expect([third.status, third.waitlistPosition]).toEqual(["waitlisted", 2]);
+
+    const dto = await readJson(await call("GET", `/v1/events/${event.id}`, c.id), EventDto);
+    expect(dto).toMatchObject({
+      registrationState: "full",
+      confirmedCount: 1,
+      waitlistCount: 2,
+      myRegistration: { status: "waitlisted", waitlistPosition: 2 },
+    });
+    const again = await registerAs(b.id, event.id);
+    expect((await readError(again)).message).toBe(
+      "Tu es déjà sur la liste d'attente de cet événement.",
+    );
   });
 
   it("never exceeds the capacity under concurrent registrations", async () => {
     const event = await createEvent({ poleId: sport.id, capacity: 1 });
     const students = await Promise.all([1, 2, 3, 4].map(() => createPersona("student")));
-    const statuses = await Promise.all(students.map((s) => registerAs(s.id, event.id)));
-    expect(statuses.map((r) => r.status).sort()).toEqual([201, 409, 409, 409]);
-    const rows = await getTestDb()
-      .select()
-      .from(registration)
-      .where(eq(registration.eventId, event.id));
-    expect(rows).toHaveLength(1);
+    const tickets = await Promise.all(
+      students.map(async (s) => readJson(await registerAs(s.id, event.id), TicketDto)),
+    );
+    expect(tickets.map((t) => t.status).sort()).toEqual([
+      "confirmed",
+      "waitlisted",
+      "waitlisted",
+      "waitlisted",
+    ]);
+    const positions = tickets.map((t) => t.waitlistPosition).filter((p) => p !== null);
+    expect(positions.sort()).toEqual([1, 2, 3]);
+  });
+
+  it("mails a confirmation or the waitlist position", async () => {
+    const event = await createEvent({ poleId: sport.id, title: "Gala", capacity: 1 });
+    const a = await createUser({ email: "a@myskolae.fr" });
+    const b = await createUser({ email: "b@myskolae.fr" });
+    const ticket = await readJson(await registerAs(a.id, event.id), TicketDto);
+    await registerAs(b.id, event.id);
+    expect(testMailer.lastTo("a@myskolae.fr")?.subject).toBe("Inscription confirmée : Gala");
+    expect(testMailer.lastTo("a@myskolae.fr")?.text).toContain(`/tickets/${ticket.id}`);
+    expect(testMailer.lastTo("b@myskolae.fr")?.text).toContain("position 1");
   });
 
   it("refuses after the deadline", async () => {
@@ -106,26 +138,54 @@ describe("POST /v1/events/:id/registrations", () => {
 });
 
 describe("POST /v1/registrations/:id/cancel", () => {
-  it("cancels, frees the place, and re-registration reuses the ticket", async () => {
-    const event = await createEvent({ poleId: sport.id, capacity: 1 });
-    const [a, b] = await Promise.all([createPersona("student"), createPersona("student")]);
+  it("cancels, gives the place to the first waitlisted person and mails them", async () => {
+    const event = await createEvent({ poleId: sport.id, title: "Gala", capacity: 1 });
+    const a = await createUser();
+    const b = await createUser({ email: "second@myskolae.fr" });
+    const c = await createUser();
     const ticket = await readJson(await registerAs(a.id, event.id), TicketDto);
+    const bTicket = await readJson(await registerAs(b.id, event.id), TicketDto);
+    await registerAs(c.id, event.id);
 
     const res = await call("POST", `/v1/registrations/${ticket.id}/cancel`, a.id);
     expect(res.status).toBe(200);
     const cancelled = await readJson(res, TicketDto);
-    expect(cancelled.status).toBe("cancelled");
-    expect(cancelled.cancelledAt).not.toBeNull();
+    expect([cancelled.status, cancelled.cancelledAt !== null]).toEqual(["cancelled", true]);
 
-    expect((await registerAs(b.id, event.id)).status).toBe(201);
-    expect((await registerAs(a.id, event.id)).status).toBe(409);
+    const promoted = await readJson(
+      await call("GET", `/v1/tickets/${bTicket.id}`, b.id),
+      TicketDto,
+    );
+    expect([promoted.status, promoted.waitlistPosition]).toEqual(["confirmed", null]);
+    expect(testMailer.lastTo("second@myskolae.fr")?.subject).toBe("Une place s'est libérée : Gala");
+    const [cTicket] = await readJson(await call("GET", "/v1/me/tickets", c.id), z.array(TicketDto));
+    expect(cTicket?.waitlistPosition).toBe(1);
+  });
 
-    // b leaves: a can come back, with the same registration and QR token.
-    const [bTicket] = await readJson(await call("GET", "/v1/me/tickets", b.id), z.array(TicketDto));
-    await call("POST", `/v1/registrations/${bTicket?.id}/cancel`, b.id);
-    const back = await readJson(await registerAs(a.id, event.id), TicketDto);
-    expect(back.id).toBe(ticket.id);
-    expect(back.qrToken).toBe(ticket.qrToken);
+  it("re-registration after cancelling reuses the same registration and QR token", async () => {
+    const event = await createEvent({ poleId: sport.id });
+    const student = await createPersona("student");
+    const ticket = await readJson(await registerAs(student.id, event.id), TicketDto);
+    await call("POST", `/v1/registrations/${ticket.id}/cancel`, student.id);
+    const back = await readJson(await registerAs(student.id, event.id), TicketDto);
+    expect([back.id, back.qrToken, back.status]).toEqual([ticket.id, ticket.qrToken, "confirmed"]);
+  });
+
+  it("leaving the waitlist promotes nobody", async () => {
+    const event = await createEvent({ poleId: sport.id, capacity: 1 });
+    const a = await createPersona("student");
+    const b = await createPersona("student");
+    const c = await createPersona("student");
+    await registerAs(a.id, event.id);
+    const bTicket = await readJson(await registerAs(b.id, event.id), TicketDto);
+    await registerAs(c.id, event.id);
+    await call("POST", `/v1/registrations/${bTicket.id}/cancel`, b.id);
+    const dto = await readJson(await call("GET", `/v1/events/${event.id}`, c.id), EventDto);
+    expect(dto).toMatchObject({
+      confirmedCount: 1,
+      waitlistCount: 1,
+      myRegistration: { waitlistPosition: 1 },
+    });
   });
 
   it("rejects a forged pagination cursor", async () => {
@@ -229,5 +289,51 @@ describe("GET /v1/events/:id/registrations", () => {
     expect((await call("GET", `/v1/events/${event.id}/registrations`, otherLead.id)).status).toBe(
       403,
     );
+  });
+});
+
+describe("organiser changes", () => {
+  it("raising the capacity promotes waitlisted people, in order", async () => {
+    const event = await createEvent({ poleId: sport.id, capacity: 1 });
+    const board = await createPersona("board");
+    const students = await Promise.all([1, 2, 3].map(() => createPersona("student")));
+    for (const s of students) await registerAs(s.id, event.id);
+
+    const res = await call("PATCH", `/v1/events/${event.id}`, board.id, { capacity: 2 });
+    expect(res.status).toBe(200);
+    expect(await readJson(res, EventDto)).toMatchObject({ confirmedCount: 2, waitlistCount: 1 });
+  });
+
+  it("refuses a capacity below the confirmed registrations", async () => {
+    const event = await createEvent({ poleId: sport.id, capacity: 5 });
+    const board = await createPersona("board");
+    const students = await Promise.all([1, 2, 3].map(() => createPersona("student")));
+    for (const s of students) await registerAs(s.id, event.id);
+
+    const res = await call("PATCH", `/v1/events/${event.id}`, board.id, {
+      capacity: 2,
+      title: "Nouveau titre",
+    });
+    expect(res.status).toBe(409);
+    expect((await readError(res)).code).toBe("CAPACITY_BELOW_REGISTRATIONS");
+    const dto = await readJson(await call("GET", `/v1/events/${event.id}`, board.id), EventDto);
+    expect([dto.capacity, dto.title]).toEqual([5, event.title]);
+  });
+
+  it("mails confirmed and waitlisted people when the event is cancelled", async () => {
+    const event = await createEvent({ poleId: sport.id, title: "Gala", capacity: 1 });
+    const board = await createPersona("board");
+    const a = await createUser({ email: "a@myskolae.fr" });
+    const b = await createUser({ email: "b@myskolae.fr" });
+    const c = await createUser({ email: "c@myskolae.fr" });
+    await registerAs(a.id, event.id);
+    await registerAs(b.id, event.id);
+    const cTicket = await readJson(await registerAs(c.id, event.id), TicketDto);
+    await call("POST", `/v1/registrations/${cTicket.id}/cancel`, c.id);
+    testMailer.sent.length = 0;
+
+    await call("POST", `/v1/events/${event.id}/cancel`, board.id);
+    expect(testMailer.sent.map((m) => m.to).sort()).toEqual(["a@myskolae.fr", "b@myskolae.fr"]);
+    expect(testMailer.sent[0]?.subject).toBe("Événement annulé : Gala");
   });
 });

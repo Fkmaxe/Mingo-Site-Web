@@ -1,10 +1,16 @@
 import type { RegistrationStatus } from "@bde/shared";
 import type { DbOrTx } from "../../db/client";
-import { countConfirmedByEvent, findUserRegistrations } from "./registrations.repo";
+import {
+  countConfirmedByEvent,
+  countWaitlistedByEvent,
+  findUserRegistrations,
+  findWaitlistRanks,
+} from "./registrations.repo";
 
 export type RegistrationSummary = {
   confirmedCount: number;
-  mine: { id: string; status: RegistrationStatus } | null;
+  waitlistCount: number;
+  mine: { id: string; status: RegistrationStatus; waitlistPosition: number | null } | null;
 };
 
 /**
@@ -16,13 +22,24 @@ export async function registrationSummaries(
   eventIds: string[],
   userId: string | null,
 ): Promise<(eventId: string) => RegistrationSummary> {
-  const [counts, mine] = await Promise.all([
+  const [counts, waitlisted, mine] = await Promise.all([
     countConfirmedByEvent(db, eventIds),
+    countWaitlistedByEvent(db, eventIds),
     userId ? findUserRegistrations(db, userId, eventIds) : Promise.resolve([]),
   ]);
-  const mineByEvent = new Map(mine.map((r) => [r.eventId, { id: r.id, status: r.status }]));
+  const ranks = await findWaitlistRanks(
+    db,
+    mine.filter((r) => r.status === "waitlisted").map((r) => r.id),
+  );
+  const mineByEvent = new Map(
+    mine.map((r) => [
+      r.eventId,
+      { id: r.id, status: r.status, waitlistPosition: ranks.get(r.id) ?? null },
+    ]),
+  );
   return (eventId) => ({
     confirmedCount: counts.get(eventId) ?? 0,
+    waitlistCount: waitlisted.get(eventId) ?? 0,
     mine: mineByEvent.get(eventId) ?? null,
   });
 }

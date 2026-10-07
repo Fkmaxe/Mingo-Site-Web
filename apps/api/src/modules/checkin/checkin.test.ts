@@ -181,3 +181,17 @@ describe("check-in search and stats", () => {
     expect(stats).toEqual({ confirmedCount: 2, checkedInCount: 1 });
   });
 });
+
+describe("waitlisted tickets", () => {
+  it("are refused at the door", async () => {
+    const event = await createEvent({ poleId: sport.id, capacity: 1 });
+    const board = await createPersona("board");
+    await registeredStudent(event.id, "Premier");
+    const { ticket } = await registeredStudent(event.id, "Attente");
+    const res = await scan(board.id, event.id, { qrToken: ticket.qrToken });
+    expect(res.status).toBe(422);
+    expect((await readError(res)).message).toBe(
+      "Attente est sur liste d'attente, sans place confirmée.",
+    );
+  });
+});

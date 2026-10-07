@@ -32,6 +32,11 @@ export function TicketList({ tickets, empty }: { tickets: Ticket[]; empty: strin
             </span>
             {ticket.event.status === "cancelled" ? (
               <span className="font-medium text-destructive text-sm">Événement annulé</span>
+            ) : ticket.status === "waitlisted" ? (
+              <span className="font-medium text-sm text-warning">
+                Liste d'attente
+                {ticket.waitlistPosition ? ` · position ${ticket.waitlistPosition}` : ""}
+              </span>
             ) : null}
           </Link>
         </li>

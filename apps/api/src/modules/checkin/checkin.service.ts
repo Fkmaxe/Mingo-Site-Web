@@ -60,7 +60,9 @@ export async function recordCheckin(
     throw new AppError(
       "TICKET_NOT_VALID",
       422,
-      `L'inscription de ${participant.user.name} a été annulée.`,
+      participant.status === "waitlisted"
+        ? `${participant.user.name} est sur liste d'attente, sans place confirmée.`
+        : `L'inscription de ${participant.user.name} a été annulée.`,
     );
   }
 

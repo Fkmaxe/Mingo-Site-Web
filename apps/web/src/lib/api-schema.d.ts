@@ -1508,7 +1508,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "EVENT_FULL" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -1548,6 +1548,7 @@ export interface components {
             };
             canManage: boolean;
             confirmedCount: number;
+            waitlistCount: number;
             /** @enum {string} */
             registrationState: "open" | "full" | "closed";
             myRegistration: {
@@ -1555,6 +1556,7 @@ export interface components {
                 id: string;
                 /** @enum {string} */
                 status: "confirmed" | "waitlisted" | "cancelled";
+                waitlistPosition: number | null;
             } | null;
         };
         CreateEventInput: {
@@ -1610,6 +1612,7 @@ export interface components {
             /** @enum {string} */
             status: "confirmed" | "waitlisted" | "cancelled";
             qrToken: string;
+            waitlistPosition: number | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */

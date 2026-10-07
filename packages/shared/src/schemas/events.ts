@@ -118,9 +118,18 @@ export const EventDto = z
     /** Whether the current user may edit, publish or cancel it. */
     canManage: z.boolean(),
     confirmedCount: z.int(),
+    waitlistCount: z.int(),
+    /** `full`: new registrations join the waitlist. */
     registrationState: z.enum(REGISTRATION_STATES),
     /** The current user's registration, cancelled ones included. */
-    myRegistration: z.object({ id: z.uuid(), status: z.enum(REGISTRATION_STATUSES) }).nullable(),
+    myRegistration: z
+      .object({
+        id: z.uuid(),
+        status: z.enum(REGISTRATION_STATUSES),
+        /** 1 = next to get a place. Null unless waitlisted. */
+        waitlistPosition: z.int().nullable(),
+      })
+      .nullable(),
   })
   .meta({ id: "Event" });
 export type EventDto = z.infer<typeof EventDto>;

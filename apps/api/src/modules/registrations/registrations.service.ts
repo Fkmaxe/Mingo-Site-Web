@@ -2,11 +2,14 @@ import type { RegistrantDto, RegistrationStatus, TicketDto } from "@bde/shared";
 import { z } from "zod";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
+import type { DomainEvents } from "../../core/events";
 import { decodeCursor, type Page, PgTimestampText, toPage } from "../../core/http";
-import { inTransaction } from "../../core/tx";
+import { inTransactionWithEffects } from "../../core/tx";
 import { findManageableEvent, findVisibleEvent } from "../events";
+import { confirmedEmail, eventCancelledEmail, waitlistedEmail } from "./registrations.emails";
 import {
   countConfirmed,
+  findActiveRegistrantContacts,
   findAllRegistrants,
   findParticipant,
   findParticipantByToken,
@@ -14,27 +17,43 @@ import {
   findRegistration,
   findTicket,
   findUserTickets,
+  findWaitlistRanks,
   insertRegistration,
   lockEventRegistrations,
+  maxWaitlistPosition,
   searchConfirmedParticipants,
   type TicketRow,
   updateRegistration,
 } from "./registrations.repo";
 import { canUnregister, newQrToken, registrationState } from "./rules";
+import { eventUrl, fillFreePlaces, ticketUrl } from "./waitlist";
 
-function toTicket(row: TicketRow): TicketDto {
+function toTicket(row: TicketRow, waitlistRank: number | null): TicketDto {
   return {
     id: row.id,
     status: row.status,
     qrToken: row.qrToken,
+    waitlistPosition: row.status === "waitlisted" ? waitlistRank : null,
     createdAt: row.createdAt.toISOString(),
     cancelledAt: row.cancelledAt?.toISOString() ?? null,
     event: {
-      ...row.event,
+      id: row.event.id,
+      slug: row.event.slug,
+      title: row.event.title,
+      location: row.event.location,
+      status: row.event.status,
       startsAt: row.event.startsAt.toISOString(),
       endsAt: row.event.endsAt.toISOString(),
     },
   };
+}
+
+async function toTickets(ctx: Pick<AuthedCtx, "db">, rows: TicketRow[]): Promise<TicketDto[]> {
+  const ranks = await findWaitlistRanks(
+    ctx.db,
+    rows.filter((r) => r.status === "waitlisted").map((r) => r.id),
+  );
+  return rows.map((row) => toTicket(row, ranks.get(row.id) ?? null));
 }
 
 const ticketNotFound = () => new AppError("NOT_FOUND", 404, "Ce billet n'existe pas.");
@@ -46,18 +65,30 @@ async function findOwnTicket(ctx: AuthedCtx, registrationId: string): Promise<Ti
   return row;
 }
 
+/**
+ * Registers the current user: confirmed while there is room, waitlisted once the event is
+ * full (rule 2). Mails the outcome after the commit.
+ */
 export async function register(
   ctx: AuthedCtx,
   eventId: string,
   now: Date = new Date(),
 ): Promise<TicketDto> {
   const event = await findVisibleEvent(ctx, eventId);
-  const registrationId = await inTransaction(ctx.db, async (tx) => {
+  const registrationId = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockEventRegistrations(tx, event.id);
     const existing = await findRegistration(tx, event.id, ctx.user.id);
     if (existing && existing.status !== "cancelled") {
-      throw new AppError("ALREADY_REGISTERED", 409, "Tu es déjà inscrit·e à cet événement.");
+      throw new AppError(
+        "ALREADY_REGISTERED",
+        409,
+        existing.status === "waitlisted"
+          ? "Tu es déjà sur la liste d'attente de cet événement."
+          : "Tu es déjà inscrit·e à cet événement.",
+      );
     }
+    // Places freed without promotion (should not happen) go to the waitlist first.
+    await fillFreePlaces(tx, event, defer, ctx.services);
 
     const state = registrationState(event, await countConfirmed(tx, event.id), now);
     if (state === "closed") {
@@ -69,32 +100,52 @@ export async function register(
             "Les inscriptions ne sont pas ouvertes pour cet événement.",
           );
     }
-    if (state === "full") {
-      throw new AppError("EVENT_FULL", 409, "L'événement est complet.");
+    const waitlisted = state === "full";
+    const values = {
+      status: waitlisted ? ("waitlisted" as const) : ("confirmed" as const),
+      waitlistPosition: waitlisted ? (await maxWaitlistPosition(tx, event.id)) + 1 : null,
+      cancelledAt: null,
+    };
+    // Re-registration after a cancellation: same row (unique per event and user), same token.
+    let id: string;
+    if (existing) {
+      await updateRegistration(tx, existing.id, values);
+      id = existing.id;
+    } else {
+      id = await insertRegistration(tx, {
+        eventId: event.id,
+        userId: ctx.user.id,
+        qrToken: newQrToken(),
+        ...values,
+      });
     }
 
-    if (existing) {
-      // Re-registration after a cancellation: same row (unique per event and user), same token.
-      await updateRegistration(tx, existing.id, { status: "confirmed", cancelledAt: null });
-      return existing.id;
+    const person = { name: ctx.user.name, email: ctx.user.email };
+    if (waitlisted) {
+      const [rank] = (await findWaitlistRanks(tx, [id])).values();
+      defer(() =>
+        ctx.services.mailer.send(
+          waitlistedEmail(person, event, rank ?? 1, eventUrl(ctx.services, event.slug)),
+        ),
+      );
+    } else {
+      defer(() =>
+        ctx.services.mailer.send(confirmedEmail(person, event, ticketUrl(ctx.services, id))),
+      );
     }
-    return insertRegistration(tx, {
-      eventId: event.id,
-      userId: ctx.user.id,
-      status: "confirmed",
-      qrToken: newQrToken(),
-    });
+    return id;
   });
   return getTicket(ctx, registrationId);
 }
 
+/** Unregisters; a confirmed place goes to the first waitlisted person (rule 3). */
 export async function cancelRegistration(
   ctx: AuthedCtx,
   registrationId: string,
   now: Date = new Date(),
 ): Promise<TicketDto> {
   const ticket = await findOwnTicket(ctx, registrationId);
-  if (ticket.status === "cancelled") return toTicket(ticket);
+  if (ticket.status === "cancelled") return getTicket(ctx, ticket.id);
   if (!canUnregister(ticket.event, now)) {
     throw new AppError(
       "DEADLINE_PASSED",
@@ -102,12 +153,24 @@ export async function cancelRegistration(
       "L'événement a commencé : tu ne peux plus te désinscrire.",
     );
   }
-  await updateRegistration(ctx.db, ticket.id, { status: "cancelled", cancelledAt: now });
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
+    await lockEventRegistrations(tx, ticket.event.id);
+    await updateRegistration(tx, ticket.id, {
+      status: "cancelled",
+      cancelledAt: now,
+      waitlistPosition: null,
+    });
+    if (ticket.status === "confirmed") {
+      await fillFreePlaces(tx, ticket.event, defer, ctx.services);
+    }
+  });
   return getTicket(ctx, ticket.id);
 }
 
 export async function getTicket(ctx: AuthedCtx, registrationId: string): Promise<TicketDto> {
-  return toTicket(await findOwnTicket(ctx, registrationId));
+  const [ticket] = await toTickets(ctx, [await findOwnTicket(ctx, registrationId)]);
+  if (!ticket) throw ticketNotFound();
+  return ticket;
 }
 
 export async function listMyTickets(
@@ -115,7 +178,7 @@ export async function listMyTickets(
   scope: "upcoming" | "past",
   now: Date = new Date(),
 ): Promise<TicketDto[]> {
-  return (await findUserTickets(ctx.db, ctx.user.id, scope, now)).map(toTicket);
+  return toTickets(ctx, await findUserTickets(ctx.db, ctx.user.id, scope, now));
 }
 
 const RegistrantCursor = z.object({ c: PgTimestampText, id: z.uuid() });
@@ -163,4 +226,33 @@ export function confirmedCount(ctx: Pick<AuthedCtx, "db">, eventId: string) {
 
 export function allRegistrants(ctx: Pick<AuthedCtx, "db">, eventId: string) {
   return findAllRegistrants(ctx.db, eventId);
+}
+
+// --- Domain event subscribers (registered in index.ts) ---
+
+/** Capacity change: refused below the confirmed count, otherwise free places are given out. */
+export async function onEventUpdated(payload: DomainEvents["event.updated"]) {
+  const { db, event } = payload;
+  if (event.capacity === payload.previousCapacity) return;
+  await lockEventRegistrations(db, event.id);
+  const confirmed = await countConfirmed(db, event.id);
+  if (event.capacity !== null && event.capacity < confirmed) {
+    throw new AppError(
+      "CAPACITY_BELOW_REGISTRATIONS",
+      409,
+      `${confirmed} personnes sont déjà inscrites : la capacité ne peut pas descendre en dessous.`,
+    );
+  }
+  await fillFreePlaces(db, event, payload.defer, payload.services);
+}
+
+/** Cancelled event: every confirmed or waitlisted person is told, after the commit. */
+export async function onEventCancelled(payload: DomainEvents["event.cancelled"]) {
+  const contacts = await findActiveRegistrantContacts(payload.db, payload.event.id);
+  const url = `${payload.services.webOrigin}/events`;
+  for (const contact of contacts) {
+    payload.defer(() =>
+      payload.services.mailer.send(eventCancelledEmail(contact.user, payload.event, url)),
+    );
+  }
 }

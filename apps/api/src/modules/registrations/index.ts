@@ -1,3 +1,9 @@
+import { on } from "../../core/events";
+import { onEventCancelled, onEventUpdated } from "./registrations.service";
+
+on("event.updated", onEventUpdated);
+on("event.cancelled", onEventCancelled);
+
 export { createRegistrationsRouter } from "./registrations.routes";
 export {
   allRegistrants,

@@ -9,14 +9,9 @@ import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/action-result";
 import type { Event } from "../events/types";
 import { cancelRegistrationAction, registerAction } from "./actions";
+import { placesLabel } from "./places";
 
 type Props = { event: Event; signedIn: boolean };
-
-function placesLabel(event: Event) {
-  if (event.capacity === null) return `${event.confirmedCount} inscrit·e·s`;
-  const left = Math.max(event.capacity - event.confirmedCount, 0);
-  return `${left} place${left > 1 ? "s" : ""} restante${left > 1 ? "s" : ""} sur ${event.capacity}`;
-}
 
 /** Registration call to action, kept at the bottom of the screen within thumb reach. */
 export function RegistrationPanel({ event, signedIn }: Props) {
@@ -25,6 +20,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [pending, startTransition] = useTransition();
   const mine = event.myRegistration?.status === "confirmed" ? event.myRegistration : null;
+  const waiting = event.myRegistration?.status === "waitlisted" ? event.myRegistration : null;
 
   const run = (action: () => Promise<ActionResult>) =>
     startTransition(async () => {
@@ -70,10 +66,31 @@ export function RegistrationPanel({ event, signedIn }: Props) {
         )}
       </>
     );
-  } else if (event.registrationState === "open") {
+  } else if (waiting) {
+    content = (
+      <>
+        <p className="font-medium">
+          Tu es sur liste d'attente
+          {waiting.waitlistPosition ? ` · position ${waiting.waitlistPosition}` : ""}
+        </p>
+        <p className="text-muted-foreground text-sm">
+          Si une place se libère, tu passes inscrit·e automatiquement et tu reçois un mail.
+        </p>
+        <Button
+          variant="ghost"
+          disabled={pending}
+          onClick={() => run(() => cancelRegistrationAction(waiting.id))}
+        >
+          Quitter la liste d'attente
+        </Button>
+      </>
+    );
+  } else if (event.registrationState === "open" || event.registrationState === "full") {
+    const label =
+      event.registrationState === "full" ? "Rejoindre la liste d'attente" : "S'inscrire";
     content = signedIn ? (
       <Button size="lg" disabled={pending} onClick={() => run(() => registerAction(event.id))}>
-        {pending ? "Inscription…" : "S'inscrire"}
+        {pending ? "Un instant…" : label}
       </Button>
     ) : (
       <Button asChild size="lg">
@@ -82,8 +99,6 @@ export function RegistrationPanel({ event, signedIn }: Props) {
         </Link>
       </Button>
     );
-  } else if (event.registrationState === "full") {
-    content = <p className="font-medium">L'événement est complet.</p>;
   } else {
     content = <p className="text-muted-foreground">Les inscriptions sont fermées.</p>;
   }

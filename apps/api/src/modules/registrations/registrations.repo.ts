@@ -82,7 +82,9 @@ const ticketSelection = {
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     status: event.status,
+    capacity: event.capacity,
   },
+  waitlistPosition: registration.waitlistPosition,
 };
 
 export type TicketRow = NonNullable<Awaited<ReturnType<typeof findTicket>>>;
@@ -201,4 +203,70 @@ export function findAllRegistrants(db: DbOrTx, eventId: string) {
     .innerJoin(user, eq(user.id, registration.userId))
     .where(eq(registration.eventId, eventId))
     .orderBy(asc(user.name));
+}
+
+export async function maxWaitlistPosition(db: DbOrTx, eventId: string): Promise<number> {
+  const [row] = await db
+    .select({ max: sql<number | null>`max(${registration.waitlistPosition})` })
+    .from(registration)
+    .where(and(eq(registration.eventId, eventId), eq(registration.status, "waitlisted")));
+  return Number(row?.max ?? 0);
+}
+
+/** The next waitlisted registrations, in waitlist order. */
+export function findFirstWaitlisted(db: DbOrTx, eventId: string, limit: number) {
+  return db
+    .select({ id: registration.id, user: { name: user.name, email: user.email } })
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(and(eq(registration.eventId, eventId), eq(registration.status, "waitlisted")))
+    .orderBy(asc(registration.waitlistPosition))
+    .limit(limit);
+}
+
+export async function promoteRegistrations(db: DbOrTx, ids: string[]) {
+  if (ids.length === 0) return;
+  await db
+    .update(registration)
+    .set({ status: "confirmed", waitlistPosition: null })
+    .where(and(inArray(registration.id, ids), eq(registration.status, "waitlisted")));
+}
+
+/** 1-based rank of each waitlisted registration of the given ids (others are absent). */
+export async function findWaitlistRanks(db: DbOrTx, registrationIds: string[]) {
+  if (registrationIds.length === 0) return new Map<string, number>();
+  const ranked = db
+    .select({
+      id: registration.id,
+      rank: sql<number>`row_number() over (partition by ${registration.eventId} order by ${registration.waitlistPosition})`.as(
+        "rank",
+      ),
+    })
+    .from(registration)
+    .where(eq(registration.status, "waitlisted"))
+    .as("ranked");
+  const rows = await db
+    .select({ id: ranked.id, rank: ranked.rank })
+    .from(ranked)
+    .where(inArray(ranked.id, registrationIds));
+  return new Map(rows.map((r) => [r.id, Number(r.rank)]));
+}
+
+export async function countWaitlistedByEvent(db: DbOrTx, eventIds: string[]) {
+  if (eventIds.length === 0) return new Map<string, number>();
+  const rows = await db
+    .select({ eventId: registration.eventId, n: count() })
+    .from(registration)
+    .where(and(inArray(registration.eventId, eventIds), eq(registration.status, "waitlisted")))
+    .groupBy(registration.eventId);
+  return new Map(rows.map((r) => [r.eventId, r.n]));
+}
+
+/** Confirmed and waitlisted people of an event, to notify them. */
+export function findActiveRegistrantContacts(db: DbOrTx, eventId: string) {
+  return db
+    .select({ id: registration.id, user: { name: user.name, email: user.email } })
+    .from(registration)
+    .innerJoin(user, eq(user.id, registration.userId))
+    .where(and(eq(registration.eventId, eventId), ne(registration.status, "cancelled")));
 }

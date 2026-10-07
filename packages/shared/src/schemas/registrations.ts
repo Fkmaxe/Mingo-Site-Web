@@ -16,7 +16,10 @@ export const TicketDto = z
   .object({
     id: z.uuid(),
     status: z.enum(REGISTRATION_STATUSES),
+    /** Only valid at the door when `status` is `confirmed`. */
     qrToken: z.string(),
+    /** 1 = next to get a place. Null unless waitlisted. */
+    waitlistPosition: z.int().nullable(),
     createdAt: z.iso.datetime(),
     cancelledAt: z.iso.datetime().nullable(),
     event: EventSummary,

@@ -194,7 +194,7 @@
                   "NOT_FOUND",
                   "INVALID_STATUS_TRANSITION",
                   "ALREADY_REGISTERED",
-                  "EVENT_FULL",
+                  "CAPACITY_BELOW_REGISTRATIONS",
                   "REGISTRATION_CLOSED",
                   "DEADLINE_PASSED",
                   "ALREADY_CHECKED_IN",
@@ -340,6 +340,9 @@
           "confirmedCount": {
             "type": "integer"
           },
+          "waitlistCount": {
+            "type": "integer"
+          },
           "registrationState": {
             "type": "string",
             "enum": [
@@ -365,11 +368,18 @@
                   "waitlisted",
                   "cancelled"
                 ]
+              },
+              "waitlistPosition": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
               }
             },
             "required": [
               "id",
-              "status"
+              "status",
+              "waitlistPosition"
             ]
           }
         },
@@ -390,6 +400,7 @@
           "pole",
           "canManage",
           "confirmedCount",
+          "waitlistCount",
           "registrationState",
           "myRegistration"
         ]
@@ -557,6 +568,12 @@
           "qrToken": {
             "type": "string"
           },
+          "waitlistPosition": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -617,6 +634,7 @@
           "id",
           "status",
           "qrToken",
+          "waitlistPosition",
           "createdAt",
           "cancelledAt",
           "event"

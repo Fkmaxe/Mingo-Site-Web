@@ -11,9 +11,10 @@ import { z } from "zod";
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx, Ctx } from "../../core/context";
 import { AppError } from "../../core/errors";
+import { emit } from "../../core/events";
 import { decodeCursor, type Page, toPage } from "../../core/http";
 import { assertPoleAccess } from "../../core/permissions";
-import { inTransaction } from "../../core/tx";
+import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import { getPole } from "../poles";
 import { registrationState } from "../registrations/rules";
 import { type RegistrationSummary, registrationSummaries } from "../registrations/summary";
@@ -78,6 +79,7 @@ function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: 
     pole: row.pole,
     canManage: canManage(ctx, row.poleId),
     confirmedCount: summary.confirmedCount,
+    waitlistCount: summary.waitlistCount,
     registrationState: registrationState(row, summary.confirmedCount, now),
     myRegistration: summary.mine,
   };
@@ -201,7 +203,7 @@ export async function updateEvent(
   }
 
   const { startsAt, endsAt, registrationDeadline, ...rest } = input;
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await updateEventRow(tx, existing.id, {
       ...rest,
       ...(startsAt ? { startsAt: new Date(startsAt) } : {}),
@@ -216,6 +218,22 @@ export async function updateEvent(
       entity: "event",
       entityId: existing.id,
       payload: { fields: Object.keys(input) },
+    });
+    // Registrations check the new capacity and promote waitlisted people (may refuse: 409).
+    await emit("event.updated", {
+      db: tx,
+      defer,
+      services: ctx.services,
+      event: {
+        id: existing.id,
+        slug: existing.slug,
+        title: input.title ?? existing.title,
+        location: input.location ?? existing.location,
+        startsAt: startsAt ? new Date(startsAt) : existing.startsAt,
+        status: existing.status,
+        capacity: input.capacity === undefined ? existing.capacity : input.capacity,
+      },
+      previousCapacity: existing.capacity,
     });
   });
   return getEvent(ctx, existing.id);
@@ -235,7 +253,7 @@ async function transition(
   if (!change.from.includes(existing.status)) {
     throw new AppError("INVALID_STATUS_TRANSITION", 409, change.refusal);
   }
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await updateEventRow(tx, existing.id, { status: change.to });
     await writeAudit(tx, {
       actorUserId: ctx.user.id,
@@ -244,6 +262,9 @@ async function transition(
       entityId: existing.id,
       payload: { from: existing.status },
     });
+    if (change.to === "cancelled") {
+      await emit("event.cancelled", { db: tx, defer, services: ctx.services, event: existing });
+    }
   });
   return getEvent(ctx, existing.id);
 }

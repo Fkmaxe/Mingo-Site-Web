@@ -32,7 +32,7 @@ export function createApp(deps: AppDeps) {
   app.route("/", createHealthRouter(db));
   app.on(["GET", "POST"], `${AUTH_BASE_PATH}/*`, (c) => auth.handler(c.req.raw));
 
-  app.use("/v1/*", loadContext(auth, db));
+  app.use("/v1/*", loadContext(auth, db, { mailer: deps.mailer, webOrigin: env.WEB_ORIGIN }));
   app.route("/v1", createMeRouter());
   app.route("/v1", createPolesRouter());
   app.route("/v1", createEventsRouter());

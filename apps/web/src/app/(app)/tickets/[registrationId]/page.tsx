@@ -32,6 +32,12 @@ export default async function TicketPage({
             Montre ce QR code à l'entrée. Monte la luminosité de ton écran.
           </p>
         </>
+      ) : ticket.status === "waitlisted" && ticket.event.status !== "cancelled" ? (
+        <p role="status" className="rounded-md bg-warning/10 p-4 text-center text-warning">
+          Tu es sur liste d'attente
+          {ticket.waitlistPosition ? ` (position ${ticket.waitlistPosition})` : ""}. Ton QR code
+          apparaîtra ici dès qu'une place se libère.
+        </p>
       ) : (
         <p role="status" className="rounded-md bg-destructive/10 p-4 text-center text-destructive">
           {ticket.event.status === "cancelled"

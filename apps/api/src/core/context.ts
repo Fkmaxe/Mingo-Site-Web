@@ -1,29 +1,43 @@
 import { createMiddleware } from "hono/factory";
 import type { DbOrTx } from "../db/client";
+import type { Mailer } from "../lib/mailer";
 import type { Auth } from "./auth/auth";
 import { AppError } from "./errors";
 import { type Authorization, loadAuthorization, NO_AUTHORIZATION } from "./permissions/permissions";
 
 export type SessionUser = { id: string; email: string; name: string };
 
+/** Outside-world dependencies services may use (injected: fakes in tests). */
+export type Services = {
+  mailer: Mailer;
+  /** Public web origin, for links in mails. */
+  webOrigin: string;
+};
+
 /** Passed to every service. Services never see Hono objects. */
 export type Ctx = Authorization & {
   user: SessionUser | null;
   db: DbOrTx;
+  services: Services;
 };
 
 export type AuthedCtx = Ctx & { user: SessionUser };
 
 export type AppEnv = { Variables: { ctx: Ctx } };
 
-export function loadContext(auth: Auth, db: DbOrTx) {
+export function loadContext(auth: Auth, db: DbOrTx, services: Services) {
   return createMiddleware<AppEnv>(async (c, next) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session) {
-      c.set("ctx", { user: null, db, ...NO_AUTHORIZATION });
+      c.set("ctx", { user: null, db, services, ...NO_AUTHORIZATION });
     } else {
       const { id, email, name } = session.user;
-      c.set("ctx", { user: { id, email, name }, db, ...(await loadAuthorization(db, id)) });
+      c.set("ctx", {
+        user: { id, email, name },
+        db,
+        services,
+        ...(await loadAuthorization(db, id)),
+      });
     }
     await next();
   });
