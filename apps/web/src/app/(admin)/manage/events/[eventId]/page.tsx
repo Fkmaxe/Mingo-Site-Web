@@ -13,6 +13,8 @@ import { manageablePoles } from "@/features/events/manageable-poles";
 import { getEventOr404, listPoles } from "@/features/events/queries";
 import { listAllRegistrants } from "@/features/registrations/queries";
 import { RegistrantsList } from "@/features/registrations/registrants-table";
+import { listStaffSlots } from "@/features/staff/queries";
+import { StaffManager } from "@/features/staff/staff-manager";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gérer l'événement" };
@@ -27,7 +29,10 @@ export default async function ManageEventPage({
   const [{ eventId }, { created }] = await Promise.all([params, searchParams]);
   const [me, event, poles] = await Promise.all([requireMe(), getEventOr404(eventId), listPoles()]);
   if (!event.canManage) notFound();
-  const registrants = event.status === "draft" ? [] : await listAllRegistrants(event.id);
+  const [registrants, staffSlots] = await Promise.all([
+    event.status === "draft" ? [] : listAllRegistrants(event.id),
+    listStaffSlots(event.id),
+  ]);
   const editable = event.status === "draft" || event.status === "published";
   // The current pole stays selectable even when the user cannot create events for it.
   const options = manageablePoles(me, poles);
@@ -84,6 +89,13 @@ export default async function ManageEventPage({
               </DownloadLink>
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {editable ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">Staff</h2>
+          <StaffManager eventId={event.id} slots={staffSlots} />
         </section>
       ) : null}
 

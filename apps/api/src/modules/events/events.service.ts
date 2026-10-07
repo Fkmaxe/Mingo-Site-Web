@@ -311,3 +311,8 @@ export async function deleteEvent(ctx: AuthedCtx, eventId: string): Promise<void
     });
   });
 }
+
+/** Whether the user may manage this event (its pole, or every pole for the board). */
+export function canManageEvent(ctx: AuthzCtx, event: Pick<EventRow, "poleId">): boolean {
+  return canManage(ctx, event.poleId);
+}

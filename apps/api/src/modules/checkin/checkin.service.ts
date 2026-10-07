@@ -1,4 +1,10 @@
-import type { CheckinCandidateDto, CheckinDto, CheckinInput, CheckinStatsDto } from "@bde/shared";
+import type {
+  AttendanceKind,
+  CheckinCandidateDto,
+  CheckinDto,
+  CheckinInput,
+  CheckinStatsDto,
+} from "@bde/shared";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
 import { emit } from "../../core/events";
@@ -7,7 +13,6 @@ import { inTransaction } from "../../core/tx";
 import { findManageableEvent } from "../events";
 import {
   confirmedCount,
-  type Participant,
   participantByToken,
   participantOfEvent,
   searchParticipants,
@@ -21,15 +26,6 @@ import {
 } from "./checkin.repo";
 
 const KIND = "participant" as const;
-
-function alreadyCheckedIn(participant: Participant, checkedInAt: Date) {
-  return new AppError(
-    "ALREADY_CHECKED_IN",
-    409,
-    `${participant.user.name} est déjà entré·e à ${parisTime(checkedInAt)}.`,
-    { checkedInAt: checkedInAt.toISOString(), user: participant.user },
-  );
-}
 
 /** Checks a participant in, by QR token or (manual fallback) by user id. Idempotent. */
 export async function recordCheckin(
@@ -66,26 +62,48 @@ export async function recordCheckin(
     );
   }
 
+  return recordAttendance(ctx, event, participant.user, KIND);
+}
+
+type Person = { id: string; name: string; promo: string | null };
+
+/**
+ * Records a presence once (409 ALREADY_CHECKED_IN otherwise, also under concurrency) and
+ * emits checkin.recorded in the same transaction. Callers check permissions and eligibility.
+ */
+export async function recordAttendance(
+  ctx: AuthedCtx,
+  event: { id: string; title: string; openPointsValue: number },
+  person: Person,
+  kind: AttendanceKind,
+): Promise<CheckinDto> {
+  const already = (checkedInAt: Date) =>
+    new AppError(
+      "ALREADY_CHECKED_IN",
+      409,
+      `${person.name} est déjà entré·e à ${parisTime(checkedInAt)}.`,
+      { checkedInAt: checkedInAt.toISOString(), user: person },
+    );
   return inTransaction(ctx.db, async (tx) => {
-    const existing = await findAttendance(tx, event.id, participant.user.id, KIND);
-    if (existing) throw alreadyCheckedIn(participant, existing.checkedInAt);
+    const existing = await findAttendance(tx, event.id, person.id, kind);
+    if (existing) throw already(existing.checkedInAt);
 
     const created = await insertAttendance(tx, {
       eventId: event.id,
-      userId: participant.user.id,
-      kind: KIND,
+      userId: person.id,
+      kind,
       checkedInBy: ctx.user.id,
     });
     if (!created) {
-      const winner = await findAttendance(tx, event.id, participant.user.id, KIND);
-      throw alreadyCheckedIn(participant, winner?.checkedInAt ?? new Date());
+      const winner = await findAttendance(tx, event.id, person.id, kind);
+      throw already(winner?.checkedInAt ?? new Date());
     }
 
     await emit("checkin.recorded", {
       db: tx,
       attendanceId: created.id,
-      kind: KIND,
-      userId: participant.user.id,
+      kind,
+      userId: person.id,
       actorUserId: ctx.user.id,
       event: { id: event.id, title: event.title, openPointsValue: event.openPointsValue },
     });
@@ -94,7 +112,7 @@ export async function recordCheckin(
       attendanceId: created.id,
       kind: created.kind,
       checkedInAt: created.checkedInAt.toISOString(),
-      user: { id: participant.user.id, name: participant.user.name, promo: participant.user.promo },
+      user: { id: person.id, name: person.name, promo: person.promo },
     };
   });
 }

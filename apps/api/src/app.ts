@@ -12,6 +12,7 @@ import { createMeRouter } from "./modules/me";
 import { createOpenPointsRouter } from "./modules/open-points";
 import { createPolesRouter } from "./modules/poles";
 import { createRegistrationsRouter } from "./modules/registrations";
+import { createStaffRouter } from "./modules/staff";
 
 export type AppDeps = AuthDeps;
 
@@ -40,6 +41,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createCheckinRouter());
   app.route("/v1", createOpenPointsRouter());
   app.route("/v1", createExportsRouter());
+  app.route("/v1", createStaffRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

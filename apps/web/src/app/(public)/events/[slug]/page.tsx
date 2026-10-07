@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, VisibilityBadge } from "@/features/events/event-badges";
 import { getEventOr404 } from "@/features/events/queries";
 import { RegistrationPanel } from "@/features/registrations/registration-panel";
+import { listStaffSlots } from "@/features/staff/queries";
+import { StaffVolunteerPanel } from "@/features/staff/staff-volunteer-panel";
 import { formatDateTime, formatEventRange } from "@/lib/paris-time";
 import { getMe } from "@/lib/session";
 
@@ -17,6 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   const [event, me] = await Promise.all([getEventOr404((await params).slug), getMe()]);
+  const isMember = me?.roles.includes("member") ?? false;
+  const staffSlots = isMember && event.status === "published" ? await listStaffSlots(event.id) : [];
   return (
     <article className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
@@ -69,6 +73,8 @@ export default async function EventPage({ params }: Props) {
       ) : null}
 
       {event.status !== "draft" ? <RegistrationPanel event={event} signedIn={me !== null} /> : null}
+
+      <StaffVolunteerPanel slots={staffSlots} />
 
       {event.canManage ? (
         <Button asChild variant="outline" size="lg">

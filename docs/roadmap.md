@@ -25,7 +25,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 - [x] Liste d'attente + promotion automatique + mail
 - [x] Champs d'inscription personnalisés
-- [ ] Créneaux staff et affectations
+- [x] Créneaux staff et affectations
 - [ ] Notation des membres (périodes, calcul présence, proposition, validation, publication)
 - [ ] Mails transactionnels et rappels J-1
 

@@ -35,3 +35,6 @@ export type OpenPointsStatus = (typeof OPEN_POINTS_STATUSES)[number];
 
 export const OPEN_POINTS_SOURCES = ["auto", "manual"] as const;
 export type OpenPointsSource = (typeof OPEN_POINTS_SOURCES)[number];
+
+export const STAFF_ASSIGNMENT_STATUSES = ["proposed", "validated", "declined"] as const;
+export type StaffAssignmentStatus = (typeof STAFF_ASSIGNMENT_STATUSES)[number];
