@@ -1,13 +1,14 @@
 "use client";
 
-import { CheckCircle2, CircleAlert, CircleX, Search } from "lucide-react";
+import { CheckCircle2, CircleAlert, CircleX, CloudOff, Search } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { checkinAction, searchCandidatesAction } from "./actions";
+import { enqueue, readQueue, removeFromQueue } from "./offline-queue";
 import type { CheckinCandidate, CheckinStats, ScanOutcome } from "./types";
 
 // Camera code and jsQR are only loaded on this screen, client-side.
@@ -46,18 +47,87 @@ export function CheckinScreen({ eventId, initialStats }: Props) {
   const [candidates, setCandidates] = useState<CheckinCandidate[] | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searching, startSearch] = useTransition();
+  const [queued, setQueued] = useState(0);
+  const [syncReport, setSyncReport] = useState<string | null>(null);
+  const syncing = useRef(false);
+
+  /** Without network the scan is kept on the phone, to be sent later (check-in is idempotent). */
+  const queueOffline = (qrToken: string) => {
+    setQueued(enqueue(localStorage, eventId, qrToken).length);
+    setOutcome({
+      tone: "warning",
+      title: "Hors ligne",
+      detail:
+        "Billet gardé sur le téléphone : il sera pointé au retour du réseau. Vérifie-le visuellement.",
+    });
+    navigator.vibrate?.([80, 60, 80]);
+  };
 
   const checkin = async (input: { qrToken: string } | { userId: string }) => {
+    if ("qrToken" in input && !navigator.onLine) {
+      queueOffline(input.qrToken);
+      return;
+    }
     setBusy(true);
     try {
       const result = await checkinAction(eventId, input);
       setOutcome(result.outcome);
       if (result.stats) setStats(result.stats);
       navigator.vibrate?.(result.outcome.tone === "success" ? 120 : [80, 60, 80]);
+    } catch {
+      // The server action could not reach the server: network down.
+      if ("qrToken" in input) queueOffline(input.qrToken);
+      else
+        setOutcome({
+          tone: "error",
+          title: "Hors ligne",
+          detail: "Réessaie quand le réseau revient.",
+        });
     } finally {
       setBusy(false);
     }
   };
+
+  /** Sends queued scans one by one; stops at the first network failure. */
+  const sync = useCallback(async () => {
+    if (syncing.current) return;
+    syncing.current = true;
+    const counts = { success: 0, warning: 0, error: 0 };
+    const refusals: string[] = [];
+    try {
+      for (const scan of readQueue(localStorage, eventId)) {
+        let result: Awaited<ReturnType<typeof checkinAction>>;
+        try {
+          result = await checkinAction(eventId, { qrToken: scan.qrToken });
+        } catch {
+          break;
+        }
+        counts[result.outcome.tone]++;
+        if (result.outcome.tone === "error") refusals.push(result.outcome.detail);
+        if (result.stats) setStats(result.stats);
+        setQueued(removeFromQueue(localStorage, eventId, [scan.qrToken]).length);
+      }
+    } finally {
+      syncing.current = false;
+    }
+    const sent = counts.success + counts.warning + counts.error;
+    if (sent > 0) {
+      setSyncReport(
+        `Synchronisé : ${counts.success} entrée(s), ${counts.warning} déjà entrée(s), ${counts.error} refusée(s).${
+          refusals.length > 0 ? ` ${refusals.join(" ")}` : ""
+        }`,
+      );
+    }
+  }, [eventId]);
+
+  // Browser state, not data loading: queued scans survive a reload; sync when back online.
+  useEffect(() => {
+    setQueued(readQueue(localStorage, eventId).length);
+    if (navigator.onLine) void sync();
+    const onOnline = () => void sync();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [eventId, sync]);
 
   const search = (event: React.FormEvent) => {
     event.preventDefault();
@@ -104,6 +174,23 @@ export function CheckinScreen({ eventId, initialStats }: Props) {
           </button>
         ))}
       </div>
+
+      {queued > 0 ? (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-warning/40 p-3">
+          <span className="flex items-center gap-2 text-sm">
+            <CloudOff aria-hidden className="size-5 text-warning" />
+            {queued} scan{queued > 1 ? "s" : ""} en attente de réseau
+          </span>
+          <Button size="sm" variant="outline" onClick={() => void sync()}>
+            Synchroniser
+          </Button>
+        </div>
+      ) : null}
+      {syncReport ? (
+        <p role="status" className="rounded-xl bg-muted p-3 text-sm">
+          {syncReport}
+        </p>
+      ) : null}
 
       {outcome ? <OutcomeBanner outcome={outcome} /> : null}
 

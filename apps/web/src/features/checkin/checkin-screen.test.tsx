@@ -8,7 +8,13 @@ const actions = vi.hoisted(() => ({
   searchCandidatesAction: vi.fn(),
 }));
 vi.mock("./actions", () => actions);
-vi.mock("./qr-scanner", () => ({ QrScanner: () => <p>scanner</p> }));
+vi.mock("./qr-scanner", () => ({
+  QrScanner: ({ onScan }: { onScan: (code: string) => void }) => (
+    <button type="button" onClick={() => onScan("tok-1")}>
+      simuler un scan
+    </button>
+  ),
+}));
 
 describe("CheckinScreen — manual search", () => {
   it("finds a registrant, checks them in and updates the counter", async () => {
@@ -40,5 +46,32 @@ describe("CheckinScreen — manual search", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Jeanne Durand");
     expect(screen.getByText("4")).toBeInTheDocument();
     expect(screen.getByText("Entré·e")).toBeInTheDocument();
+  });
+});
+
+describe("CheckinScreen — offline", () => {
+  it("keeps a scan made without network and sends it on sync", async () => {
+    localStorage.clear();
+    actions.checkinAction.mockReset();
+    actions.checkinAction.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    const user = userEvent.setup();
+    render(<CheckinScreen eventId="e1" initialStats={{ confirmedCount: 10, checkedInCount: 3 }} />);
+
+    await user.click(await screen.findByRole("button", { name: "simuler un scan" }));
+    expect(await screen.findByText("Hors ligne")).toBeInTheDocument();
+    expect(screen.getByText("1 scan en attente de réseau")).toBeInTheDocument();
+    expect(localStorage.getItem("bde-checkin-queue:e1")).toContain("tok-1");
+
+    actions.checkinAction.mockResolvedValueOnce({
+      outcome: { tone: "success", title: "Jeanne", detail: "Bienvenue !" },
+      stats: { confirmedCount: 10, checkedInCount: 4 },
+    });
+    await user.click(screen.getByRole("button", { name: "Synchroniser" }));
+    expect(
+      await screen.findByText("Synchronisé : 1 entrée(s), 0 déjà entrée(s), 0 refusée(s)."),
+    ).toBeInTheDocument();
+    expect(actions.checkinAction).toHaveBeenLastCalledWith("e1", { qrToken: "tok-1" });
+    expect(screen.queryByText(/en attente de réseau/)).toBeNull();
+    expect(localStorage.getItem("bde-checkin-queue:e1")).toBeNull();
   });
 });

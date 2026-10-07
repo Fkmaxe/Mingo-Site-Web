@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { clearOfflinePages } from "@/features/pwa/service-worker-register";
 import { authClient } from "@/lib/auth-client";
 
 export function SignOutButton() {
@@ -17,6 +18,7 @@ export function SignOutButton() {
       onClick={() =>
         startTransition(async () => {
           await authClient.signOut();
+          await clearOfflinePages();
           router.push("/login");
           router.refresh();
         })

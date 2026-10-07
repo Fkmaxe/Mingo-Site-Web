@@ -123,6 +123,12 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 - Session en cookie httpOnly, partagé avec le web (même domaine parent en prod, proxy Next en dev).
 - Le middleware `requireAuth` charge l'utilisateur et ses permissions dans le contexte Hono.
 
+## Application installable (PWA) et hors ligne
+
+- Manifeste (`apps/web/src/app/manifest.ts`) et icônes générées (`/icons/192`, `/icons/512`).
+- Service worker écrit à la main (`apps/web/public/sw.js`, actif en production) : fichiers `/_next/static` en cache, **billets** et **écran de pointage** gardés pour un usage hors ligne, page `/offline` sinon. Les pages gardées sont effacées à la déconnexion.
+- Check-in hors ligne : un scan sans réseau est gardé dans le `localStorage` du téléphone et rejoué au retour du réseau. Rejouer est sûr : le check-in est idempotent (`409 ALREADY_CHECKED_IN`).
+
 ## Jobs planifiés
 
 - `apps/api/src/jobs/scheduler.ts` : planificateur dans le processus de l'API (une seule instance), lancé par `index.ts`.

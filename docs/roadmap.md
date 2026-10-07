@@ -35,8 +35,8 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [x] Réunions + présences
 - [x] Recrutement
 - [x] Partenaires
-- [ ] Synchro Sheets nocturne
-- [ ] PWA installable + file de check-in hors ligne
+- [x] ~~Synchro Sheets nocturne~~ abandonnée : on garde l'export CSV (octobre 2026)
+- [x] PWA installable + file de check-in hors ligne
 
 ## Plus tard
 
