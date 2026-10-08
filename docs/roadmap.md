@@ -40,7 +40,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 ## Lot 4
 
-- [ ] Trésorerie : budget par événement, dépenses / recettes (journal), justificatifs
+- [x] Trésorerie : budget par événement, dépenses / recettes (journal), justificatifs
 - [ ] Inscriptions d'équipe (tournois)
 - [ ] Statistiques
 - [ ] Notifications push

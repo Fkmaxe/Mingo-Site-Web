@@ -9,6 +9,7 @@ import {
   exportAttendance,
   exportOpenPoints,
   exportRegistrations,
+  exportTreasury,
 } from "./exports.service";
 
 const csvResponse = (description: string) => ({
@@ -53,6 +54,17 @@ const openPointsRoute = createRoute({
   },
 });
 
+const treasuryRoute = createRoute({
+  method: "get",
+  path: "/exports/treasury.csv",
+  tags: ["exports"],
+  middleware: [requirePermission("budget:read")] as const,
+  responses: {
+    200: csvResponse("Écritures de trésorerie de l'année"),
+    403: errorResponse("Réservé au bureau et au trésorier"),
+  },
+});
+
 export function createExportsRouter() {
   return new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError })
     .openapi(eventExportRoute("registrations", "Inscrits (avec l'heure d'entrée)"), async (c) =>
@@ -61,6 +73,7 @@ export function createExportsRouter() {
     .openapi(eventExportRoute("attendance", "Présences"), async (c) =>
       sendCsv(c, await exportAttendance(authedCtx(c.get("ctx")), c.req.valid("param").eventId)),
     )
+    .openapi(treasuryRoute, async (c) => sendCsv(c, await exportTreasury(authedCtx(c.get("ctx")))))
     .openapi(openPointsRoute, async (c) =>
       sendCsv(c, await exportOpenPoints(authedCtx(c.get("ctx")), c.req.valid("query").view)),
     );

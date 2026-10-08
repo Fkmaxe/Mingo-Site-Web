@@ -82,5 +82,7 @@ export async function updateTask(
   taskId: string,
   values: Patch<typeof task.$inferInsert>,
 ) {
-  await db.update(task).set(compact(values)).where(eq(task.id, taskId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(task).set(changes).where(eq(task.id, taskId));
 }

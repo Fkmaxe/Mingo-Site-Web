@@ -1,4 +1,11 @@
-import { CalendarDays, ChevronRight, GraduationCap, Sparkles, UserPlus } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  GraduationCap,
+  PiggyBank,
+  Sparkles,
+  UserPlus,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireMe } from "@/lib/session";
@@ -35,6 +42,13 @@ export default async function ManagePage() {
       description: "Recrutement des nouveaux membres",
       icon: UserPlus,
       show: me.permissions.includes("members:manage"),
+    },
+    {
+      href: "/manage/treasury",
+      title: "Trésorerie",
+      description: "Budgets, dépenses et recettes",
+      icon: PiggyBank,
+      show: me.permissions.includes("budget:read"),
     },
   ].filter((link) => link.show);
 

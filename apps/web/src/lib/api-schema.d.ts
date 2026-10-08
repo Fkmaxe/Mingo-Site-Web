@@ -1473,6 +1473,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/exports/treasury.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Écritures de trésorerie de l'année */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
+                    };
+                };
+                /** @description Réservé au bureau et au trésorier */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/exports/open-points.csv": {
         parameters: {
             query?: never;
@@ -4584,6 +4628,490 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/treasury/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Totaux de l'année et par événement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TreasurySummary"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/treasury/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    eventId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Écritures de l'année */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Transaction"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateTransactionInput"];
+                };
+            };
+            responses: {
+                /** @description Écriture enregistrée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Transaction"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/treasury/transactions/{transactionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    transactionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateTransactionInput"];
+                };
+            };
+            responses: {
+                /** @description Libellé, date ou justificatif modifié */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Transaction"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/v1/treasury/transactions/{transactionId}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    transactionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Écriture d'annulation */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Transaction"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/budget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SetEventBudgetInput"];
+                };
+            };
+            responses: {
+                /** @description Budget enregistré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SetEventBudgetInput"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4604,7 +5132,7 @@ export interface components {
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
             roles: ("student" | "member" | "pole_lead" | "board" | "treasurer" | "admin")[];
-            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
+            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:read" | "budget:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
         };
         Membership: {
             /** Format: uuid */
@@ -4623,7 +5151,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_REVERSED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -5305,6 +5833,73 @@ export interface components {
             notes?: string;
             /** Format: uuid */
             ownerMembershipId?: string | null;
+        };
+        TreasurySummary: {
+            schoolYear: string;
+            incomeCents: number;
+            expenseCents: number;
+            balanceCents: number;
+            events: {
+                event: {
+                    /** Format: uuid */
+                    id: string;
+                    title: string;
+                    slug: string;
+                    /** Format: date-time */
+                    startsAt: string;
+                };
+                budgetCents: number | null;
+                incomeCents: number;
+                expenseCents: number;
+                balanceCents: number;
+            }[];
+        };
+        Transaction: {
+            /** Format: uuid */
+            id: string;
+            label: string;
+            amountCents: number;
+            occurredOn: string;
+            receiptUrl: string | null;
+            event: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                slug: string;
+            } | null;
+            createdBy: string | null;
+            /** Format: uuid */
+            reversalOfId: string | null;
+            /** Format: uuid */
+            reversedById: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateTransactionInput: {
+            /**
+             * Format: uuid
+             * @default null
+             */
+            eventId: string | null;
+            label: string;
+            amountCents: number;
+            /** Format: date */
+            occurredOn: string;
+            /**
+             * Format: uri
+             * @default null
+             */
+            receiptUrl: string | null;
+        };
+        UpdateTransactionInput: {
+            label?: string;
+            /** Format: date */
+            occurredOn?: string;
+            /** Format: uri */
+            receiptUrl?: string | null;
+        };
+        SetEventBudgetInput: {
+            budgetCents: number | null;
         };
     };
     responses: never;

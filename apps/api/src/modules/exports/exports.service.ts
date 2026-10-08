@@ -8,6 +8,7 @@ import { findManageableEvent } from "../events";
 import { yearLedger } from "../open-points";
 import { allRegistrants } from "../registrations";
 import { requireCurrentSchoolYear } from "../school-years";
+import { yearTransactions } from "../treasury";
 
 export type CsvFile = { filename: string; content: string };
 
@@ -135,6 +136,30 @@ export async function exportOpenPoints(
       filename: `points-open-${year.label}-${view === "detail" ? "detail" : "total"}.csv`,
       content,
     },
+    null,
+  );
+}
+
+/** Treasury ledger of the current school year, amounts in euros. */
+export async function exportTreasury(ctx: AuthedCtx): Promise<CsvFile> {
+  const { year, rows } = await yearTransactions(ctx);
+  const euros = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
+  const content = toCsv(
+    ["Date", "Libellé", "Événement", "Montant (€)", "Justificatif", "Saisi par", "Annule"],
+    rows.map((t) => [
+      t.occurredOn,
+      t.label,
+      t.event?.title,
+      euros(t.amountCents),
+      t.receiptUrl,
+      t.createdBy,
+      t.reversalOfId ? "oui" : "",
+    ]),
+  );
+  return audited(
+    ctx,
+    "export.treasury",
+    { filename: `tresorerie-${year.label}.csv`, content },
     null,
   );
 }

@@ -69,5 +69,7 @@ export async function updatePartner(
   partnerId: string,
   values: Patch<typeof partner.$inferInsert>,
 ) {
-  await db.update(partner).set(compact(values)).where(eq(partner.id, partnerId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(partner).set(changes).where(eq(partner.id, partnerId));
 }

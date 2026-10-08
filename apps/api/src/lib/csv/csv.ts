@@ -1,11 +1,14 @@
 /** Spreadsheet apps evaluate cells starting with these characters as formulas. */
 const FORMULA_START = /^[=+\-@\t\r]/;
+const PLAIN_NUMBER = /^[-+]?\d+([.,]\d+)?$/;
 
 function cell(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "";
   let text = String(value);
-  // Neutralize formula injection (CSV injection), but keep plain negative numbers.
-  if (typeof value === "string" && FORMULA_START.test(text)) text = `'${text}`;
+  // Neutralize formula injection (CSV injection), but keep plain numbers ("-120,50").
+  if (typeof value === "string" && FORMULA_START.test(text) && !PLAIN_NUMBER.test(text)) {
+    text = `'${text}`;
+  }
   if (/[";\n\r]/.test(text)) text = `"${text.replaceAll('"', '""')}"`;
   return text;
 }

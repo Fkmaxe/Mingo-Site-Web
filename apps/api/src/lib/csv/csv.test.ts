@@ -17,6 +17,11 @@ describe("toCsv", () => {
     expect(csv).toContain(";-2\r\n");
   });
 
+  it("keeps numbers written as text, but not formulas starting with a sign", () => {
+    const csv = toCsv(["a", "b"], [["-120,50", "-1+1"]]);
+    expect(csv).toContain("-120,50;'-1+1");
+  });
+
   it("writes empty cells for null and undefined", () => {
     expect(toCsv(["a", "b"], [[null, undefined]])).toBe("﻿a;b\r\n;\r\n");
   });

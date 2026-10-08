@@ -39,7 +39,9 @@ export async function updatePeriod(
   periodId: string,
   values: Patch<typeof gradePeriod.$inferInsert>,
 ) {
-  await db.update(gradePeriod).set(compact(values)).where(eq(gradePeriod.id, periodId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(gradePeriod).set(changes).where(eq(gradePeriod.id, periodId));
 }
 
 export async function deletePeriod(db: DbOrTx, periodId: string) {
@@ -196,7 +198,9 @@ export async function updateGrade(
   gradeId: string,
   values: Patch<typeof memberGrade.$inferInsert>,
 ) {
-  await db.update(memberGrade).set(compact(values)).where(eq(memberGrade.id, gradeId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(memberGrade).set(changes).where(eq(memberGrade.id, gradeId));
 }
 
 /** Moves the grades of the given memberships from one status to another. */

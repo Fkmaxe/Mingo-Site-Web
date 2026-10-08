@@ -1,6 +1,6 @@
 import type { Ctx } from "../../core/context";
 import { AppError } from "../../core/errors";
-import { findCurrentSchoolYear } from "./school-years.repo";
+import { findCurrentSchoolYear, findSchoolYearById } from "./school-years.repo";
 
 export type SchoolYearRef = { id: string; label: string };
 
@@ -18,4 +18,8 @@ export async function requireCurrentSchoolYear(ctx: Pick<Ctx, "db">): Promise<Sc
     );
   }
   return year;
+}
+
+export function schoolYearById(ctx: Pick<Ctx, "db">, schoolYearId: string) {
+  return findSchoolYearById(ctx.db, schoolYearId);
 }

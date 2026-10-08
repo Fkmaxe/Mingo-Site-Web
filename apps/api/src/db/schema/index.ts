@@ -11,3 +11,4 @@ export * from "./partners";
 export * from "./registrations";
 export * from "./staff";
 export * from "./tasks";
+export * from "./treasury";

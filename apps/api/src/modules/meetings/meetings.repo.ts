@@ -54,7 +54,9 @@ export async function updateMeeting(
   meetingId: string,
   values: Patch<typeof meeting.$inferInsert>,
 ) {
-  await db.update(meeting).set(compact(values)).where(eq(meeting.id, meetingId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(meeting).set(changes).where(eq(meeting.id, meetingId));
 }
 
 /** Who is expected: members of the pole, or every active member for a general meeting. */

@@ -20,6 +20,7 @@ export const PERMISSIONS = [
   "open-points:validate",
   "open-points:adjust",
   "exports:run",
+  "budget:read",
   "budget:manage",
   /** Acts on every pole. Without it, pole-scoped actions require leading that pole. */
   "poles:all",
@@ -69,8 +70,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "open-points:adjust",
     "exports:run",
     "partners:manage",
+    "budget:read",
     "poles:all",
   ],
-  treasurer: ["budget:manage"],
+  treasurer: ["budget:read", "budget:manage"],
   admin: ["roles:manage", "settings:manage", "audit:read"],
 };

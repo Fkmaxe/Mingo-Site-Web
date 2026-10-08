@@ -37,7 +37,9 @@ export async function updateSlot(
   slotId: string,
   values: Patch<typeof staffSlot.$inferInsert>,
 ) {
-  await db.update(staffSlot).set(compact(values)).where(eq(staffSlot.id, slotId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(staffSlot).set(changes).where(eq(staffSlot.id, slotId));
 }
 
 export async function deleteSlot(db: DbOrTx, slotId: string) {
@@ -142,7 +144,9 @@ export async function updateAssignment(
   assignmentId: string,
   values: Patch<typeof staffAssignment.$inferInsert>,
 ) {
-  await db.update(staffAssignment).set(compact(values)).where(eq(staffAssignment.id, assignmentId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(staffAssignment).set(changes).where(eq(staffAssignment.id, assignmentId));
 }
 
 export async function deleteAssignment(db: DbOrTx, assignmentId: string) {

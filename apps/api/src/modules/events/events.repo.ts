@@ -113,5 +113,7 @@ export async function updateEvent(
   eventId: string,
   values: Patch<typeof event.$inferInsert>,
 ) {
-  await db.update(event).set(compact(values)).where(eq(event.id, eventId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(event).set(changes).where(eq(event.id, eventId));
 }

@@ -64,7 +64,9 @@ export async function updateRegistration(
   registrationId: string,
   values: Patch<typeof registration.$inferInsert>,
 ) {
-  await db.update(registration).set(compact(values)).where(eq(registration.id, registrationId));
+  const changes = compact(values);
+  if (!changes) return;
+  await db.update(registration).set(changes).where(eq(registration.id, registrationId));
 }
 
 const ticketSelection = {
