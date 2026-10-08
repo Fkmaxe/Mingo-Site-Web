@@ -10,6 +10,13 @@ describe("diagnose", () => {
     );
     expect(diagnose({ message: "x", responseCode: 421 }, false, 587)).toMatch(/421/);
     expect(diagnose({ message: "x", responseCode: 553 }, false, 587)).toMatch(/MAIL_FROM/);
+    expect(
+      diagnose(
+        { message: "Mail command failed: 501 5.1.7 Invalid address", responseCode: 501 },
+        false,
+        587,
+      ),
+    ).toMatch(/MAIL_FROM/);
     expect(diagnose("boom", false, 587)).toBe("Erreur inconnue.");
   });
 });

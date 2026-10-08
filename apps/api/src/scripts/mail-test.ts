@@ -34,6 +34,9 @@ export function diagnose(error: unknown, secure: boolean, port: number): string 
   if (responseCode === 421) {
     return "Le serveur refuse la connexion (421) : relais non autorisé pour ce compte ou cette IP, ou trop de tentatives.";
   }
+  if (responseCode === 501 || /5\.1\.7/.test(parsed.data.response ?? message)) {
+    return "Adresse invalide : vérifie MAIL_FROM (ex. « BDE Mingo <contact@ton-domaine.fr> ») et l'adresse de destination.";
+  }
   if (responseCode === 550 || responseCode === 553 || responseCode === 554) {
     return "Expéditeur ou destinataire refusé : MAIL_FROM doit être une adresse que ce compte SMTP a le droit d'utiliser.";
   }

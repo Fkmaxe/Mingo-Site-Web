@@ -73,4 +73,13 @@ describe("loadEnv", () => {
       }).VAPID_SUBJECT,
     ).toBe("mailto:bureau@bde-mingo.fr");
   });
+
+  it("wants a real sender address in MAIL_FROM", () => {
+    expect(() => loadEnv({ ...validEnv, MAIL_FROM: "BDE Mingo <pro3.mail.ovh.net>" })).toThrow(
+      /MAIL_FROM/,
+    );
+    expect(loadEnv({ ...validEnv, MAIL_FROM: "contact@fkcloud.fr" }).MAIL_FROM).toBe(
+      "contact@fkcloud.fr",
+    );
+  });
 });

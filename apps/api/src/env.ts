@@ -6,6 +6,12 @@ function isLocal(url: string): boolean {
   return hostname === "localhost" || hostname === "127.0.0.1";
 }
 
+/** "Name <address>" or a bare address: what an SMTP server accepts as sender. */
+function isMailbox(value: string): boolean {
+  const address = value.match(/<([^<>]+)>\s*$/)?.[1] ?? value.trim();
+  return z.email().safeParse(address).success;
+}
+
 /** `KEY=` in .env (empty) means "not set". */
 const optionalText = (schema: z.ZodString) =>
   z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
@@ -24,7 +30,12 @@ const EnvSchema = z
     SMTP_SECURE: z.stringbool().default(false),
     SMTP_USER: z.string().optional(),
     SMTP_PASSWORD: z.string().optional(),
-    MAIL_FROM: z.string().min(1),
+    MAIL_FROM: z
+      .string()
+      .refine(
+        isMailbox,
+        "doit être une adresse mail, ex. « BDE Mingo <no-reply@bde-mingo.fr> » ou « no-reply@bde-mingo.fr »",
+      ),
     /** Name announced to the SMTP server (EHLO). Default: the domain of MAIL_FROM. */
     SMTP_EHLO_NAME: optionalText(z.string()),
     /** Web Push (VAPID). All three or none: without them, notifications are off. */
