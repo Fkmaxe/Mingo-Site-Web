@@ -8,39 +8,44 @@ import { findRegistration, lockEventRegistrations } from "./registrations.repo";
 import { enrol, parseAnswers } from "./registrations.service";
 import { isTeamEvent, newJoinCode, teamIsComplete, teamIsFull } from "./rules";
 import {
+  countConfirmedTeams,
   findTeam,
   findTeamByCode,
   findTeamMembers,
   findTeamsOfEvent,
+  findTeamWaitlistRanks,
   insertTeam,
   joinCodeExists,
+  maxTeamWaitlistPosition,
   teamNameExists,
 } from "./teams.repo";
+import { fillFreePlaces } from "./waitlist";
 
 type TeamRow = NonNullable<Awaited<ReturnType<typeof findTeam>>>;
 type TeamEvent = EventRow & { teamMinSize: number; teamMaxSize: number };
 
 async function toTeamDtos(db: DbOrTx, teams: TeamRow[], minSize: number): Promise<TeamDto[]> {
-  const members = await findTeamMembers(
-    db,
-    teams.map((t) => t.id),
-  );
+  const ids = teams.map((t) => t.id);
+  const [members, ranks] = await Promise.all([
+    findTeamMembers(db, ids),
+    findTeamWaitlistRanks(
+      db,
+      teams.filter((t) => t.status === "waitlisted").map((t) => t.id),
+    ),
+  ]);
   return teams.map((t) => {
     const own = members
       .filter((m) => m.teamId === t.id)
-      .map((m) => ({
-        userId: m.userId,
-        name: m.name,
-        promo: m.promo,
-        status: m.status === "waitlisted" ? ("waitlisted" as const) : ("confirmed" as const),
-      }));
+      .map((m) => ({ userId: m.userId, name: m.name, promo: m.promo }));
     return {
       id: t.id,
       name: t.name,
       joinCode: t.joinCode,
       captainId: t.captainUserId,
+      status: t.status,
+      waitlistPosition: t.status === "waitlisted" ? (ranks.get(t.id) ?? null) : null,
       members: own,
-      complete: teamIsComplete(own.filter((m) => m.status === "confirmed").length, minSize),
+      complete: teamIsComplete(own.length, minSize),
     };
   });
 }
@@ -82,13 +87,28 @@ export async function createTeam(
     if (await teamNameExists(tx, event.id, input.name)) {
       throw new AppError("TEAM_NAME_TAKEN", 409, "Une équipe porte déjà ce nom.");
     }
+    // The capacity counts teams: a new team gets a place or the next waitlist position.
+    await fillFreePlaces(tx, event, defer, ctx.services);
+    const full =
+      event.capacity !== null && (await countConfirmedTeams(tx, event.id)) >= event.capacity;
+    const waitlistPosition = full ? (await maxTeamWaitlistPosition(tx, event.id)) + 1 : null;
+    const status = full ? ("waitlisted" as const) : ("confirmed" as const);
     const id = await insertTeam(tx, {
       eventId: event.id,
       name: input.name,
       joinCode: await uniqueJoinCode(tx),
       captainUserId: ctx.user.id,
+      status,
+      waitlistPosition,
     });
-    await enrol(tx, defer, ctx, event, { answers, teamId: id }, now);
+    await enrol(
+      tx,
+      defer,
+      ctx,
+      event,
+      { answers, teamId: id, placement: { status, waitlistPosition } },
+      now,
+    );
     return id;
   });
   return getTeam(ctx.db, teamId, event.teamMinSize);
@@ -105,6 +125,8 @@ export async function joinTeam(
   const answers = parseAnswers(event, input.answers ?? {});
   const teamId = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockEventRegistrations(tx, event.id);
+    // Promotions first, so the team's place read below is current.
+    await fillFreePlaces(tx, event, defer, ctx.services);
     const team = await findTeamByCode(tx, event.id, input.code);
     if (!team) {
       throw new AppError("NOT_FOUND", 404, "Aucune équipe avec ce code pour cet événement.");
@@ -120,7 +142,8 @@ export async function joinTeam(
         `Cette équipe est complète (${event.teamMaxSize} personnes maximum).`,
       );
     }
-    await enrol(tx, defer, ctx, event, { answers, teamId: team.id }, now);
+    const placement = { status: team.status, waitlistPosition: team.waitlistPosition };
+    await enrol(tx, defer, ctx, event, { answers, teamId: team.id, placement }, now);
     return team.id;
   });
   return getTeam(ctx.db, teamId, event.teamMinSize);

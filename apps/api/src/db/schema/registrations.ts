@@ -1,4 +1,4 @@
-import { type Answers, REGISTRATION_STATUSES } from "@bde/shared";
+import { type Answers, REGISTRATION_STATUSES, TEAM_STATUSES } from "@bde/shared";
 import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
@@ -19,6 +19,7 @@ import { createdAt, id, updatedAt } from "./columns";
 import { event } from "./events";
 
 export const registrationStatus = pgEnum("registration_status", REGISTRATION_STATUSES);
+export const teamStatus = pgEnum("team_status", TEAM_STATUSES);
 
 /** Team of a team event (tournament). Members are the registrations pointing to it. */
 export const team = pgTable(
@@ -33,9 +34,17 @@ export const team = pgTable(
     captainUserId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    /** A team takes one place of the event: all its members share its status. */
+    status: teamStatus().notNull().default("confirmed"),
+    waitlistPosition: integer(),
     createdAt: createdAt(),
   },
   (t) => [
+    check(
+      "team_waitlist_position_check",
+      sql`(${t.status} = 'waitlisted') = (${t.waitlistPosition} is not null)`,
+    ),
+    index("team_event_status_idx").on(t.eventId, t.status),
     uniqueIndex("team_event_name_unique").on(t.eventId, sql`lower(${t.name})`),
     index("team_captain_user_id_idx").on(t.captainUserId),
   ],

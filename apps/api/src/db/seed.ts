@@ -100,7 +100,7 @@ function seedEvents(poleIdBySlug: Map<string, string>, now: number) {
       startsAt: at(14, 17),
       endsAt: at(14, 20),
       visibility: "public" as const,
-      capacity: 56,
+      capacity: 8,
       teamMinSize: 5,
       teamMaxSize: 7,
       openPointsValue: 3,

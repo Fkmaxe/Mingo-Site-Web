@@ -154,7 +154,7 @@ export function RegistrationPanel({ event, signedIn, team = null }: Props) {
         <p className="text-muted-foreground text-sm">
           Inscription par équipe de {sizesLabel(sizes)}.
           {event.registrationState === "full"
-            ? " L'événement est complet : les nouveaux inscrits vont sur liste d'attente."
+            ? " Toutes les places d'équipe sont prises : une nouvelle équipe va sur liste d'attente, rejoindre une équipe inscrite reste possible."
             : ""}
         </p>
         <div className="grid grid-cols-2 gap-2">

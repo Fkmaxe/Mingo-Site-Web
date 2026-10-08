@@ -1,6 +1,7 @@
 import { EventDto, RegistrantDto, TeamDto, TicketDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { testMailer } from "../../test/env";
 import { createEvent, createPersona, createPole, createSchoolYear } from "../../test/factories";
 import { readError, readJson } from "../../test/http";
 import { call } from "../../test/request";
@@ -42,7 +43,8 @@ describe("POST /v1/events/:id/teams", () => {
       name: "Les Pingouins",
       captainId: captain.id,
       complete: false,
-      members: [{ userId: captain.id, status: "confirmed" }],
+      status: "confirmed",
+      members: [{ userId: captain.id }],
     });
     expect(team.joinCode).toMatch(/^[A-Z0-9]{6}$/);
 
@@ -161,15 +163,107 @@ describe("POST /v1/events/:id/teams/join", () => {
     const res = await joinTeam(captain.id, event.id, team.joinCode);
     expect((await readError(res)).code).toBe("ALREADY_REGISTERED");
   });
+});
 
-  it("waitlists members once the event's capacity (in people) is reached", async () => {
+describe("places per team", () => {
+  const ticketsOf = async (userId: string) =>
+    readJson(await call("GET", "/v1/me/tickets", userId), z.array(TicketDto));
+
+  it("counts teams against the capacity, members follow their team", async () => {
+    const event = await tournament({ capacity: 1 });
+    const first = await teamOf(event.id, "Albatros");
+    const second = await teamOf(event.id, "Zèbres");
+    expect(first.team).toMatchObject({ status: "confirmed", waitlistPosition: null });
+    expect(second.team).toMatchObject({ status: "waitlisted", waitlistPosition: 1 });
+
+    // Joining a team with a place is confirmed even though the event is full.
+    const mate = await createPersona("student");
+    await joinTeam(mate.id, event.id, first.team.joinCode);
+    expect((await ticketsOf(mate.id))[0]?.status).toBe("confirmed");
+    // Joining a waitlisted team waits with it, at the team's rank.
+    const waiting = await createPersona("student");
+    await joinTeam(waiting.id, event.id, second.team.joinCode);
+    expect((await ticketsOf(waiting.id))[0]).toMatchObject({
+      status: "waitlisted",
+      waitlistPosition: 1,
+    });
+
+    const dto = await readJson(await call("GET", `/v1/events/${event.id}`, mate.id), EventDto);
+    expect(dto).toMatchObject({
+      registrationState: "full",
+      confirmedTeamCount: 1,
+      waitlistTeamCount: 1,
+      confirmedCount: 2,
+      waitlistCount: 2,
+    });
+  });
+
+  it("gives a freed place to the next team, with all its members, and mails them", async () => {
+    const event = await tournament({ capacity: 1, title: "Tournoi" });
+    const first = await teamOf(event.id, "Albatros");
+    const second = await teamOf(event.id, "Zèbres");
+    const mate = await createPersona("student");
+    await joinTeam(mate.id, event.id, second.team.joinCode);
+
+    // A member leaving does not free the team's place.
+    const extra = await createPersona("student");
+    await joinTeam(extra.id, event.id, first.team.joinCode);
+    const [extraTicket] = await ticketsOf(extra.id);
+    await call("POST", `/v1/registrations/${extraTicket?.id}/cancel`, extra.id);
+    expect((await ticketsOf(mate.id))[0]?.status).toBe("waitlisted");
+
+    const [captainTicket] = await ticketsOf(first.captain.id);
+    await call("POST", `/v1/registrations/${captainTicket?.id}/cancel`, first.captain.id);
+    const promoted = await readJson(
+      await call("GET", `/v1/events/${event.id}/teams/mine`, mate.id),
+      TeamDto,
+    );
+    expect(promoted).toMatchObject({ status: "confirmed", waitlistPosition: null });
+    for (const userId of [second.captain.id, mate.id]) {
+      expect((await ticketsOf(userId))[0]).toMatchObject({
+        status: "confirmed",
+        waitlistPosition: null,
+      });
+    }
+    const subjects = testMailer.sent.map((m) => m.subject);
+    expect(subjects.filter((s) => s.includes("Tournoi") && /place/i.test(s))).toHaveLength(2);
+  });
+
+  it("promotes waitlisted teams when the capacity grows, refuses it below the teams with a place", async () => {
+    const event = await tournament({ capacity: 1 });
+    await teamOf(event.id, "Albatros");
+    const second = await teamOf(event.id, "Zèbres");
+    const board = await createPersona("board");
+    await call("PATCH", `/v1/events/${event.id}`, board.id, { capacity: 2 });
+    expect(
+      (
+        await readJson(
+          await call("GET", `/v1/events/${event.id}/teams/mine`, second.captain.id),
+          TeamDto,
+        )
+      ).status,
+    ).toBe("confirmed");
+
+    const res = await call("PATCH", `/v1/events/${event.id}`, board.id, { capacity: 1 });
+    expect(res.status).toBe(409);
+    expect((await readError(res)).code).toBe("CAPACITY_BELOW_REGISTRATIONS");
+  });
+
+  it("never gives more team places than the capacity under concurrent creations", async () => {
     const event = await tournament({ capacity: 2 });
-    const { team } = await teamOf(event.id);
-    const second = await createPersona("student");
-    const third = await createPersona("student");
-    await joinTeam(second.id, event.id, team.joinCode);
-    const joined = await readJson(await joinTeam(third.id, event.id, team.joinCode), TeamDto);
-    expect(joined.members.map((m) => m.status)).toEqual(["confirmed", "confirmed", "waitlisted"]);
+    const captains = await Promise.all([1, 2, 3, 4, 5].map(() => createPersona("student")));
+    const teams = await Promise.all(
+      captains.map(async (c, i) =>
+        readJson(await createTeam(c.id, event.id, { name: `Équipe ${i}` }), TeamDto),
+      ),
+    );
+    expect(teams.filter((t) => t.status === "confirmed")).toHaveLength(2);
+    expect(
+      teams
+        .map((t) => t.waitlistPosition)
+        .filter((p) => p !== null)
+        .sort(),
+    ).toEqual([1, 2, 3]);
   });
 });
 

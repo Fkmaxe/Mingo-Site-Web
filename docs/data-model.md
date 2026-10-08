@@ -27,9 +27,9 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité), registration_deadline, open_points_value, custom_fields_schema (jsonb), team_min_size, team_max_size (Lot 4, les deux null = inscription individuelle), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at ; tailles d'équipe toutes deux nulles ou 1 ≤ min ≤ max |
+| `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité ; en équipes pour un événement par équipe), registration_deadline, open_points_value, custom_fields_schema (jsonb), team_min_size, team_max_size (Lot 4, les deux null = inscription individuelle), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at ; tailles d'équipe toutes deux nulles ou 1 ≤ min ≤ max |
 | `registration` | event_id, user_id, status (`confirmed`, `waitlisted`, `cancelled`), waitlist_position, answers (jsonb, Lot 2), qr_token (unique), team_id (Lot 4, vidé à l'annulation), cancelled_at | unique (event_id, user_id) ; cancelled_at ssi cancelled ; waitlist_position ssi waitlisted |
-| `team` | event_id, name, join_code (6 caractères, unique), captain_user_id | unique (event_id, lower(name)) ; les membres sont les inscriptions qui pointent vers l'équipe |
+| `team` | event_id, name, join_code (6 caractères, unique), captain_user_id, status (`confirmed`, `waitlisted`), waitlist_position | unique (event_id, lower(name)) ; les membres sont les inscriptions qui pointent vers l'équipe et partagent son statut et sa position ; waitlist_position ssi waitlisted |
 | `staff_slot` | event_id, label, starts_at, ends_at, capacity | |
 | `staff_assignment` | staff_slot_id, membership_id, status (`proposed`, `validated`, `declined`) | unique (staff_slot_id, membership_id) |
 | `attendance` | event_id, user_id, kind (`participant`, `staff`, `meeting`), checked_in_at, checked_in_by | unique (event_id, user_id, kind) |
@@ -71,4 +71,4 @@ Montants toujours en **centimes entiers**, jamais en float.
 6. Un ajustement manuel sans motif est refusé.
 7. Une note `published` n'est plus modifiable sauf par le bureau, avec entrée dans `audit_log`.
 8. Un email hors `@myskolae.fr` ne peut pas créer de compte.
-9. À un événement par équipe, on ne s'inscrit qu'en créant ou en rejoignant une équipe, jamais au-delà de `team_max_size` membres actifs. Le capitaine qui part est remplacé par le plus ancien membre ; une équipe vide est supprimée.
+9. À un événement par équipe, on ne s'inscrit qu'en créant ou en rejoignant une équipe, jamais au-delà de `team_max_size` membres actifs. La capacité compte alors des équipes ; une équipe vide est supprimée et sa place passe à la première équipe en attente, avec tous ses membres. Le capitaine qui part est remplacé par le plus ancien membre.

@@ -5465,6 +5465,8 @@ export interface components {
             canManage: boolean;
             confirmedCount: number;
             waitlistCount: number;
+            confirmedTeamCount: number;
+            waitlistTeamCount: number;
             /** @enum {string} */
             registrationState: "open" | "full" | "closed";
             myRegistration: {
@@ -5611,13 +5613,14 @@ export interface components {
             joinCode: string;
             /** Format: uuid */
             captainId: string;
+            /** @enum {string} */
+            status: "confirmed" | "waitlisted";
+            waitlistPosition: number | null;
             members: {
                 /** Format: uuid */
                 userId: string;
                 name: string;
                 promo: string | null;
-                /** @enum {string} */
-                status: "confirmed" | "waitlisted";
             }[];
             complete: boolean;
         };

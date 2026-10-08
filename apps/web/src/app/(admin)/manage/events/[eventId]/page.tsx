@@ -75,7 +75,12 @@ export default async function ManageEventPage({
       {event.status !== "draft" && teamMinSize !== null ? (
         <section className="flex flex-col gap-3">
           <h2 className="font-semibold text-lg">
-            Équipes <span className="font-normal text-muted-foreground">({teams.length})</span>
+            Équipes{" "}
+            <span className="font-normal text-muted-foreground">
+              ({event.confirmedTeamCount}
+              {event.capacity === null ? "" : ` / ${event.capacity}`}
+              {event.waitlistTeamCount > 0 ? `, ${event.waitlistTeamCount} en attente` : ""})
+            </span>
           </h2>
           <TeamsList teams={teams} minSize={teamMinSize} />
         </section>
@@ -87,7 +92,7 @@ export default async function ManageEventPage({
             Inscrits{" "}
             <span className="font-normal text-muted-foreground">
               ({event.confirmedCount}
-              {event.capacity === null ? "" : ` / ${event.capacity}`})
+              {event.capacity === null || teamMinSize !== null ? "" : ` / ${event.capacity}`})
             </span>
           </h2>
           <RegistrantsList registrants={registrants} fields={event.customFields} />

@@ -64,7 +64,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 - Un événement peut se jouer **en équipe** : l'organisateur fixe une taille minimale et maximale.
 - Le capitaine crée l'équipe (nom unique dans l'événement) et reçoit un **code à 6 caractères** à partager ; les coéquipiers rejoignent avec ce code. Pas d'inscription individuelle hors équipe.
-- La capacité de l'événement compte des **personnes**, pas des équipes : chaque membre est confirmé ou en liste d'attente individuellement. Une équipe est « complète » quand elle a au moins le minimum de membres confirmés.
+- La capacité d'un événement par équipe compte des **équipes** : une équipe prend une place entière, et tous ses membres sont inscrits ou en liste d'attente avec elle. Rejoindre une équipe qui a une place reste possible quand l'événement est complet. Quand une place d'équipe se libère (équipe vidée, capacité augmentée), la première équipe en attente passe inscrite avec tous ses membres, qui reçoivent un mail. Une équipe est « complète » quand elle a au moins le minimum de membres.
 - Se désinscrire = quitter l'équipe. Si le capitaine part, le plus ancien membre le remplace ; une équipe vide disparaît.
 - Une fois des inscrits, on ne peut plus basculer entre individuel et équipe, ni descendre le maximum sous la plus grande équipe.
 
@@ -112,4 +112,4 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [x] ~~Qui valide les notes~~ : tout le bureau (octobre 2026).
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
 - [x] ~~Paiements (soirées, goodies) dès cette année ?~~ Pas de paiement dans l'appli : un événement payant passera par un prestataire externe (octobre 2026).
-- [ ] Tournois : faut-il réserver des places par équipe entière (une équipe confirmée ou en attente d'un bloc) plutôt que par personne ? Choix actuel : par personne (octobre 2026).
+- [x] ~~Tournois : places par personne ou par équipe ?~~ Par équipe entière : la capacité compte des équipes (octobre 2026).

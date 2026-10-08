@@ -127,6 +127,13 @@
       "when": 1791449265626,
       "tag": "0017_teams",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791450469213,
+      "tag": "0018_team_places",
+      "breakpoints": true
     }
   ]
 }

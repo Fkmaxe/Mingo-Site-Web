@@ -90,3 +90,91 @@ export async function countActiveRegistrations(db: DbOrTx, eventId: string): Pro
     .where(and(eq(registration.eventId, eventId), ne(registration.status, "cancelled")));
   return Number(row?.n ?? 0);
 }
+
+/** Teams with a place and teams waiting for one, per event. */
+export async function countTeamsByEvent(db: DbOrTx, eventIds: string[]) {
+  const counts = new Map<string, { confirmed: number; waitlisted: number }>();
+  if (eventIds.length === 0) return counts;
+  const rows = await db
+    .select({ eventId: team.eventId, status: team.status, n: sql<number>`count(*)` })
+    .from(team)
+    .where(inArray(team.eventId, eventIds))
+    .groupBy(team.eventId, team.status);
+  for (const r of rows) {
+    const c = counts.get(r.eventId) ?? { confirmed: 0, waitlisted: 0 };
+    c[r.status] = Number(r.n);
+    counts.set(r.eventId, c);
+  }
+  return counts;
+}
+
+export async function countConfirmedTeams(db: DbOrTx, eventId: string): Promise<number> {
+  return (await countTeamsByEvent(db, [eventId])).get(eventId)?.confirmed ?? 0;
+}
+
+export async function maxTeamWaitlistPosition(db: DbOrTx, eventId: string): Promise<number> {
+  const [row] = await db
+    .select({ max: sql<number | null>`max(${team.waitlistPosition})` })
+    .from(team)
+    .where(eq(team.eventId, eventId));
+  return Number(row?.max ?? 0);
+}
+
+/** The next waitlisted teams of an event, in waitlist order. */
+export function findFirstWaitlistedTeams(db: DbOrTx, eventId: string, limit: number) {
+  return db
+    .select({ id: team.id })
+    .from(team)
+    .where(and(eq(team.eventId, eventId), eq(team.status, "waitlisted")))
+    .orderBy(asc(team.waitlistPosition))
+    .limit(limit);
+}
+
+/** Gives the teams a place, with all their members. Returns the promoted members. */
+export async function promoteTeams(db: DbOrTx, teamIds: string[]) {
+  if (teamIds.length === 0) return [];
+  await db
+    .update(team)
+    .set({ status: "confirmed", waitlistPosition: null })
+    .where(and(inArray(team.id, teamIds), eq(team.status, "waitlisted")));
+  const promoted = await db
+    .update(registration)
+    .set({ status: "confirmed", waitlistPosition: null })
+    .where(and(inArray(registration.teamId, teamIds), eq(registration.status, "waitlisted")))
+    .returning({ id: registration.id, userId: registration.userId });
+  if (promoted.length === 0) return [];
+  const contacts = await db
+    .select({ id: user.id, name: user.name, email: user.email })
+    .from(user)
+    .where(
+      inArray(
+        user.id,
+        promoted.map((p) => p.userId),
+      ),
+    );
+  const byId = new Map(contacts.map((c) => [c.id, c]));
+  return promoted.flatMap((p) => {
+    const contact = byId.get(p.userId);
+    return contact ? [{ id: p.id, user: { name: contact.name, email: contact.email } }] : [];
+  });
+}
+
+/** 1-based rank of each waitlisted team among the event's waitlisted teams. */
+export async function findTeamWaitlistRanks(db: DbOrTx, teamIds: string[]) {
+  if (teamIds.length === 0) return new Map<string, number>();
+  const ranked = db
+    .select({
+      id: team.id,
+      rank: sql<number>`row_number() over (partition by ${team.eventId} order by ${team.waitlistPosition})`.as(
+        "rank",
+      ),
+    })
+    .from(team)
+    .where(eq(team.status, "waitlisted"))
+    .as("ranked");
+  const rows = await db
+    .select({ id: ranked.id, rank: ranked.rank })
+    .from(ranked)
+    .where(inArray(ranked.id, teamIds));
+  return new Map(rows.map((r) => [r.id, Number(r.rank)]));
+}

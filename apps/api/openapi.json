@@ -427,6 +427,12 @@
           "waitlistCount": {
             "type": "integer"
           },
+          "confirmedTeamCount": {
+            "type": "integer"
+          },
+          "waitlistTeamCount": {
+            "type": "integer"
+          },
           "registrationState": {
             "type": "string",
             "enum": [
@@ -489,6 +495,8 @@
           "canManage",
           "confirmedCount",
           "waitlistCount",
+          "confirmedTeamCount",
+          "waitlistTeamCount",
           "registrationState",
           "myRegistration"
         ]
@@ -996,6 +1004,19 @@
             "type": "string",
             "format": "uuid"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "waitlisted"
+            ]
+          },
+          "waitlistPosition": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "members": {
             "type": "array",
             "items": {
@@ -1013,20 +1034,12 @@
                     "string",
                     "null"
                   ]
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "confirmed",
-                    "waitlisted"
-                  ]
                 }
               },
               "required": [
                 "userId",
                 "name",
-                "promo",
-                "status"
+                "promo"
               ]
             }
           },
@@ -1039,6 +1052,8 @@
           "name",
           "joinCode",
           "captainId",
+          "status",
+          "waitlistPosition",
           "members",
           "complete"
         ]

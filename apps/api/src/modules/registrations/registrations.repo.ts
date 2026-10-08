@@ -85,6 +85,8 @@ const ticketSelection = {
     endsAt: event.endsAt,
     status: event.status,
     capacity: event.capacity,
+    teamMinSize: event.teamMinSize,
+    teamMaxSize: event.teamMaxSize,
     customFields: event.customFieldsSchema,
   },
   waitlistPosition: registration.waitlistPosition,
@@ -246,13 +248,16 @@ export async function promoteRegistrations(db: DbOrTx, ids: string[]) {
     .where(and(inArray(registration.id, ids), eq(registration.status, "waitlisted")));
 }
 
-/** 1-based rank of each waitlisted registration of the given ids (others are absent). */
+/**
+ * 1-based rank of each waitlisted registration of the given ids (others are absent). Members of
+ * a waitlisted team share its position, so their rank is the team's rank.
+ */
 export async function findWaitlistRanks(db: DbOrTx, registrationIds: string[]) {
   if (registrationIds.length === 0) return new Map<string, number>();
   const ranked = db
     .select({
       id: registration.id,
-      rank: sql<number>`row_number() over (partition by ${registration.eventId} order by ${registration.waitlistPosition})`.as(
+      rank: sql<number>`dense_rank() over (partition by ${registration.eventId} order by ${registration.waitlistPosition})`.as(
         "rank",
       ),
     })

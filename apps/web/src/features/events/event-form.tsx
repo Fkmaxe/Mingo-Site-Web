@@ -121,7 +121,7 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
           type="number"
           inputMode="numeric"
           min={1}
-          hint="Vide : illimité"
+          hint="Vide : illimité. Événement par équipe : nombre d'équipes"
           error={errors.capacity?.message}
           {...register("capacity")}
         />
@@ -153,7 +153,7 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
           type="number"
           inputMode="numeric"
           min={1}
-          hint="Les places comptent les personnes"
+          hint="Les places comptent alors des équipes"
           error={errors.teamMaxSize?.message}
           {...register("teamMaxSize")}
         />

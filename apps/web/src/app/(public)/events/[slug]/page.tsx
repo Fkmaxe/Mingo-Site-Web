@@ -56,7 +56,11 @@ export default async function EventPage({ params }: Props) {
         </li>
         <li className="flex gap-3">
           <Users aria-hidden className="size-5 shrink-0 text-muted-foreground" />
-          {event.capacity === null ? "Places illimitées" : `${event.capacity} places`}
+          {event.capacity === null
+            ? "Places illimitées"
+            : isTeamEvent
+              ? `${event.capacity} équipe${event.capacity > 1 ? "s" : ""}`
+              : `${event.capacity} places`}
         </li>
         {isTeamEvent ? (
           <li className="flex gap-3">

@@ -10,7 +10,6 @@ type Props = { team: Team; minSize: number; maxSize: number };
 /** The user's team: the code to pass on to teammates, and who is in. */
 export function TeamCard({ team, minSize, maxSize }: Props) {
   const [copied, setCopied] = useState(false);
-  const confirmed = team.members.filter((m) => m.status === "confirmed").length;
 
   const copy = async () => {
     try {
@@ -36,9 +35,17 @@ export function TeamCard({ team, minSize, maxSize }: Props) {
               : "shrink-0 rounded-full bg-warning/10 px-2 py-0.5 font-medium text-warning text-xs"
           }
         >
-          {team.complete ? "Équipe complète" : `${confirmed}/${minSize} minimum`}
+          {team.complete ? "Équipe complète" : `${team.members.length}/${minSize} minimum`}
         </span>
       </div>
+
+      {team.status === "waitlisted" ? (
+        <p className="text-sm">
+          Ton équipe est sur liste d'attente
+          {team.waitlistPosition ? ` (position ${team.waitlistPosition})` : ""} : si une place
+          d'équipe se libère, toute l'équipe passe inscrite et chacun reçoit un mail.
+        </p>
+      ) : null}
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
@@ -69,9 +76,6 @@ export function TeamCard({ team, minSize, maxSize }: Props) {
                 <span aria-hidden className="size-4 shrink-0" />
               )}
               <span className="truncate">{m.name}</span>
-              {m.status === "waitlisted" ? (
-                <span className="text-muted-foreground text-xs">· liste d'attente</span>
-              ) : null}
             </li>
           ))}
         </ul>

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const TEAM_STATUSES = ["confirmed", "waitlisted"] as const;
+export type TeamStatus = (typeof TEAM_STATUSES)[number];
+
 const Answers = z.record(z.string(), z.unknown()).default({});
 
 export const CreateTeamInput = z
@@ -33,15 +36,18 @@ export const TeamDto = z
     /** Shown to the team's members and to organisers only. */
     joinCode: z.string(),
     captainId: z.uuid(),
+    /** The team has a place (confirmed) or waits for one, all its members with it. */
+    status: z.enum(TEAM_STATUSES),
+    /** 1 = next team to get a place. Null unless waitlisted. */
+    waitlistPosition: z.int().nullable(),
     members: z.array(
       z.object({
         userId: z.uuid(),
         name: z.string(),
         promo: z.string().nullable(),
-        status: z.enum(["confirmed", "waitlisted"]),
       }),
     ),
-    /** At least the minimum size of confirmed members. */
+    /** At least the minimum number of members. */
     complete: z.boolean(),
   })
   .meta({ id: "Team" });

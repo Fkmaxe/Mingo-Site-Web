@@ -41,7 +41,7 @@ import {
 } from "./registrations.repo";
 import { canUnregister, isTeamEvent, newQrToken, registrationState } from "./rules";
 import { afterTeamLeft } from "./team-membership";
-import { countActiveRegistrations, largestTeamSize } from "./teams.repo";
+import { countActiveRegistrations, countConfirmedTeams, largestTeamSize } from "./teams.repo";
 import { eventUrl, fillFreePlaces, ticketUrl } from "./waitlist";
 
 function toTicket(row: TicketRow, waitlistRank: number | null): TicketDto {
@@ -109,7 +109,12 @@ export async function enrol(
   defer: Defer,
   ctx: AuthedCtx,
   event: EventRow,
-  input: { answers: Answers; teamId: string | null },
+  input: {
+    answers: Answers;
+    teamId: string | null;
+    /** Team members take their team's place (or waitlist position) instead of their own. */
+    placement?: { status: "confirmed" | "waitlisted"; waitlistPosition: number | null };
+  },
   now: Date,
 ): Promise<string> {
   const existing = await findRegistration(tx, event.id, ctx.user.id);
@@ -135,10 +140,14 @@ export async function enrol(
           "Les inscriptions ne sont pas ouvertes pour cet événement.",
         );
   }
-  const waitlisted = state === "full";
+  const waitlisted = input.placement ? input.placement.status === "waitlisted" : state === "full";
   const values = {
     status: waitlisted ? ("waitlisted" as const) : ("confirmed" as const),
-    waitlistPosition: waitlisted ? (await maxWaitlistPosition(tx, event.id)) + 1 : null,
+    waitlistPosition: input.placement
+      ? input.placement.waitlistPosition
+      : waitlisted
+        ? (await maxWaitlistPosition(tx, event.id)) + 1
+        : null,
     cancelledAt: null,
     answers: input.answers,
     teamId: input.teamId,
@@ -319,12 +328,17 @@ export async function onEventUpdated(payload: DomainEvents["event.updated"]) {
     }
   }
   if (event.capacity === payload.previousCapacity) return;
-  const confirmed = await countConfirmed(db, event.id);
+  const teams = isTeamEvent(event);
+  const confirmed = teams
+    ? await countConfirmedTeams(db, event.id)
+    : await countConfirmed(db, event.id);
   if (event.capacity !== null && event.capacity < confirmed) {
     throw new AppError(
       "CAPACITY_BELOW_REGISTRATIONS",
       409,
-      `${confirmed} personnes sont déjà inscrites : la capacité ne peut pas descendre en dessous.`,
+      teams
+        ? `${confirmed} équipes ont déjà une place : la capacité ne peut pas descendre en dessous.`
+        : `${confirmed} personnes sont déjà inscrites : la capacité ne peut pas descendre en dessous.`,
     );
   }
   await fillFreePlaces(db, event, payload.defer, payload.services);

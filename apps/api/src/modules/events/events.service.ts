@@ -17,7 +17,7 @@ import { decodeCursor, type Page, toPage } from "../../core/http";
 import { assertPoleAccess } from "../../core/permissions";
 import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import { getPole } from "../poles";
-import { registrationState } from "../registrations/rules";
+import { isTeamEvent, registrationState } from "../registrations/rules";
 import { type RegistrationSummary, registrationSummaries } from "../registrations/summary";
 import {
   type EventRow,
@@ -85,7 +85,14 @@ function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: 
     canManage: canManage(ctx, row.poleId),
     confirmedCount: summary.confirmedCount,
     waitlistCount: summary.waitlistCount,
-    registrationState: registrationState(row, summary.confirmedCount, now),
+    confirmedTeamCount: summary.confirmedTeamCount,
+    waitlistTeamCount: summary.waitlistTeamCount,
+    // The capacity of a team event counts teams.
+    registrationState: registrationState(
+      row,
+      isTeamEvent(row) ? summary.confirmedTeamCount : summary.confirmedCount,
+      now,
+    ),
     myRegistration: summary.mine,
   };
 }

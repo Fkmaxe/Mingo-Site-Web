@@ -6,10 +6,13 @@ import {
   findUserRegistrations,
   findWaitlistRanks,
 } from "./registrations.repo";
+import { countTeamsByEvent } from "./teams.repo";
 
 export type RegistrationSummary = {
   confirmedCount: number;
   waitlistCount: number;
+  confirmedTeamCount: number;
+  waitlistTeamCount: number;
   mine: { id: string; status: RegistrationStatus; waitlistPosition: number | null } | null;
 };
 
@@ -22,9 +25,10 @@ export async function registrationSummaries(
   eventIds: string[],
   userId: string | null,
 ): Promise<(eventId: string) => RegistrationSummary> {
-  const [counts, waitlisted, mine] = await Promise.all([
+  const [counts, waitlisted, teams, mine] = await Promise.all([
     countConfirmedByEvent(db, eventIds),
     countWaitlistedByEvent(db, eventIds),
+    countTeamsByEvent(db, eventIds),
     userId ? findUserRegistrations(db, userId, eventIds) : Promise.resolve([]),
   ]);
   const ranks = await findWaitlistRanks(
@@ -40,6 +44,8 @@ export async function registrationSummaries(
   return (eventId) => ({
     confirmedCount: counts.get(eventId) ?? 0,
     waitlistCount: waitlisted.get(eventId) ?? 0,
+    confirmedTeamCount: teams.get(eventId)?.confirmed ?? 0,
+    waitlistTeamCount: teams.get(eventId)?.waitlisted ?? 0,
     mine: mineByEvent.get(eventId) ?? null,
   });
 }

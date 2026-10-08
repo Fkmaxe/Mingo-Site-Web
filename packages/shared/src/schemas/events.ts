@@ -168,6 +168,9 @@ export const EventDto = z
     canManage: z.boolean(),
     confirmedCount: z.int(),
     waitlistCount: z.int(),
+    /** Team event: teams with a place / waiting for one (the capacity counts teams). */
+    confirmedTeamCount: z.int(),
+    waitlistTeamCount: z.int(),
     /** `full`: new registrations join the waitlist. */
     registrationState: z.enum(REGISTRATION_STATES),
     /** The current user's registration, cancelled ones included. */
