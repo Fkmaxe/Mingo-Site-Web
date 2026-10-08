@@ -1,0 +1,14 @@
+# Serveur qui a déjà son propre reverse proxy (Nginx, Nginx Proxy Manager, Traefik…).
+# À ajouter après docker-compose.prod.yml :
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.proxy.yml
+# - le Caddy du projet n'est pas lancé (le reverse proxy existant fait le HTTPS) ;
+# - le web écoute sur 127.0.0.1:3000 seulement (jamais public) : le proxy y envoie le trafic.
+# Le proxy doit REMPLACER X-Forwarded-For par l'IP du visiteur (voir README, « Mise en production »).
+services:
+  caddy:
+    # Profil jamais activé : le service existe mais ne démarre pas avec --profile full.
+    profiles: !override ["builtin-proxy"]
+
+  web:
+    ports: !override
+      - "127.0.0.1:3000:3000"
