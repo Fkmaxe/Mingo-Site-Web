@@ -2,7 +2,9 @@
 # À ajouter après docker-compose.prod.yml :
 #   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.proxy.yml
 # - le Caddy du projet n'est pas lancé (le reverse proxy existant fait le HTTPS) ;
-# - le web écoute sur 127.0.0.1:3000 seulement (jamais public) : le proxy y envoie le trafic.
+# - le web écoute sur WEB_BIND:3000 (défaut 127.0.0.1 : proxy sur la même machine). Proxy sur une
+#   autre machine : WEB_BIND = IP locale de cette VM, et pare-feu Docker (DOCKER-USER) qui n'ouvre
+#   le port 3000 qu'à l'IP du proxy (README) ; ufw ne filtre pas les ports publiés par Docker.
 # Le proxy doit REMPLACER X-Forwarded-For par l'IP du visiteur (voir README, « Mise en production »).
 services:
   caddy:
@@ -11,4 +13,4 @@ services:
 
   web:
     ports: !override
-      - "127.0.0.1:3000:3000"
+      - "${WEB_BIND:-127.0.0.1}:3000:3000"

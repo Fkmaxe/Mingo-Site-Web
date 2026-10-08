@@ -48,7 +48,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full u
   ```bash
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
   ```
-- **Serveur avec un reverse proxy déjà en place** (Nginx, Nginx Proxy Manager…) : ajouter `docker-compose.proxy.yml`. Le Caddy du projet n'est alors pas lancé, et le web écoute sur `127.0.0.1:3000` seulement. Le proxy doit envoyer vers `http://127.0.0.1:3000` et **remplacer** `X-Forwarded-For` par l'IP du visiteur (Nginx : `proxy_set_header X-Forwarded-For $remote_addr;`), sinon la limite de tentatives de connexion peut être contournée.
+- **Serveur avec un reverse proxy déjà en place** (Nginx, Nginx Proxy Manager…) : ajouter `docker-compose.proxy.yml`. Le Caddy du projet n'est alors pas lancé, et le web écoute sur `127.0.0.1:3000` seulement. Le proxy doit envoyer vers `http://127.0.0.1:3000` (proxy sur une autre machine : `WEB_BIND=<IP de la VM>` dans `.env`, proxy vers `http://<IP de la VM>:3000`, et règle `DOCKER-USER` qui n'ouvre le port 3000 qu'à l'IP du proxy, ufw ne filtrant pas les ports Docker) et **remplacer** `X-Forwarded-For` par l'IP du visiteur (Nginx : `proxy_set_header X-Forwarded-For $remote_addr;`), sinon la limite de tentatives de connexion peut être contournée.
 - Mise à jour : `git pull` puis la même commande `up -d --build`.
 
 ## Ce dossier est prêt pour Claude Code
