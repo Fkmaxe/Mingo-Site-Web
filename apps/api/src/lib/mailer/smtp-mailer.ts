@@ -25,15 +25,21 @@ export function ehloName(
   return config.MAIL_FROM.match(/@([a-z0-9.-]+\.[a-z]{2,})>?\s*$/i)?.[1]?.toLowerCase();
 }
 
-export function createSmtpMailer(config: SmtpConfig): Mailer {
+/** Nodemailer transport options, shared by the app and the `mail-test` command. */
+export function smtpOptions(config: SmtpConfig) {
   const name = ehloName(config);
-  const transport = nodemailer.createTransport({
+  return {
     host: config.SMTP_HOST,
     port: config.SMTP_PORT,
     secure: config.SMTP_SECURE,
+    connectionTimeout: 15_000,
     ...(name ? { name } : {}),
     ...(config.SMTP_USER ? { auth: { user: config.SMTP_USER, pass: config.SMTP_PASSWORD } } : {}),
-  });
+  };
+}
+
+export function createSmtpMailer(config: SmtpConfig): Mailer {
+  const transport = nodemailer.createTransport(smtpOptions(config));
   return {
     async send(mail: Mail) {
       await transport.sendMail({ from: config.MAIL_FROM, ...mail });

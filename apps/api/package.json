@@ -14,7 +14,8 @@
     "openapi:export": "tsx src/scripts/openapi-export.ts openapi.json",
     "build": "tsup",
     "start": "node --enable-source-maps dist/index.js",
-    "push:keys": "node -e \"const k=require('web-push').generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey+'\\nVAPID_PRIVATE_KEY='+k.privateKey)\""
+    "push:keys": "node -e \"const k=require('web-push').generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey+'\\nVAPID_PRIVATE_KEY='+k.privateKey)\"",
+    "mail:test": "tsx --env-file-if-exists=../../.env src/scripts/mail-test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

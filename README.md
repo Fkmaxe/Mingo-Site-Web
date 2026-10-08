@@ -52,6 +52,8 @@ Le `.env` du serveur, en plus des variables de l'exemple :
 
 L'API refuse de démarrer si une valeur est invalide ou restée à celle de l'exemple : `docker compose logs api` dit laquelle.
 
+Tester l'envoi des mails : `docker compose exec api node dist/mail-test.js toi@exemple.fr` (affiche la config utilisée et explique l'erreur).
+
 **Reverse proxy** (Nginx Proxy Manager, Nginx…) : envoyer `https://<domaine>` vers `http://<WEB_BIND>:3000`, websockets activés. Rien d'autre à régler. Sans reverse proxy : `COMPOSE_PROFILES=caddy` et `DOMAIN=<domaine>` dans `.env`, le Caddy du projet fait le HTTPS sur 80/443.
 
 - Migrations appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
