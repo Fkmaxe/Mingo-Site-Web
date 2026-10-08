@@ -25,6 +25,8 @@ const EnvSchema = z
     SMTP_USER: z.string().optional(),
     SMTP_PASSWORD: z.string().optional(),
     MAIL_FROM: z.string().min(1),
+    /** Name announced to the SMTP server (EHLO). Default: the domain of MAIL_FROM. */
+    SMTP_EHLO_NAME: optionalText(z.string()),
     /** Web Push (VAPID). All three or none: without them, notifications are off. */
     VAPID_PUBLIC_KEY: optionalText(z.string()),
     VAPID_PRIVATE_KEY: optionalText(z.string()),
