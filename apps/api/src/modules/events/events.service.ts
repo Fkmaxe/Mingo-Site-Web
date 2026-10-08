@@ -288,6 +288,15 @@ async function transition(
     if (change.to === "cancelled") {
       await emit("event.cancelled", { db: tx, defer, services: ctx.services, event: existing });
     }
+    if (change.to === "published") {
+      await emit("event.published", {
+        db: tx,
+        defer,
+        services: ctx.services,
+        event: existing,
+        publishedBy: ctx.user.id,
+      });
+    }
   });
   return getEvent(ctx, existing.id);
 }

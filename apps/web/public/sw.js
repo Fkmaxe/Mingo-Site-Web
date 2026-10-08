@@ -1,6 +1,7 @@
-// BDE Mingo service worker: offline tickets, offline check-in screen, cached static assets.
+// BDE Mingo service worker: offline tickets, offline check-in screen, cached static assets,
+// push notifications.
 // Plain JS on purpose (served as is, no build step).
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `static-${VERSION}`;
 const PAGES_CACHE = `pages-${VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -78,4 +79,39 @@ self.addEventListener("fetch", (event) => {
         ),
     );
   }
+});
+
+// --- Push notifications (payload: { title, body, url, tag }, sent by the API) ---
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  const title = typeof data.title === "string" ? data.title : "BDE Mingo";
+  // Only paths of this site are opened: a payload cannot send the user elsewhere.
+  const url = typeof data.url === "string" && data.url.startsWith("/") ? data.url : "/home";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: typeof data.body === "string" ? data.body : "",
+      icon: "/icons/192",
+      badge: "/icons/192",
+      tag: typeof data.tag === "string" ? data.tag : undefined,
+      data: { url },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || "/home", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((w) => w.url.startsWith(self.location.origin));
+      if (open) return open.navigate(url).then((w) => (w || open).focus());
+      return self.clients.openWindow(url);
+    }),
+  );
 });

@@ -10,6 +10,8 @@ import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
 import { Card, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
+import { NotificationsCard } from "@/features/push/notifications-card";
+import { getPushSetup } from "@/features/push/queries";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { requireMe } from "@/lib/session";
 
@@ -27,7 +29,7 @@ function initials(name: string): string {
 type Row = { href: string; label: string; icon: LucideIcon };
 
 export default async function ProfilePage() {
-  const me = await requireMe();
+  const [me, push] = await Promise.all([requireMe(), getPushSetup()]);
   const rows: Row[] = me.roles.includes("member")
     ? [
         { href: "/grades", label: "Ma note et mes présences", icon: GraduationCap },
@@ -74,6 +76,8 @@ export default async function ProfilePage() {
           </ul>
         ) : null}
       </Card>
+
+      <NotificationsCard publicKey={push.publicKey} newEvents={push.newEvents} />
 
       <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card shadow-primary/5 shadow-sm">
         {rows.map(({ href, label, icon: Icon }) => (

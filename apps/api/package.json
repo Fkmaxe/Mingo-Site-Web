@@ -13,11 +13,13 @@
     "db:studio": "drizzle-kit studio",
     "openapi:export": "tsx src/scripts/openapi-export.ts openapi.json",
     "build": "tsup",
-    "start": "node --enable-source-maps dist/index.js"
+    "start": "node --enable-source-maps dist/index.js",
+    "push:keys": "node -e \"const k=require('web-push').generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey+'\\nVAPID_PRIVATE_KEY='+k.privateKey)\""
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "@types/nodemailer": "^8.0.2",
+    "@types/web-push": "3.6.4",
     "drizzle-kit": "^0.31.11",
     "tsup": "^8.5.1",
     "tsx": "^4.23.15"
@@ -32,6 +34,7 @@
     "hono": "^4.13.13",
     "nodemailer": "^10.0.15",
     "postgres": "^3.4.9",
+    "web-push": "3.6.7",
     "zod": "^4.6.5"
   }
 }

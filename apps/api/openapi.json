@@ -3525,6 +3525,96 @@
           "members",
           "byPole"
         ]
+      },
+      "PushConfig": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "publicKey"
+        ]
+      },
+      "PushStatus": {
+        "type": "object",
+        "properties": {
+          "devices": {
+            "type": "integer"
+          },
+          "newEvents": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "devices",
+          "newEvents"
+        ]
+      },
+      "SubscribePushInput": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          },
+          "keys": {
+            "type": "object",
+            "properties": {
+              "p256dh": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "auth": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            },
+            "required": [
+              "p256dh",
+              "auth"
+            ]
+          },
+          "newEvents": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ]
+      },
+      "UnsubscribePushInput": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          }
+        },
+        "required": [
+          "endpoint"
+        ]
+      },
+      "PushPreferencesInput": {
+        "type": "object",
+        "properties": {
+          "newEvents": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "newEvents"
+        ]
       }
     },
     "parameters": {}
@@ -9245,6 +9335,209 @@
           },
           "422": {
             "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/push/config": {
+      "get": {
+        "tags": [
+          "push"
+        ],
+        "responses": {
+          "200": {
+            "description": "Clé publique VAPID (null si le push est désactivé)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/push": {
+      "get": {
+        "tags": [
+          "push"
+        ],
+        "responses": {
+          "200": {
+            "description": "Mes appareils abonnés et mes préférences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "push"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushPreferencesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Préférences enregistrées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requête invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/push/subscriptions": {
+      "post": {
+        "tags": [
+          "push"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribePushInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Appareil abonné",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Abonnement invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/push/unsubscribe": {
+      "post": {
+        "tags": [
+          "push"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribePushInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Appareil désabonné",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requête invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
             "content": {
               "application/json": {
                 "schema": {

@@ -134,6 +134,13 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 - `apps/api/src/jobs/scheduler.ts` : planificateur dans le processus de l'API (une seule instance), lancé par `index.ts`.
 - Rappels J-1 toutes les 15 minutes : inscrits confirmés et staffs validés des événements / créneaux qui commencent dans les 24 h. Chaque rappel est « réservé » (`reminder_sent_at`, `FOR UPDATE SKIP LOCKED`) avant l'envoi, après le commit : jamais envoyé deux fois.
 
+## Notifications push
+
+- Web Push standard (VAPID), sans service tiers à configurer : clés générées avec `pnpm --filter api push:keys`, dans `.env` (`VAPID_*`). Sans clés, le push est désactivé et l'appli marche normalement.
+- Table `push_subscription` (un appareil par ligne). Les modules appellent `services.notifier` dans un effet différé après le commit, comme pour les mails ; une annonce de nouvel événement part en tâche de fond. Un abonnement révoqué (404 / 410) est supprimé.
+- L'API n'envoie qu'aux services push des navigateurs (Google, Mozilla, Apple, Microsoft), en https et sans suivre de redirection : l'adresse vient du navigateur, elle ne doit pas pouvoir viser autre chose (SSRF).
+- Le service worker affiche la notification et n'ouvre que des chemins du site.
+
 ## Déploiement
 
 - Docker Compose : `db`, `mailpit` (dev), `api`, `web` (profil `full`). En prod, `docker-compose.prod.yml` ajoute `caddy` (TLS) et `backup`, et retire les ports publiés des autres services.

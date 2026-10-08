@@ -232,7 +232,7 @@ export async function maxWaitlistPosition(db: DbOrTx, eventId: string): Promise<
 /** The next waitlisted registrations, in waitlist order. */
 export function findFirstWaitlisted(db: DbOrTx, eventId: string, limit: number) {
   return db
-    .select({ id: registration.id, user: { name: user.name, email: user.email } })
+    .select({ id: registration.id, user: { id: user.id, name: user.name, email: user.email } })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
     .where(and(eq(registration.eventId, eventId), eq(registration.status, "waitlisted")))
@@ -284,7 +284,7 @@ export async function countWaitlistedByEvent(db: DbOrTx, eventIds: string[]) {
 /** Confirmed and waitlisted people of an event, to notify them. */
 export function findActiveRegistrantContacts(db: DbOrTx, eventId: string) {
   return db
-    .select({ id: registration.id, user: { name: user.name, email: user.email } })
+    .select({ id: registration.id, user: { id: user.id, name: user.name, email: user.email } })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
     .where(and(eq(registration.eventId, eventId), ne(registration.status, "cancelled")));
@@ -318,7 +318,7 @@ export async function claimDueReminders(db: DbOrTx, from: Date, to: Date, now: D
   return db
     .select({
       id: registration.id,
-      user: { name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email },
       event: {
         title: event.title,
         slug: event.slug,

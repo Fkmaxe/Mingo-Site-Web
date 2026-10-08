@@ -155,7 +155,9 @@ export async function promoteTeams(db: DbOrTx, teamIds: string[]) {
   const byId = new Map(contacts.map((c) => [c.id, c]));
   return promoted.flatMap((p) => {
     const contact = byId.get(p.userId);
-    return contact ? [{ id: p.id, user: { name: contact.name, email: contact.email } }] : [];
+    return contact
+      ? [{ id: p.id, user: { id: contact.id, name: contact.name, email: contact.email } }]
+      : [];
   });
 }
 

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { describe, expect, it, vi } from "vitest";
 import { createMemoryMailer } from "../lib/mailer";
+import { createMemoryPusher } from "../lib/push";
 import { getTestDb } from "../test/db";
 import type { AppEnv } from "./context";
 import { onError } from "./errors";
@@ -15,7 +16,12 @@ function appFor(userId: string | null) {
     c.set("ctx", {
       user,
       db: getTestDb(),
-      services: { mailer: createMemoryMailer(), webOrigin: "http://localhost:3000" },
+      services: {
+        mailer: createMemoryMailer(),
+        pusher: createMemoryPusher(),
+        notifier: { notifyUsers: async () => 0, announceEvent: async () => 0 },
+        webOrigin: "http://localhost:3000",
+      },
       ...NO_AUTHORIZATION,
     });
     await next();

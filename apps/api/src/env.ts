@@ -6,6 +6,10 @@ function isLocal(url: string): boolean {
   return hostname === "localhost" || hostname === "127.0.0.1";
 }
 
+/** `KEY=` in .env (empty) means "not set". */
+const optionalText = (schema: z.ZodString) =>
+  z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
+
 const EnvSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -21,8 +25,22 @@ const EnvSchema = z
     SMTP_USER: z.string().optional(),
     SMTP_PASSWORD: z.string().optional(),
     MAIL_FROM: z.string().min(1),
+    /** Web Push (VAPID). All three or none: without them, notifications are off. */
+    VAPID_PUBLIC_KEY: optionalText(z.string()),
+    VAPID_PRIVATE_KEY: optionalText(z.string()),
+    VAPID_SUBJECT: optionalText(
+      z.string().regex(/^(mailto:|https:\/\/)/, "doit commencer par mailto: ou https://"),
+    ),
   })
   .superRefine((env, ctx) => {
+    const vapid = [env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT];
+    if (vapid.some(Boolean) && !vapid.every(Boolean)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["VAPID_PUBLIC_KEY"],
+        message: "VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY et VAPID_SUBJECT vont ensemble",
+      });
+    }
     // Development values must never reach a real deployment: it fails at startup instead.
     // The full stack run locally (docker compose --profile full, on localhost) stays allowed.
     if (env.NODE_ENV !== "production" || isLocal(env.WEB_ORIGIN)) return;

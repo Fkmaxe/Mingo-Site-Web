@@ -2,7 +2,7 @@ import { StaffSlotDto, TicketDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { getTestDb } from "../test/db";
-import { testMailer } from "../test/env";
+import { testMailer, testNotifier, testPusher } from "../test/env";
 import {
   createEvent,
   createPersona,
@@ -16,7 +16,12 @@ import { runReminders } from "./reminders";
 
 const deps = () => ({
   db: getTestDb(),
-  services: { mailer: testMailer, webOrigin: "http://localhost:3000" },
+  services: {
+    mailer: testMailer,
+    pusher: testPusher,
+    notifier: testNotifier,
+    webOrigin: "http://localhost:3000",
+  },
 });
 const hours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
 

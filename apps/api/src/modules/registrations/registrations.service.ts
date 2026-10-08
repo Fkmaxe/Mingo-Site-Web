@@ -14,6 +14,7 @@ import { decodeCursor, type Page, PgTimestampText, toPage } from "../../core/htt
 import { type Defer, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
 import { type EventRow, findManageableEvent, findVisibleEvent } from "../events";
+import { cancelledPush, reminderPush } from "../push";
 import {
   confirmedEmail,
   eventCancelledEmail,
@@ -353,6 +354,10 @@ export async function onEventCancelled(payload: DomainEvents["event.cancelled"])
       payload.services.mailer.send(eventCancelledEmail(contact.user, payload.event, url)),
     );
   }
+  const userIds = contacts.map((c) => c.user.id);
+  payload.defer(async () => {
+    await payload.services.notifier.notifyUsers(userIds, cancelledPush(payload.event));
+  });
 }
 
 const DAY_MS = 24 * 3600 * 1000;
@@ -368,6 +373,9 @@ export async function sendRegistrationReminders(
       defer(() =>
         deps.services.mailer.send(reminderEmail(r.user, r.event, ticketUrl(deps.services, r.id))),
       );
+      defer(async () => {
+        await deps.services.notifier.notifyUsers([r.user.id], reminderPush(r.event, r.id));
+      });
     }
     return due.length;
   });

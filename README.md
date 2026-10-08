@@ -42,7 +42,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full u
   - `DOMAIN=bde-mingo.fr`, `WEB_ORIGIN` et `BETTER_AUTH_URL` = `https://<domaine>` ;
   - `BETTER_AUTH_SECRET` généré avec `openssl rand -base64 32` ;
   - `POSTGRES_PASSWORD` fort (pas `bde`), et `DATABASE_URL` cohérent pour les commandes lancées hors Docker ;
-  - `SMTP_*` et `MAIL_FROM` du BDE.
+  - `SMTP_*` et `MAIL_FROM` du BDE ;
+  - notifications push : `pnpm --filter api push:keys` (une seule fois, à garder : changer les clés désabonne tous les appareils), puis `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
 - **Sauvegardes** : le service `backup` écrit chaque jour `backups/bde-AAAA-MM-JJ.dump` (14 jours gardés). Les recopier hors du serveur. Restauration :
   ```bash
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump

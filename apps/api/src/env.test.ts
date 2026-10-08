@@ -59,4 +59,18 @@ describe("loadEnv", () => {
       }).NODE_ENV,
     ).toBe("production");
   });
+
+  it("treats empty push keys as not set, and wants all three together", () => {
+    const off = loadEnv({ ...validEnv, VAPID_PUBLIC_KEY: "", VAPID_PRIVATE_KEY: "" });
+    expect(off.VAPID_PUBLIC_KEY).toBeUndefined();
+    expect(() => loadEnv({ ...validEnv, VAPID_PUBLIC_KEY: "abc" })).toThrow(/VAPID_PUBLIC_KEY/);
+    expect(
+      loadEnv({
+        ...validEnv,
+        VAPID_PUBLIC_KEY: "pub",
+        VAPID_PRIVATE_KEY: "priv",
+        VAPID_SUBJECT: "mailto:bureau@bde-mingo.fr",
+      }).VAPID_SUBJECT,
+    ).toBe("mailto:bureau@bde-mingo.fr");
+  });
 });

@@ -1,6 +1,7 @@
 import type { Services } from "../../core/context";
 import type { Defer } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
+import { promotedPush } from "../push";
 import { promotedEmail } from "./registrations.emails";
 import { countConfirmed, findFirstWaitlisted, promoteRegistrations } from "./registrations.repo";
 import { isTeamEvent } from "./rules";
@@ -40,7 +41,7 @@ export async function fillFreePlaces(
   const taken = team ? await countConfirmedTeams(db, event.id) : await countConfirmed(db, event.id);
   const free = event.capacity === null ? 10_000 : event.capacity - taken;
   if (free <= 0) return 0;
-  let promoted: { id: string; user: { name: string; email: string } }[];
+  let promoted: { id: string; user: { id: string; name: string; email: string } }[];
   if (team) {
     const teams = await findFirstWaitlistedTeams(db, event.id, free);
     promoted = await promoteTeams(
@@ -56,6 +57,9 @@ export async function fillFreePlaces(
   }
   for (const r of promoted) {
     defer(() => services.mailer.send(promotedEmail(r.user, event, ticketUrl(services, r.id))));
+    defer(async () => {
+      await services.notifier.notifyUsers([r.user.id], promotedPush(event, r.id));
+    });
   }
   return promoted.length;
 }

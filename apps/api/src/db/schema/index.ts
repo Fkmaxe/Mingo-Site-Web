@@ -8,6 +8,7 @@ export * from "./meetings";
 export * from "./open-points";
 export * from "./organization";
 export * from "./partners";
+export * from "./push";
 export * from "./registrations";
 export * from "./staff";
 export * from "./tasks";

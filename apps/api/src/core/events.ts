@@ -25,6 +25,13 @@ export type DomainEvents = {
     previousTeamMaxSize: number | null;
   };
   "event.cancelled": { db: DbOrTx; defer: Defer; services: Services; event: EventRef };
+  "event.published": {
+    db: DbOrTx;
+    defer: Defer;
+    services: Services;
+    event: EventRef & { visibility: string };
+    publishedBy: string;
+  };
   "checkin.recorded": {
     db: DbOrTx;
     attendanceId: string;
@@ -41,6 +48,7 @@ type Handler<K extends EventName> = (payload: DomainEvents[K]) => Promise<void>;
 const handlers: { [K in EventName]: Handler<K>[] } = {
   "event.updated": [],
   "event.cancelled": [],
+  "event.published": [],
   "checkin.recorded": [],
 };
 

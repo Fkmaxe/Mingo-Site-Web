@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import type { DbOrTx } from "../db/client";
 import type { Mailer } from "../lib/mailer";
+import type { Notifier, Pusher } from "../lib/push";
 import type { Auth } from "./auth/auth";
 import { AppError } from "./errors";
 import { type Authorization, loadAuthorization, NO_AUTHORIZATION } from "./permissions/permissions";
@@ -10,6 +11,8 @@ export type SessionUser = { id: string; email: string; name: string };
 /** Outside-world dependencies services may use (injected: fakes in tests). */
 export type Services = {
   mailer: Mailer;
+  pusher: Pusher;
+  notifier: Notifier;
   /** Public web origin, for links in mails. */
   webOrigin: string;
 };

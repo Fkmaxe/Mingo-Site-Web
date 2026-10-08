@@ -89,6 +89,13 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Partenariats : fiches partenaires, contacts, statut, contreparties. Gérées par le bureau ; le membre référent d'un partenaire peut modifier sa fiche. Les partenaires actifs (nom, site, avantages) sont affichés publiquement.
 - Trésorerie simple : budget par événement, dépenses / recettes, justificatifs.
 
+## Notifications push
+
+- Chacun active les notifications sur ses appareils, depuis son profil (sur iPhone : une fois l'appli ajoutée à l'écran d'accueil). Elles complètent les mails, ne les remplacent pas.
+- Notifications personnelles : **place libérée** (liste d'attente, y compris l'équipe entière d'un tournoi), **rappel la veille**, **événement annulé**.
+- **Nouvel événement publié** : envoyé aux appareils qui l'acceptent (case « Me prévenir des nouveaux événements », cochée par défaut), seulement à ceux qui peuvent voir l'événement (événements « membres » : membres de l'année), jamais à la personne qui publie.
+- Se déconnecter désabonne l'appareil : un téléphone prêté ne reçoit pas les notifications d'un autre compte.
+
 ## Statistiques
 
 - **Par événement** (ses organisateurs : responsable du pôle, bureau) : inscrits, liste d'attente, désinscriptions, présents et taux de présence, absents (inscrits non venus, une fois l'événement commencé), staff validé et pointé, points open générés, inscriptions jour par jour. Équipes inscrites pour un tournoi.
