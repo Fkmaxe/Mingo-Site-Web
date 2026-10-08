@@ -30,4 +30,33 @@ describe("loadEnv", () => {
       /DATABASE_URL[\s\S]*BETTER_AUTH_SECRET/,
     );
   });
+
+  it("refuses development values in production", () => {
+    const prod = {
+      ...validEnv,
+      NODE_ENV: "production",
+      WEB_ORIGIN: "http://bde-mingo.fr",
+      BETTER_AUTH_URL: "http://bde-mingo.fr",
+    };
+    expect(() =>
+      loadEnv({ ...prod, BETTER_AUTH_SECRET: "change-me-change-me-change-me-change-me" }),
+    ).toThrow(/BETTER_AUTH_SECRET[\s\S]*WEB_ORIGIN[\s\S]*BETTER_AUTH_URL/);
+    expect(
+      loadEnv({
+        ...prod,
+        WEB_ORIGIN: "https://bde-mingo.fr",
+        BETTER_AUTH_URL: "https://bde-mingo.fr",
+      }).NODE_ENV,
+    ).toBe("production");
+  });
+
+  it("keeps the local full stack (production build on localhost) working", () => {
+    expect(
+      loadEnv({
+        ...validEnv,
+        NODE_ENV: "production",
+        BETTER_AUTH_SECRET: "change-me-change-me-change-me-change-me",
+      }).NODE_ENV,
+    ).toBe("production");
+  });
 });

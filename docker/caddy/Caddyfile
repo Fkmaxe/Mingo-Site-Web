@@ -1,0 +1,7 @@
+# TLS automatique (Let's Encrypt) pour le domaine du site. Seul service exposé en production.
+{$DOMAIN} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	# Caddy remplace X-Forwarded-For par l'IP du client : l'en-tête ne peut pas être falsifié.
+	reverse_proxy web:3000
+}

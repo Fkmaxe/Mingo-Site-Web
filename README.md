@@ -24,8 +24,30 @@ docker compose --profile full up -d --build # db + mailpit + api + web
 - Web : http://localhost:3000 · API : http://localhost:3001 (doc `/v1/docs` désactivée en production).
 - Les migrations sont appliquées au démarrage du conteneur API.
 - Données de démo (une seule fois, depuis ta machine) : `pnpm db:seed`.
-- Dans Docker, Mailpit s'appelle `mailpit` : pour l'utiliser, `SMTP_HOST=mailpit` et `SMTP_PORT=1025`.
+- Dans Docker, Mailpit s'appelle `mailpit` : pour l'utiliser, `SMTP_HOST=mailpit` et `SMTP_PORT=1025`. **Attention** : avec le SMTP réel dans `.env`, les tests manuels envoient de vrais mails aux comptes de démo.
 - `docker compose --profile full down` pour tout arrêter (le volume de la base est conservé).
+
+## Mise en production
+
+Sur le serveur (Docker + Compose v2.24 ou plus), avec le domaine pointé vers sa IP :
+
+```bash
+cp .env.example .env    # puis remplir, voir la checklist
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full up -d --build
+```
+
+- Seul **Caddy** est exposé (80/443, certificat HTTPS automatique). La base, l'API et le web restent dans le réseau Docker.
+- Les migrations sont appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
+- Checklist `.env` (l'API refuse de démarrer si une valeur de dev est restée) :
+  - `DOMAIN=bde-mingo.fr`, `WEB_ORIGIN` et `BETTER_AUTH_URL` = `https://<domaine>` ;
+  - `BETTER_AUTH_SECRET` généré avec `openssl rand -base64 32` ;
+  - `POSTGRES_PASSWORD` fort (pas `bde`), et `DATABASE_URL` cohérent pour les commandes lancées hors Docker ;
+  - `SMTP_*` et `MAIL_FROM` du BDE.
+- **Sauvegardes** : le service `backup` écrit chaque jour `backups/bde-AAAA-MM-JJ.dump` (14 jours gardés). Les recopier hors du serveur. Restauration :
+  ```bash
+  docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
+  ```
+- Mise à jour : `git pull` puis la même commande `up -d --build`.
 
 ## Ce dossier est prêt pour Claude Code
 

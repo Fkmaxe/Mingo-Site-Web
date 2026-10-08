@@ -1,0 +1,72 @@
+# Production, sur le serveur :
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full up -d --build
+# Seul Caddy est exposé (80/443). La base, l'API et le web ne sont joignables que dans le
+# réseau Docker (docs/architecture.md, « Déploiement »).
+services:
+  db:
+    ports: !reset []
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire en production}
+
+  api:
+    ports: !reset []
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-bde}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire en production}@db:5432/${POSTGRES_DB:-bde_mingo}
+
+  web:
+    ports: !reset []
+
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ["full"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN est obligatoire en production (ex. bde-mingo.fr)}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+
+  # Sauvegarde quotidienne (format custom de pg_dump, 14 jours gardés) dans ./backups.
+  # À recopier régulièrement hors du serveur. Restauration : voir README.
+  backup:
+    image: postgres:16-alpine
+    profiles: ["full"]
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-bde}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire en production}
+      PGDATABASE: ${POSTGRES_DB:-bde_mingo}
+    volumes:
+      - ./backups:/backups
+    entrypoint:
+      - sh
+      - -c
+      - |
+        while true; do
+          file="/backups/bde-$$(date +%Y-%m-%d).dump"
+          if pg_dump -Fc -f "$$file.tmp"; then
+            mv "$$file.tmp" "$$file"
+            echo "Sauvegarde écrite : $$file"
+          else
+            rm -f "$$file.tmp"
+            echo "Sauvegarde en échec" >&2
+          fi
+          find /backups -name 'bde-*.dump' -mtime +14 -delete
+          sleep 86400
+        done
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  caddy-data:
+  caddy-config:

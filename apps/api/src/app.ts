@@ -1,9 +1,11 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
+import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
-import { onError, onNotFound, throwOnValidationError } from "./core/errors";
+import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
 import { createEventsRouter } from "./modules/events";
@@ -33,7 +35,17 @@ export function createApp(deps: AppDeps) {
   const auth = createAuth(deps);
   const app = new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError });
 
+  app.use("*", secureHeaders());
   app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }));
+  // JSON only (files are links): anything bigger is a mistake or an attack.
+  app.use(
+    "*",
+    bodyLimit({
+      maxSize: 1024 * 1024,
+      onError: (c) =>
+        c.json(errorBody("VALIDATION_ERROR", "La requête est trop volumineuse."), 413),
+    }),
+  );
   app.onError(onError);
   app.notFound(onNotFound);
 
