@@ -103,4 +103,4 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [x] ~~Échelle et pondération de la note membre~~ : total de points plafonné (présence + pôle), barème et points réglables par le bureau, périodes trimestrielles par défaut (octobre 2026).
 - [x] ~~Qui valide les notes~~ : tout le bureau (octobre 2026).
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
-- [ ] Paiements (soirées, goodies) dès cette année ?
+- [x] ~~Paiements (soirées, goodies) dès cette année ?~~ Pas de paiement dans l'appli : un événement payant passera par un prestataire externe (octobre 2026).

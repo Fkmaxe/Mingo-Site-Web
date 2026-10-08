@@ -38,6 +38,13 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [x] ~~Synchro Sheets nocturne~~ abandonnée : on garde l'export CSV (octobre 2026)
 - [x] PWA installable + file de check-in hors ligne
 
-## Plus tard
+## Lot 4
 
-- Trésorerie, inscriptions d'équipe (tournois), billetterie payante, statistiques, notifications push.
+- [ ] Trésorerie : budget par événement, dépenses / recettes (journal), justificatifs
+- [ ] Inscriptions d'équipe (tournois)
+- [ ] Statistiques
+- [ ] Notifications push
+
+## Hors périmètre
+
+- Billetterie payante : si un événement devient payant, on passera par un prestataire externe (pas de paiement dans l'appli).
