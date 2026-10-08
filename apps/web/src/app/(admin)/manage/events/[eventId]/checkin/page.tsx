@@ -21,7 +21,9 @@ export default async function CheckinPage({ params }: { params: Promise<{ eventI
         <ArrowLeft aria-hidden className="size-4" />
         {event.title}
       </Link>
-      <h1 className="font-semibold text-2xl">Pointage</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Pointage
+      </h1>
       {event.status === "published" ? (
         <CheckinScreen eventId={event.id} initialStats={await getCheckinStats(event.id)} />
       ) : (

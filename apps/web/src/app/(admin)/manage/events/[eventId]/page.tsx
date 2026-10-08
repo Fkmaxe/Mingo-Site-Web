@@ -46,7 +46,9 @@ export default async function ManageEventPage({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <StatusBadge status={event.status} />
-        <h1 className="font-semibold text-2xl leading-tight">{event.title}</h1>
+        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
+          {event.title}
+        </h1>
         {event.status !== "draft" ? (
           <Link
             href={`/events/${event.slug}`}
@@ -74,7 +76,7 @@ export default async function ManageEventPage({
 
       {event.status !== "draft" && teamMinSize !== null ? (
         <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">
+          <h2 className="font-bold font-display text-lg">
             Équipes{" "}
             <span className="font-normal text-muted-foreground">
               ({event.confirmedTeamCount}
@@ -88,7 +90,7 @@ export default async function ManageEventPage({
 
       {event.status !== "draft" ? (
         <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">
+          <h2 className="font-bold font-display text-lg">
             Inscrits{" "}
             <span className="font-normal text-muted-foreground">
               ({event.confirmedCount}
@@ -111,14 +113,14 @@ export default async function ManageEventPage({
 
       {editable ? (
         <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">Staff</h2>
+          <h2 className="font-bold font-display text-lg">Staff</h2>
           <StaffManager eventId={event.id} slots={staffSlots} />
         </section>
       ) : null}
 
       {editable ? (
         <section className="flex flex-col gap-4">
-          <h2 className="font-semibold text-lg">Informations</h2>
+          <h2 className="font-bold font-display text-lg">Informations</h2>
           <EventForm
             eventId={event.id}
             poles={manageablePoles(me, poles).concat(

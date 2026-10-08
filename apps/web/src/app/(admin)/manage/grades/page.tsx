@@ -23,7 +23,9 @@ export default async function ManageGradesPage({
   if (periods.length === 0) {
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="font-semibold text-2xl">Notes des membres</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Notes des membres
+        </h1>
         <p className="text-muted-foreground text-sm">Aucune période de notation cette année.</p>
         {isBoard ? <GenerateQuartersButton /> : null}
       </div>
@@ -40,7 +42,9 @@ export default async function ManageGradesPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Notes des membres</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Notes des membres
+      </h1>
       <nav
         aria-label="Période"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

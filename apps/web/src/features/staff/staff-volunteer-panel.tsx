@@ -30,7 +30,7 @@ export function StaffVolunteerPanel({ slots }: { slots: StaffSlot[] }) {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-semibold text-lg">Staff</h2>
+      <h2 className="font-bold font-display text-lg">Staff</h2>
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
       <ul className="flex flex-col divide-y rounded-xl border">
         {slots.map((slot) => (

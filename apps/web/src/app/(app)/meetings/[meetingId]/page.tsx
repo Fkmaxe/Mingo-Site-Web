@@ -16,7 +16,9 @@ export default async function MeetingPage({ params }: { params: Promise<{ meetin
         <p className="text-primary text-sm">
           {meeting.pole ? `Pôle ${meeting.pole.name}` : "Réunion générale"}
         </p>
-        <h1 className="font-semibold text-2xl leading-tight">{meeting.title}</h1>
+        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
+          {meeting.title}
+        </h1>
         <p className="flex items-center gap-2 text-muted-foreground text-sm">
           <CalendarDays aria-hidden className="size-4" />
           <span className="first-letter:uppercase">{formatDateTime(meeting.startsAt)}</span>
@@ -36,7 +38,7 @@ export default async function MeetingPage({ params }: { params: Promise<{ meetin
         <>
           <AttendanceList meeting={meeting} />
           <section className="flex flex-col gap-3">
-            <h2 className="font-semibold text-lg">Ordre du jour et compte rendu</h2>
+            <h2 className="font-bold font-display text-lg">Ordre du jour et compte rendu</h2>
             <MeetingForm mode="edit" meeting={meeting} />
           </section>
           <DeleteMeetingButton meetingId={meeting.id} />
@@ -44,13 +46,13 @@ export default async function MeetingPage({ params }: { params: Promise<{ meetin
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-lg">Ordre du jour</h2>
+            <h2 className="font-bold font-display text-lg">Ordre du jour</h2>
             <p className="whitespace-pre-line text-sm">
               {meeting.agenda || "Pas d'ordre du jour."}
             </p>
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-lg">Compte rendu</h2>
+            <h2 className="font-bold font-display text-lg">Compte rendu</h2>
             <p className="whitespace-pre-line text-sm">
               {meeting.minutes || "Le compte rendu n'est pas encore rédigé."}
             </p>

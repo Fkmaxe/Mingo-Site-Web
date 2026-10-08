@@ -10,7 +10,9 @@ export default async function AdjustOpenPointsPage() {
   if (!me.permissions.includes("open-points:adjust")) notFound();
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Ajustement manuel</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Ajustement manuel
+      </h1>
       <p className="text-muted-foreground text-sm">
         L'ajustement est validé immédiatement et tracé dans le journal.
       </p>

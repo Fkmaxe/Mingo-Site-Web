@@ -15,7 +15,9 @@ export default async function NewMeetingPage() {
     : me.memberships.flatMap((m) => (m.role === "pole_lead" && m.pole ? [m.pole] : []));
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Nouvelle réunion</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Nouvelle réunion
+      </h1>
       <MeetingForm mode="create" poles={poles} allowGeneral={isBoard} />
     </div>
   );

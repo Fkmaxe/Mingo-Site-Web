@@ -21,7 +21,9 @@ export default async function TeamPartnersPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">Partenaires</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Partenaires
+        </h1>
         {me.permissions.includes("partners:manage") ? (
           <Button asChild>
             <Link href="/team/partners/new">Ajouter</Link>
@@ -38,7 +40,7 @@ export default async function TeamPartnersPage() {
             <li key={p.id}>
               <Link
                 href={`/team/partners/${p.id}`}
-                className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+                className="flex flex-col gap-1 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm transition-colors hover:bg-accent/40"
               >
                 <span className="flex items-start justify-between gap-3">
                   <span className="font-semibold">{p.name}</span>

@@ -42,7 +42,9 @@ export default async function TreasuryPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">Trésorerie {summary.schoolYear}</h1>
+        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
+          Trésorerie {summary.schoolYear}
+        </h1>
         <DownloadLink href="/manage/treasury/export">CSV</DownloadLink>
       </div>
       <div className="grid grid-cols-3 gap-2">
@@ -68,7 +70,7 @@ export default async function TreasuryPage() {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-semibold text-lg">Par événement</h2>
+        <h2 className="font-bold font-display text-lg">Par événement</h2>
         {rows.length === 0 ? (
           <p className="text-muted-foreground text-sm">Aucun événement cette année.</p>
         ) : (
@@ -118,7 +120,7 @@ export default async function TreasuryPage() {
       {canManage ? <TransactionForm events={events} today={today} /> : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-semibold text-lg">Écritures</h2>
+        <h2 className="font-bold font-display text-lg">Écritures</h2>
         <TransactionList transactions={transactions} canManage={canManage} />
       </section>
     </div>

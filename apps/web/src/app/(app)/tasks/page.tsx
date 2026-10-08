@@ -43,7 +43,9 @@ export default async function TasksPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Tâches</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Tâches
+      </h1>
       <nav
         aria-label="Tableau"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

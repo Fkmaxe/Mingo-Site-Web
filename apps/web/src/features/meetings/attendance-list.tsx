@@ -18,7 +18,7 @@ export function AttendanceList({ meeting }: { meeting: Meeting }) {
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="font-semibold text-lg">
+      <h2 className="font-bold font-display text-lg">
         Présents{" "}
         <span className="font-normal text-muted-foreground">
           ({presentCount}/{attendees.length})

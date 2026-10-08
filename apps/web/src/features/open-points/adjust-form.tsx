@@ -61,7 +61,7 @@ export function AdjustForm() {
       {message ? <FormAlert tone={message.tone}>{message.text}</FormAlert> : null}
       {target ? (
         <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm">
             <p className="font-semibold">{target.user.name}</p>
             <p className="text-muted-foreground text-sm">
               Solde actuel : {formatPoints(target.balance)}

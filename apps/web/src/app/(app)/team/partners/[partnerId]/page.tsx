@@ -19,14 +19,18 @@ export default async function PartnerPage({ params }: { params: Promise<{ partne
       : undefined;
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="font-semibold text-2xl">{partner.name}</h1>
+        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
+          {partner.name}
+        </h1>
         <PartnerForm partner={partner} owners={owners} canDelete={isBoard} />
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="font-semibold text-2xl">{partner.name}</h1>
+      <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
+        {partner.name}
+      </h1>
       <p className="text-sm">Statut : {PARTNER_STATUS_LABELS[partner.status]}</p>
       <p className="text-sm">Référent : {partner.owner?.name ?? "personne"}</p>
       {partner.contactName || partner.contactEmail ? (

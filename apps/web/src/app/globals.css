@@ -1,55 +1,79 @@
 @import "tailwindcss";
 
-/* Theme tokens (shadcn/ui). Components use bg-primary, text-muted-foreground…, never raw colors. */
+/*
+ * Theme tokens (shadcn/ui), taken from the BDE Mingo logo: royal blue, flamingo pink, lagoon
+ * cyan, night navy. Components use bg-primary, text-muted-foreground…, never raw colors.
+ */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 1rem;
+  --background: oklch(0.985 0.008 320);
+  --foreground: oklch(0.22 0.06 270);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.45 0.2 275);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.01 275);
-  --secondary-foreground: oklch(0.25 0.05 275);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(0.95 0.02 275);
-  --accent-foreground: oklch(0.25 0.05 275);
-  --destructive: oklch(0.55 0.22 27);
-  --success: oklch(0.5 0.13 150);
-  --warning: oklch(0.55 0.13 70);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.88 0 0);
-  --ring: oklch(0.45 0.2 275);
+  --card-foreground: oklch(0.22 0.06 270);
+  /* Royal blue of the logo's disc. */
+  --primary: oklch(0.5 0.21 265);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.04 340);
+  --secondary-foreground: oklch(0.3 0.08 330);
+  --muted: oklch(0.96 0.012 300);
+  --muted-foreground: oklch(0.48 0.04 280);
+  --accent: oklch(0.95 0.025 290);
+  --accent-foreground: oklch(0.25 0.07 270);
+  --destructive: oklch(0.55 0.22 22);
+  --success: oklch(0.52 0.13 160);
+  --warning: oklch(0.56 0.14 60);
+  --border: oklch(0.91 0.02 300);
+  --input: oklch(0.87 0.025 300);
+  --ring: oklch(0.5 0.21 265);
+  /* Brand accents: decorations, badges, gradients. */
+  --brand-pink: oklch(0.79 0.13 345);
+  --brand-pink-foreground: oklch(0.22 0.06 270);
+  --brand-lavender: oklch(0.78 0.08 300);
+  --brand-cyan: oklch(0.86 0.12 195);
+  --brand-navy: oklch(0.22 0.06 270);
+  /* Deep stops of the poster gradient: white text on them stays readable (AA). */
+  --brand-magenta: oklch(0.55 0.19 350);
+  --brand-violet: oklch(0.48 0.17 300);
+  --brand-blue: oklch(0.48 0.2 265);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.16 0.01 275);
-    --foreground: oklch(0.97 0 0);
-    --card: oklch(0.21 0.01 275);
-    --card-foreground: oklch(0.97 0 0);
-    --primary: oklch(0.72 0.15 275);
-    --primary-foreground: oklch(0.16 0.01 275);
-    --secondary: oklch(0.27 0.02 275);
-    --secondary-foreground: oklch(0.97 0 0);
-    --muted: oklch(0.25 0.01 275);
-    --muted-foreground: oklch(0.72 0 0);
-    --accent: oklch(0.3 0.03 275);
-    --accent-foreground: oklch(0.97 0 0);
+    --background: oklch(0.17 0.045 272);
+    --foreground: oklch(0.97 0.01 300);
+    --card: oklch(0.22 0.055 272);
+    --card-foreground: oklch(0.97 0.01 300);
+    --primary: oklch(0.7 0.16 265);
+    --primary-foreground: oklch(0.15 0.05 272);
+    --secondary: oklch(0.32 0.07 335);
+    --secondary-foreground: oklch(0.95 0.03 340);
+    --muted: oklch(0.25 0.05 272);
+    --muted-foreground: oklch(0.76 0.03 290);
+    --accent: oklch(0.29 0.06 280);
+    --accent-foreground: oklch(0.97 0.01 300);
     --destructive: oklch(0.7 0.19 22);
-    --success: oklch(0.75 0.14 150);
-    --warning: oklch(0.8 0.14 80);
-    --border: oklch(1 0 0 / 12%);
-    --input: oklch(1 0 0 / 18%);
-    --ring: oklch(0.72 0.15 275);
+    --success: oklch(0.76 0.14 160);
+    --warning: oklch(0.82 0.14 75);
+    --border: oklch(1 0 0 / 11%);
+    --input: oklch(1 0 0 / 17%);
+    --ring: oklch(0.7 0.16 265);
+    --brand-pink: oklch(0.78 0.13 345);
+    --brand-pink-foreground: oklch(0.18 0.05 272);
+    --brand-lavender: oklch(0.55 0.1 295);
+    --brand-cyan: oklch(0.82 0.12 195);
+    --brand-navy: oklch(0.13 0.04 272);
+    --brand-magenta: oklch(0.5 0.17 350);
+    --brand-violet: oklch(0.42 0.15 300);
+    --brand-blue: oklch(0.42 0.18 265);
   }
 }
 
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  /* Headings: heavy, italic, like the BDE's posters. */
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
@@ -70,6 +94,14 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-pink-foreground: var(--brand-pink-foreground);
+  --color-brand-lavender: var(--brand-lavender);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-magenta: var(--brand-magenta);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-blue: var(--brand-blue);
 }
 
 @layer base {

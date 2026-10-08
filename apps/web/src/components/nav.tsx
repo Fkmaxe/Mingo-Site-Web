@@ -19,7 +19,7 @@ export function BottomNav({ canManage = false }: { canManage?: boolean }) {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_-12px] shadow-primary/20 backdrop-blur-md md:hidden"
     >
       <ul className="mx-auto flex max-w-md">
         {items.map(({ href, label, icon: Icon }) => {
@@ -30,11 +30,18 @@ export function BottomNav({ canManage = false }: { canManage?: boolean }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-16 flex-col items-center justify-center gap-1 font-medium text-xs",
+                  "flex min-h-16 flex-col items-center justify-center gap-0.5 font-semibold text-[0.7rem]",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                <Icon aria-hidden className="size-6" />
+                <span
+                  className={cn(
+                    "flex h-8 w-14 items-center justify-center rounded-full transition-colors",
+                    active && "bg-primary/12",
+                  )}
+                >
+                  <Icon aria-hidden className="size-5" />
+                </span>
                 {label}
               </Link>
             </li>
@@ -60,10 +67,10 @@ export function SideNav({ canManage = false }: { canManage?: boolean }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-md px-3 font-medium text-sm",
+                  "flex min-h-11 items-center gap-3 rounded-full px-4 font-semibold text-sm transition-colors",
                   active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/60",
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
               >
                 <Icon aria-hidden className="size-5" />

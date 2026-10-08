@@ -30,7 +30,9 @@ export default async function ApplicationsPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Candidatures</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Candidatures
+      </h1>
       <nav
         aria-label="Statut"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

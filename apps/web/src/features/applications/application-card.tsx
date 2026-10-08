@@ -28,7 +28,7 @@ export function ApplicationCard({ application, poles }: Props) {
     });
 
   return (
-    <li className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+    <li className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <span className="font-semibold">{application.user.name}</span>

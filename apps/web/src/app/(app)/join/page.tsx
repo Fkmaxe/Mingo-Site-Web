@@ -31,7 +31,9 @@ export default async function JoinPage() {
   const [application, poles] = await Promise.all([getMyApplication(), listPoles()]);
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Rejoindre le BDE</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Rejoindre le BDE
+      </h1>
       {application ? (
         <Card>
           <CardTitle>

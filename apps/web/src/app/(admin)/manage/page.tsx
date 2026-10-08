@@ -54,13 +54,15 @@ export default async function ManagePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Gestion</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Gestion
+      </h1>
       <ul className="flex flex-col gap-3">
         {links.map(({ href, title, description, icon: Icon }) => (
           <li key={href}>
             <Link
               href={href}
-              className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+              className="flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm transition-colors hover:bg-accent/40"
             >
               <Icon aria-hidden className="size-6 text-primary" />
               <span className="flex flex-1 flex-col">

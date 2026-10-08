@@ -28,7 +28,9 @@ export default async function MeetingsPage({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">Réunions</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Réunions
+        </h1>
         {me.permissions.includes("meetings:manage") ? (
           <Button asChild>
             <Link href="/meetings/new">Créer</Link>
@@ -65,7 +67,7 @@ export default async function MeetingsPage({
             <li key={m.id}>
               <Link
                 href={`/meetings/${m.id}`}
-                className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+                className="flex flex-col gap-1 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm transition-colors hover:bg-accent/40"
               >
                 <span className="font-semibold">{m.title}</span>
                 <span className="flex items-center gap-2 text-muted-foreground text-sm">

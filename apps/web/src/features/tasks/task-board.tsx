@@ -28,7 +28,7 @@ function TaskCard({
   const late =
     task.dueOn && task.status !== "done" && task.dueOn < new Date().toISOString().slice(0, 10);
   return (
-    <li className="flex flex-col gap-2 rounded-xl border bg-card p-3">
+    <li className="flex flex-col gap-2 rounded-2xl border bg-card p-3 shadow-primary/5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium leading-tight">{task.title}</span>
         {task.canEdit ? (

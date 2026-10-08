@@ -15,7 +15,9 @@ export default async function TicketsPage({
   const tickets = await listMyTickets(scope);
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Mes billets</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Mes billets
+      </h1>
       <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
         {(
           [

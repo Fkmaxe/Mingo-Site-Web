@@ -92,3 +92,21 @@ export function formatDateTime(iso: string): string {
 export function formatShortDay(iso: string): string {
   return shortDayFormatter.format(new Date(iso));
 }
+
+const monthFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: TIME_ZONE, month: "short" });
+
+/** Day of the month and short month in Paris time, for date blocks: { day: "12", month: "oct." }. */
+export function dateBlock(iso: string): { day: string; month: string } {
+  const date = new Date(iso);
+  return { day: String(parisParts(date).day), month: monthFormatter.format(date) };
+}
+
+/** Times only, the day being shown apart: "19:00 – 23:00", or "21:00 → jeu. 15 oct. 05:00". */
+export function formatEventTimes(startsAt: string, endsAt: string): string {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  if (sameParisDay(start, end)) {
+    return `${timeFormatter.format(start)} – ${timeFormatter.format(end)}`;
+  }
+  return `${timeFormatter.format(start)} → ${shortDayFormatter.format(end)} ${timeFormatter.format(end)}`;
+}

@@ -11,7 +11,12 @@ const STATUS_STYLES: Record<Event["status"], string> = {
 
 export function StatusBadge({ status }: { status: Event["status"] }) {
   return (
-    <span className={cn("rounded-full px-2.5 py-0.5 font-medium text-xs", STATUS_STYLES[status])}>
+    <span
+      className={cn(
+        "w-fit rounded-full px-2.5 py-0.5 font-semibold text-xs",
+        STATUS_STYLES[status],
+      )}
+    >
       {EVENT_STATUS_LABELS[status]}
     </span>
   );
@@ -19,7 +24,7 @@ export function StatusBadge({ status }: { status: Event["status"] }) {
 
 export function VisibilityBadge({ visibility }: { visibility: Event["visibility"] }) {
   return (
-    <span className="rounded-full bg-secondary px-2.5 py-0.5 font-medium text-secondary-foreground text-xs">
+    <span className="w-fit rounded-full bg-secondary px-2.5 py-0.5 font-semibold text-secondary-foreground text-xs">
       {EVENT_VISIBILITY_LABELS[visibility]}
     </span>
   );

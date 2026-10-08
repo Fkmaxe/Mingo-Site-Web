@@ -10,7 +10,9 @@ export default async function PointsPage() {
   const points = await getMyOpenPoints();
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Mes points open</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Mes points open
+      </h1>
       {points.isMember ? (
         <Card>
           <CardDescription>
@@ -34,7 +36,7 @@ export default async function PointsPage() {
             ) : null}
           </Card>
           <section className="flex flex-col gap-3">
-            <h2 className="font-semibold text-lg">Historique</h2>
+            <h2 className="font-bold font-display text-lg">Historique</h2>
             <MovementList movements={points.movements} />
           </section>
         </>

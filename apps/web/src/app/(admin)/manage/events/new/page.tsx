@@ -13,7 +13,9 @@ export default async function NewEventPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="font-semibold text-2xl">Nouvel événement</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Nouvel événement
+        </h1>
         <p className="text-muted-foreground text-sm">
           Il est créé en brouillon : personne ne le voit avant sa publication.
         </p>

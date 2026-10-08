@@ -17,7 +17,7 @@ export function TicketList({ tickets, empty }: { tickets: Ticket[]; empty: strin
         <li key={ticket.id}>
           <Link
             href={`/tickets/${ticket.id}`}
-            className="flex flex-col gap-2 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/40"
+            className="flex flex-col gap-2 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm transition-colors hover:bg-accent/40"
           >
             <span className="font-semibold leading-tight">{ticket.event.title}</span>
             <span className="flex items-center gap-2 text-muted-foreground text-sm">

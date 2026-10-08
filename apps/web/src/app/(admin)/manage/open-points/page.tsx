@@ -16,7 +16,9 @@ export default async function ManageOpenPointsPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">Points open</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Points open
+        </h1>
         {me.permissions.includes("open-points:adjust") ? (
           <Button asChild variant="outline">
             <Link href="/manage/open-points/adjust">Ajuster</Link>

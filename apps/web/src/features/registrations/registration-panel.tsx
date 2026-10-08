@@ -193,7 +193,7 @@ export function RegistrationPanel({ event, signedIn, team = null }: Props) {
   return (
     <section
       aria-label="Inscription"
-      className="sticky bottom-20 flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm md:bottom-4"
+      className="sticky bottom-20 flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-lg shadow-primary/10 md:bottom-4"
     >
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
       {event.status === "published" ? (

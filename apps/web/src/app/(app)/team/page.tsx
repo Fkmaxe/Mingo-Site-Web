@@ -27,7 +27,9 @@ export default async function TeamPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">L'équipe</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          L'équipe
+        </h1>
         <Link
           href="/team/partners"
           className="text-primary text-sm underline-offset-4 hover:underline"
@@ -37,7 +39,9 @@ export default async function TeamPage() {
       </div>
       {[...groups.entries()].map(([name, people]) => (
         <section key={name} className="flex flex-col gap-2">
-          <h2 className="font-semibold text-lg">{name === "Bureau" ? name : `Pôle ${name}`}</h2>
+          <h2 className="font-bold font-display text-lg">
+            {name === "Bureau" ? name : `Pôle ${name}`}
+          </h2>
           <ul className="flex flex-col divide-y rounded-xl border">
             {people.map((e) => (
               <li

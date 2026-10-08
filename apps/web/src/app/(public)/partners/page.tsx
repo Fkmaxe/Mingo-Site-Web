@@ -8,7 +8,9 @@ export default async function PartnersPage() {
   const partners = await listPublicPartners();
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Nos partenaires</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Nos partenaires
+      </h1>
       <p className="text-muted-foreground text-sm">
         Les bons plans négociés par le BDE pour les élèves.
       </p>
@@ -19,7 +21,10 @@ export default async function PartnersPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {partners.map((p) => (
-            <li key={p.id} className="flex flex-col gap-2 rounded-xl border bg-card p-4">
+            <li
+              key={p.id}
+              className="flex flex-col gap-2 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm"
+            >
               <span className="font-semibold">{p.name}</span>
               {p.benefits ? <p className="whitespace-pre-line text-sm">{p.benefits}</p> : null}
               {p.website ? (

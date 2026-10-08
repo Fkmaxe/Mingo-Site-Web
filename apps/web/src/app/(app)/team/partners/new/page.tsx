@@ -15,7 +15,9 @@ export default async function NewPartnerPage() {
   }));
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-semibold text-2xl">Nouveau partenaire</h1>
+      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+        Nouveau partenaire
+      </h1>
       <PartnerForm owners={owners} />
     </div>
   );

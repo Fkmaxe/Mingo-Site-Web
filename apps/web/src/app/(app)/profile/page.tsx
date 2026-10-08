@@ -1,5 +1,13 @@
+import {
+  ChevronRight,
+  ClipboardList,
+  GraduationCap,
+  type LucideIcon,
+  Sparkles,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandPanel, DisplayTitle } from "@/components/brand";
 import { Card, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
@@ -7,15 +15,40 @@ import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Profil" };
 
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+type Row = { href: string; label: string; icon: LucideIcon };
+
 export default async function ProfilePage() {
   const me = await requireMe();
+  const rows: Row[] = me.roles.includes("member")
+    ? [
+        { href: "/grades", label: "Ma note et mes présences", icon: GraduationCap },
+        { href: "/tasks", label: "Mes tâches", icon: ClipboardList },
+      ]
+    : [{ href: "/points", label: "Mes points open", icon: Sparkles }];
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-semibold text-2xl">{me.name}</h1>
-        <p className="break-all text-muted-foreground">{me.email}</p>
-        {me.promo ? <p className="text-muted-foreground text-sm">Promo {me.promo}</p> : null}
-      </div>
+      <BrandPanel className="flex items-center gap-4">
+        <span
+          aria-hidden
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white/20 font-display font-extrabold text-2xl italic ring-2 ring-white/60"
+        >
+          {initials(me.name)}
+        </span>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <DisplayTitle className="text-2xl normal-case">{me.name}</DisplayTitle>
+          <p className="truncate text-sm text-white/90">{me.email}</p>
+          {me.promo ? <p className="text-sm text-white/85">Promo {me.promo}</p> : null}
+        </div>
+      </BrandPanel>
 
       <Card>
         <CardTitle>Mes rôles</CardTitle>
@@ -23,7 +56,7 @@ export default async function ProfilePage() {
           {me.roles.map((role) => (
             <li
               key={role}
-              className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground text-sm"
+              className="rounded-full bg-secondary px-3 py-1 font-semibold text-secondary-foreground text-sm"
             >
               {ROLE_LABELS[role]}
             </li>
@@ -42,20 +75,20 @@ export default async function ProfilePage() {
         ) : null}
       </Card>
 
-      {me.roles.includes("member") ? (
-        <div className="flex flex-col gap-2">
-          <Link href="/grades" className="text-primary underline-offset-4 hover:underline">
-            Ma note et mes présences
-          </Link>
-          <Link href="/tasks" className="text-primary underline-offset-4 hover:underline">
-            Mes tâches
-          </Link>
-        </div>
-      ) : (
-        <Link href="/points" className="text-primary underline-offset-4 hover:underline">
-          Mes points open
-        </Link>
-      )}
+      <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card shadow-primary/5 shadow-sm">
+        {rows.map(({ href, label, icon: Icon }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              className="flex min-h-14 items-center gap-3 px-4 font-semibold transition-colors hover:bg-accent"
+            >
+              <Icon aria-hidden className="size-5 text-primary" />
+              <span className="flex-1">{label}</span>
+              <ChevronRight aria-hidden className="size-4 text-muted-foreground" />
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       <SignOutButton />
     </div>

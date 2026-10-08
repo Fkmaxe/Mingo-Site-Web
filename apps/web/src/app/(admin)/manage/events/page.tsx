@@ -16,7 +16,9 @@ export default async function ManageEventsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-semibold text-2xl">Mes événements</h1>
+        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
+          Mes événements
+        </h1>
         <Button asChild>
           <Link href="/manage/events/new">
             <Plus aria-hidden />
