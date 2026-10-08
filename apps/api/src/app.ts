@@ -16,7 +16,7 @@ import { createMembersRouter } from "./modules/members";
 import { createOpenPointsRouter } from "./modules/open-points";
 import { createPartnersRouter } from "./modules/partners";
 import { createPolesRouter } from "./modules/poles";
-import { createRegistrationsRouter } from "./modules/registrations";
+import { createRegistrationsRouter, createTeamsRouter } from "./modules/registrations";
 import { createStaffRouter } from "./modules/staff";
 import { createTasksRouter } from "./modules/tasks";
 import { createTreasuryRouter } from "./modules/treasury";
@@ -45,6 +45,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createPolesRouter());
   app.route("/v1", createEventsRouter());
   app.route("/v1", createRegistrationsRouter());
+  app.route("/v1", createTeamsRouter());
   app.route("/v1", createCheckinRouter());
   app.route("/v1", createOpenPointsRouter());
   app.route("/v1", createExportsRouter());

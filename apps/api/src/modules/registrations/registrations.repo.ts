@@ -16,7 +16,7 @@ import {
 } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { compact, type Patch } from "../../db/patch";
-import { event, registration, user } from "../../db/schema";
+import { event, registration, team, user } from "../../db/schema";
 
 export async function countConfirmedByEvent(db: DbOrTx, eventIds: string[]) {
   if (eventIds.length === 0) return new Map<string, number>();
@@ -89,6 +89,8 @@ const ticketSelection = {
   },
   waitlistPosition: registration.waitlistPosition,
   answers: registration.answers,
+  teamId: registration.teamId,
+  teamName: team.name,
 };
 
 export type TicketRow = NonNullable<Awaited<ReturnType<typeof findTicket>>>;
@@ -98,6 +100,7 @@ export async function findTicket(db: DbOrTx, registrationId: string) {
     .select(ticketSelection)
     .from(registration)
     .innerJoin(event, eq(event.id, registration.eventId))
+    .leftJoin(team, eq(team.id, registration.teamId))
     .where(eq(registration.id, registrationId));
   return row;
 }
@@ -108,6 +111,7 @@ export function findUserTickets(db: DbOrTx, userId: string, scope: "upcoming" | 
     .select(ticketSelection)
     .from(registration)
     .innerJoin(event, eq(event.id, registration.eventId))
+    .leftJoin(team, eq(team.id, registration.teamId))
     .where(
       and(
         eq(registration.userId, userId),
@@ -144,10 +148,12 @@ export function findRegistrants(
       answers: registration.answers,
       // JS dates stop at milliseconds: the cursor keeps Postgres' full precision.
       createdAtKey: sql<string>`${registration.createdAt}::text`,
+      team: team.name,
       user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
     })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
+    .leftJoin(team, eq(team.id, registration.teamId))
     .where(and(...conditions))
     .orderBy(asc(registration.createdAt), asc(registration.id))
     .limit(params.limit + 1);
@@ -203,10 +209,12 @@ export function findAllRegistrants(db: DbOrTx, eventId: string) {
       status: registration.status,
       createdAt: registration.createdAt,
       answers: registration.answers,
+      team: team.name,
       user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
     })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
+    .leftJoin(team, eq(team.id, registration.teamId))
     .where(eq(registration.eventId, eventId))
     .orderBy(asc(user.name));
 }

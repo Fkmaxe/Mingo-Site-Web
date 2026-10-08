@@ -30,6 +30,11 @@ export function TicketList({ tickets, empty }: { tickets: Ticket[]; empty: strin
               <MapPin aria-hidden className="size-4 shrink-0" />
               {ticket.event.location}
             </span>
+            {ticket.team ? (
+              <span className="text-sm">
+                Équipe <span className="font-medium">{ticket.team.name}</span>
+              </span>
+            ) : null}
             {ticket.event.status === "cancelled" ? (
               <span className="font-medium text-destructive text-sm">Événement annulé</span>
             ) : ticket.status === "waitlisted" ? (

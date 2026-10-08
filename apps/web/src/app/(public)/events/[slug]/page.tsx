@@ -1,9 +1,10 @@
-import { CalendarDays, Clock, MapPin, Sparkles, Users } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Shield, Sparkles, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, VisibilityBadge } from "@/features/events/event-badges";
 import { getEventOr404 } from "@/features/events/queries";
+import { getMyTeam } from "@/features/registrations/queries";
 import { RegistrationPanel } from "@/features/registrations/registration-panel";
 import { listStaffSlots } from "@/features/staff/queries";
 import { StaffVolunteerPanel } from "@/features/staff/staff-volunteer-panel";
@@ -20,7 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EventPage({ params }: Props) {
   const [event, me] = await Promise.all([getEventOr404((await params).slug), getMe()]);
   const isMember = me?.roles.includes("member") ?? false;
-  const staffSlots = isMember && event.status === "published" ? await listStaffSlots(event.id) : [];
+  const isTeamEvent = event.teamMinSize !== null && event.teamMaxSize !== null;
+  const [staffSlots, team] = await Promise.all([
+    isMember && event.status === "published" ? listStaffSlots(event.id) : [],
+    isTeamEvent && event.myRegistration ? getMyTeam(event.id) : null,
+  ]);
   return (
     <article className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
@@ -53,6 +58,14 @@ export default async function EventPage({ params }: Props) {
           <Users aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           {event.capacity === null ? "Places illimitées" : `${event.capacity} places`}
         </li>
+        {isTeamEvent ? (
+          <li className="flex gap-3">
+            <Shield aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+            {event.teamMinSize === event.teamMaxSize
+              ? `Équipes de ${event.teamMaxSize}`
+              : `Équipes de ${event.teamMinSize} à ${event.teamMaxSize} personnes`}
+          </li>
+        ) : null}
         {event.registrationDeadline ? (
           <li className="flex gap-3">
             <Clock aria-hidden className="size-5 shrink-0 text-muted-foreground" />
@@ -72,7 +85,9 @@ export default async function EventPage({ params }: Props) {
         <p className="whitespace-pre-line leading-relaxed">{event.description}</p>
       ) : null}
 
-      {event.status !== "draft" ? <RegistrationPanel event={event} signedIn={me !== null} /> : null}
+      {event.status !== "draft" ? (
+        <RegistrationPanel event={event} signedIn={me !== null} team={team} />
+      ) : null}
 
       <StaffVolunteerPanel slots={staffSlots} />
 

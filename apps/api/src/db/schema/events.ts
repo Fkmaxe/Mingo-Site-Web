@@ -41,6 +41,9 @@ export const event = pgTable(
     openPointsValue: integer().notNull().default(0),
     status: eventStatus().notNull().default("draft"),
     customFieldsSchema: jsonb().$type<CustomFieldDef[]>().notNull().default([]),
+    /** Team event (tournament) when both are set. */
+    teamMinSize: integer(),
+    teamMaxSize: integer(),
     /** Grade points of a member's presence; null: the grade period's default. */
     memberPoints: numeric({ precision: 7, scale: 2, mode: "number" }),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
@@ -59,6 +62,10 @@ export const event = pgTable(
     ),
     check("event_capacity_check", sql`${t.capacity} is null or ${t.capacity} > 0`),
     check("event_open_points_check", sql`${t.openPointsValue} >= 0`),
+    check(
+      "event_team_size_check",
+      sql`(${t.teamMinSize} is null and ${t.teamMaxSize} is null) or (${t.teamMinSize} >= 1 and ${t.teamMaxSize} >= ${t.teamMinSize})`,
+    ),
     check("event_member_points_check", sql`${t.memberPoints} is null or ${t.memberPoints} >= 0`),
   ],
 );

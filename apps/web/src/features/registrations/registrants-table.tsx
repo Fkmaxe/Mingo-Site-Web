@@ -6,7 +6,10 @@ function People({ people, fields }: { people: Registrant[]; fields: CustomFieldD
     <ol className="flex flex-col divide-y rounded-xl border">
       {people.map((r) => (
         <li key={r.id} className="flex flex-col gap-0.5 px-4 py-3">
-          <span className="font-medium">{r.user.name}</span>
+          <span className="font-medium">
+            {r.user.name}
+            {r.team ? <span className="font-normal text-muted-foreground"> · {r.team}</span> : null}
+          </span>
           <span className="break-all text-muted-foreground text-xs">
             {r.user.email}
             {r.user.promo ? ` · ${r.user.promo}` : ""}

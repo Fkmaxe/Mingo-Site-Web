@@ -47,14 +47,25 @@ export async function exportRegistrations(ctx: AuthedCtx, eventId: string): Prom
     attendances.filter((a) => a.kind === "participant").map((a) => [a.user.id, a.checkedInAt]),
   );
   const fields = event.customFieldsSchema;
+  const teams = event.teamMaxSize !== null;
   const content = toCsv(
-    ["Nom", "Email", "Promo", "Statut", "Inscrit le", "Entrée", ...fields.map((f) => f.label)],
+    [
+      "Nom",
+      "Email",
+      "Promo",
+      ...(teams ? ["Équipe"] : []),
+      "Statut",
+      "Inscrit le",
+      "Entrée",
+      ...fields.map((f) => f.label),
+    ],
     registrants.map((r) => {
       const at = entered.get(r.user.id);
       return [
         r.user.name,
         r.user.email,
         r.user.promo,
+        ...(teams ? [r.team ?? ""] : []),
         REGISTRATION_LABELS[r.status],
         parisDateTime(r.createdAt),
         at ? parisDateTime(at) : "",

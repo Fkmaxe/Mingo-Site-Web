@@ -36,6 +36,17 @@ const EventFields = z.object({
   posterUrl: z.url("Adresse d'affiche invalide").nullable(),
   /** Extra questions asked at registration (t-shirt size, diet…). */
   customFields: CustomFieldsSchema,
+  /** Team event (tournament): both set. Individual registrations: both null. */
+  teamMinSize: z
+    .int("Taille d'équipe invalide")
+    .min(1, "Au moins 1 personne")
+    .max(20, "20 personnes maximum")
+    .nullable(),
+  teamMaxSize: z
+    .int("Taille d'équipe invalide")
+    .min(1, "Au moins 1 personne")
+    .max(20, "20 personnes maximum")
+    .nullable(),
   /** Grade points of a member's presence; null: the grade period's default. */
   memberPoints: z
     .number("Indique un nombre")
@@ -71,8 +82,29 @@ export function eventDateIssues(
   return issues;
 }
 
-function checkDates(value: DateFields, ctx: z.RefinementCtx) {
-  for (const issue of eventDateIssues(value)) {
+type TeamFields = {
+  teamMinSize?: number | null | undefined;
+  teamMaxSize?: number | null | undefined;
+};
+
+/** Team sizes: both null (individual) or both set with min <= max. */
+export function teamSizeIssues(
+  sizes: TeamFields,
+): { path: "teamMinSize" | "teamMaxSize"; message: string }[] {
+  const min = sizes.teamMinSize ?? null;
+  const max = sizes.teamMaxSize ?? null;
+  if (min === null && max === null) return [];
+  if (min === null) return [{ path: "teamMinSize", message: "Indique la taille minimale" }];
+  if (max === null) return [{ path: "teamMaxSize", message: "Indique la taille maximale" }];
+  return min > max
+    ? [{ path: "teamMaxSize", message: "Le maximum doit être au moins égal au minimum" }]
+    : [];
+}
+
+function checkDates(value: DateFields & TeamFields, ctx: z.RefinementCtx) {
+  // Partial updates check team sizes against stored values (service), not here.
+  const bothSizes = value.teamMinSize !== undefined && value.teamMaxSize !== undefined;
+  for (const issue of [...eventDateIssues(value), ...(bothSizes ? teamSizeIssues(value) : [])]) {
     ctx.addIssue({ code: "custom", path: [issue.path], message: issue.message });
   }
 }
@@ -85,6 +117,8 @@ export const CreateEventInput = EventFields.extend({
   posterUrl: EventFields.shape.posterUrl.default(null),
   customFields: EventFields.shape.customFields.default([]),
   memberPoints: EventFields.shape.memberPoints.default(null),
+  teamMinSize: EventFields.shape.teamMinSize.default(null),
+  teamMaxSize: EventFields.shape.teamMaxSize.default(null),
 })
   .superRefine(checkDates)
   .meta({ id: "CreateEventInput" });
@@ -127,6 +161,8 @@ export const EventDto = z
     posterUrl: z.string().nullable(),
     customFields: z.array(CustomFieldDef),
     memberPoints: z.number().nullable(),
+    teamMinSize: z.int().nullable(),
+    teamMaxSize: z.int().nullable(),
     pole: z.object({ id: z.uuid(), slug: z.string(), name: z.string() }),
     /** Whether the current user may edit, publish or cancel it. */
     canManage: z.boolean(),

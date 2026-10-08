@@ -14,3 +14,4 @@ export {
   searchParticipants,
   sendRegistrationReminders,
 } from "./registrations.service";
+export { createTeamsRouter } from "./teams.routes";

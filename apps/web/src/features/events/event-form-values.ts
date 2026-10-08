@@ -1,4 +1,10 @@
-import { CreateEventInput, type CustomFieldType, eventDateIssues, fieldKey } from "@bde/shared";
+import {
+  CreateEventInput,
+  type CustomFieldType,
+  eventDateIssues,
+  fieldKey,
+  teamSizeIssues,
+} from "@bde/shared";
 import type { FieldErrors, ResolverResult } from "react-hook-form";
 import { isoToParisInput, parisInputToIso } from "@/lib/paris-time";
 import type { Event } from "./types";
@@ -17,6 +23,9 @@ export type EventFormValues = {
   openPointsValue: string;
   /** Empty: the grade period's default. */
   memberPoints: string;
+  /** Both empty: individual registrations. */
+  teamMinSize: string;
+  teamMaxSize: string;
   customFields: CustomFieldFormValues[];
 };
 
@@ -76,6 +85,8 @@ export function emptyEventForm(poleId = ""): EventFormValues {
     capacity: "",
     openPointsValue: "0",
     memberPoints: "",
+    teamMinSize: "",
+    teamMaxSize: "",
     customFields: [],
   };
 }
@@ -95,6 +106,8 @@ export function eventToForm(event: Event): EventFormValues {
     capacity: event.capacity === null ? "" : String(event.capacity),
     openPointsValue: String(event.openPointsValue),
     memberPoints: event.memberPoints === null ? "" : String(event.memberPoints),
+    teamMinSize: event.teamMinSize === null ? "" : String(event.teamMinSize),
+    teamMaxSize: event.teamMaxSize === null ? "" : String(event.teamMaxSize),
     customFields: event.customFields.map((f) => ({
       key: f.key,
       label: f.label,
@@ -122,6 +135,8 @@ export function formToInput(values: EventFormValues) {
     posterUrl: null,
     memberPoints:
       values.memberPoints.trim() === "" ? null : Number(values.memberPoints.replace(",", ".")),
+    teamMinSize: values.teamMinSize.trim() === "" ? null : Number(values.teamMinSize),
+    teamMaxSize: values.teamMaxSize.trim() === "" ? null : Number(values.teamMaxSize),
     customFields: toCustomFields(values.customFields),
   };
 }
@@ -157,6 +172,13 @@ export function eventFormResolver(values: EventFormValues): ResolverResult<Event
     startsAt: validDate(input.startsAt),
     endsAt: validDate(input.endsAt),
     registrationDeadline: validDate(input.registrationDeadline),
+  })) {
+    add(issue.path, "custom", issue.message);
+  }
+  const validSize = (n: number | null) => (n !== null && Number.isInteger(n) ? n : null);
+  for (const issue of teamSizeIssues({
+    teamMinSize: validSize(input.teamMinSize),
+    teamMaxSize: validSize(input.teamMaxSize),
   })) {
     add(issue.path, "custom", issue.message);
   }

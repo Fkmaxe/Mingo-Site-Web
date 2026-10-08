@@ -16,4 +16,5 @@ export * from "./schemas/poles";
 export * from "./schemas/registrations";
 export * from "./schemas/staff";
 export * from "./schemas/tasks";
+export * from "./schemas/teams";
 export * from "./schemas/treasury";

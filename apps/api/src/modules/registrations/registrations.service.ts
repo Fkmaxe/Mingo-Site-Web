@@ -11,9 +11,9 @@ import type { AuthedCtx, Services } from "../../core/context";
 import { AppError } from "../../core/errors";
 import type { DomainEvents } from "../../core/events";
 import { decodeCursor, type Page, PgTimestampText, toPage } from "../../core/http";
-import { inTransactionWithEffects } from "../../core/tx";
+import { type Defer, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
-import { findManageableEvent, findVisibleEvent } from "../events";
+import { type EventRow, findManageableEvent, findVisibleEvent } from "../events";
 import {
   confirmedEmail,
   eventCancelledEmail,
@@ -39,7 +39,9 @@ import {
   type TicketRow,
   updateRegistration,
 } from "./registrations.repo";
-import { canUnregister, newQrToken, registrationState } from "./rules";
+import { canUnregister, isTeamEvent, newQrToken, registrationState } from "./rules";
+import { afterTeamLeft } from "./team-membership";
+import { countActiveRegistrations, largestTeamSize } from "./teams.repo";
 import { eventUrl, fillFreePlaces, ticketUrl } from "./waitlist";
 
 function toTicket(row: TicketRow, waitlistRank: number | null): TicketDto {
@@ -51,6 +53,7 @@ function toTicket(row: TicketRow, waitlistRank: number | null): TicketDto {
     createdAt: row.createdAt.toISOString(),
     cancelledAt: row.cancelledAt?.toISOString() ?? null,
     answers: row.answers,
+    team: row.teamId && row.teamName ? { id: row.teamId, name: row.teamName } : null,
     questions: row.event.customFields.map((field) => ({
       label: field.label,
       answer: formatAnswer(row.answers[field.key]),
@@ -84,10 +87,93 @@ async function findOwnTicket(ctx: AuthedCtx, registrationId: string): Promise<Ti
   return row;
 }
 
+/** Validates the answers against the event's custom fields (400 with the issues otherwise). */
+export function parseAnswers(event: EventRow, answers: Record<string, unknown>): Answers {
+  const parsed = answersSchema(event.customFieldsSchema).safeParse(answers);
+  if (!parsed.success) {
+    throw new AppError("VALIDATION_ERROR", 400, "Certaines réponses sont invalides.", {
+      issues: parsed.error.issues.map((i) => ({ ...i, path: ["answers", ...i.path] })),
+    });
+  }
+  // The schema built from the fields only admits strings, numbers and booleans.
+  return parsed.data as Answers;
+}
+
 /**
- * Registers the current user: confirmed while there is room, waitlisted once the event is
- * full (rule 2). Mails the outcome after the commit.
+ * Registers the current user inside the caller's transaction, which must hold the event's
+ * registration lock: confirmed while there is room, waitlisted once the event is full
+ * (rule 2). Mails the outcome after the commit. Returns the registration id.
  */
+export async function enrol(
+  tx: DbOrTx,
+  defer: Defer,
+  ctx: AuthedCtx,
+  event: EventRow,
+  input: { answers: Answers; teamId: string | null },
+  now: Date,
+): Promise<string> {
+  const existing = await findRegistration(tx, event.id, ctx.user.id);
+  if (existing && existing.status !== "cancelled") {
+    throw new AppError(
+      "ALREADY_REGISTERED",
+      409,
+      existing.status === "waitlisted"
+        ? "Tu es déjà sur la liste d'attente de cet événement."
+        : "Tu es déjà inscrit·e à cet événement.",
+    );
+  }
+  // Places freed without promotion (should not happen) go to the waitlist first.
+  await fillFreePlaces(tx, event, defer, ctx.services);
+
+  const state = registrationState(event, await countConfirmed(tx, event.id), now);
+  if (state === "closed") {
+    throw event.status === "published"
+      ? new AppError("DEADLINE_PASSED", 409, "Les inscriptions sont closes pour cet événement.")
+      : new AppError(
+          "REGISTRATION_CLOSED",
+          409,
+          "Les inscriptions ne sont pas ouvertes pour cet événement.",
+        );
+  }
+  const waitlisted = state === "full";
+  const values = {
+    status: waitlisted ? ("waitlisted" as const) : ("confirmed" as const),
+    waitlistPosition: waitlisted ? (await maxWaitlistPosition(tx, event.id)) + 1 : null,
+    cancelledAt: null,
+    answers: input.answers,
+    teamId: input.teamId,
+  };
+  // Re-registration after a cancellation: same row (unique per event and user), same token.
+  let id: string;
+  if (existing) {
+    await updateRegistration(tx, existing.id, values);
+    id = existing.id;
+  } else {
+    id = await insertRegistration(tx, {
+      eventId: event.id,
+      userId: ctx.user.id,
+      qrToken: newQrToken(),
+      ...values,
+    });
+  }
+
+  const person = { name: ctx.user.name, email: ctx.user.email };
+  if (waitlisted) {
+    const [rank] = (await findWaitlistRanks(tx, [id])).values();
+    defer(() =>
+      ctx.services.mailer.send(
+        waitlistedEmail(person, event, rank ?? 1, eventUrl(ctx.services, event.slug)),
+      ),
+    );
+  } else {
+    defer(() =>
+      ctx.services.mailer.send(confirmedEmail(person, event, ticketUrl(ctx.services, id))),
+    );
+  }
+  return id;
+}
+
+/** Individual registration. A team event is joined through a team instead (teams.service). */
 export async function register(
   ctx: AuthedCtx,
   eventId: string,
@@ -95,74 +181,17 @@ export async function register(
   now: Date = new Date(),
 ): Promise<TicketDto> {
   const event = await findVisibleEvent(ctx, eventId);
-  const parsed = answersSchema(event.customFieldsSchema).safeParse(input.answers);
-  if (!parsed.success) {
-    throw new AppError("VALIDATION_ERROR", 400, "Certaines réponses sont invalides.", {
-      issues: parsed.error.issues.map((i) => ({ ...i, path: ["answers", ...i.path] })),
-    });
+  if (isTeamEvent(event)) {
+    throw new AppError(
+      "TEAM_REQUIRED",
+      409,
+      "Cet événement se joue en équipe : crée une équipe ou rejoins-en une avec son code.",
+    );
   }
-  // The schema built from the fields only admits strings, numbers and booleans.
-  const answers = parsed.data as Answers;
+  const answers = parseAnswers(event, input.answers);
   const registrationId = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await lockEventRegistrations(tx, event.id);
-    const existing = await findRegistration(tx, event.id, ctx.user.id);
-    if (existing && existing.status !== "cancelled") {
-      throw new AppError(
-        "ALREADY_REGISTERED",
-        409,
-        existing.status === "waitlisted"
-          ? "Tu es déjà sur la liste d'attente de cet événement."
-          : "Tu es déjà inscrit·e à cet événement.",
-      );
-    }
-    // Places freed without promotion (should not happen) go to the waitlist first.
-    await fillFreePlaces(tx, event, defer, ctx.services);
-
-    const state = registrationState(event, await countConfirmed(tx, event.id), now);
-    if (state === "closed") {
-      throw event.status === "published"
-        ? new AppError("DEADLINE_PASSED", 409, "Les inscriptions sont closes pour cet événement.")
-        : new AppError(
-            "REGISTRATION_CLOSED",
-            409,
-            "Les inscriptions ne sont pas ouvertes pour cet événement.",
-          );
-    }
-    const waitlisted = state === "full";
-    const values = {
-      status: waitlisted ? ("waitlisted" as const) : ("confirmed" as const),
-      waitlistPosition: waitlisted ? (await maxWaitlistPosition(tx, event.id)) + 1 : null,
-      cancelledAt: null,
-      answers,
-    };
-    // Re-registration after a cancellation: same row (unique per event and user), same token.
-    let id: string;
-    if (existing) {
-      await updateRegistration(tx, existing.id, values);
-      id = existing.id;
-    } else {
-      id = await insertRegistration(tx, {
-        eventId: event.id,
-        userId: ctx.user.id,
-        qrToken: newQrToken(),
-        ...values,
-      });
-    }
-
-    const person = { name: ctx.user.name, email: ctx.user.email };
-    if (waitlisted) {
-      const [rank] = (await findWaitlistRanks(tx, [id])).values();
-      defer(() =>
-        ctx.services.mailer.send(
-          waitlistedEmail(person, event, rank ?? 1, eventUrl(ctx.services, event.slug)),
-        ),
-      );
-    } else {
-      defer(() =>
-        ctx.services.mailer.send(confirmedEmail(person, event, ticketUrl(ctx.services, id))),
-      );
-    }
-    return id;
+    return enrol(tx, defer, ctx, event, { answers, teamId: null }, now);
   });
   return getTicket(ctx, registrationId);
 }
@@ -188,7 +217,9 @@ export async function cancelRegistration(
       status: "cancelled",
       cancelledAt: now,
       waitlistPosition: null,
+      teamId: null,
     });
+    if (ticket.teamId) await afterTeamLeft(tx, ticket.teamId, ctx.user.id);
     if (ticket.status === "confirmed") {
       await fillFreePlaces(tx, ticket.event, defer, ctx.services);
     }
@@ -259,11 +290,35 @@ export function allRegistrants(ctx: Pick<AuthedCtx, "db">, eventId: string) {
 
 // --- Domain event subscribers (registered in index.ts) ---
 
-/** Capacity change: refused below the confirmed count, otherwise free places are given out. */
+/**
+ * Capacity change: refused below the confirmed count, otherwise free places are given out.
+ * Team sizes: switching between individual and team registrations is refused once people are
+ * registered, and the maximum cannot go below the largest team.
+ */
 export async function onEventUpdated(payload: DomainEvents["event.updated"]) {
   const { db, event } = payload;
-  if (event.capacity === payload.previousCapacity) return;
+  const teamModeChanged = isTeamEvent(event) !== (payload.previousTeamMaxSize !== null);
+  const teamMaxChanged = event.teamMaxSize !== payload.previousTeamMaxSize;
+  if (event.capacity === payload.previousCapacity && !teamMaxChanged) return;
   await lockEventRegistrations(db, event.id);
+  if (teamModeChanged && (await countActiveRegistrations(db, event.id)) > 0) {
+    throw new AppError(
+      "TEAMS_LOCKED",
+      409,
+      "Des personnes sont déjà inscrites : on ne peut plus passer de l'inscription individuelle à l'inscription par équipe (ou l'inverse).",
+    );
+  }
+  if (event.teamMaxSize !== null && teamMaxChanged) {
+    const largest = await largestTeamSize(db, event.id);
+    if (largest > event.teamMaxSize) {
+      throw new AppError(
+        "TEAMS_LOCKED",
+        409,
+        `Une équipe compte déjà ${largest} personnes : la taille maximale ne peut pas descendre en dessous.`,
+      );
+    }
+  }
+  if (event.capacity === payload.previousCapacity) return;
   const confirmed = await countConfirmed(db, event.id);
   if (event.capacity !== null && event.capacity < confirmed) {
     throw new AppError(

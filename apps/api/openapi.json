@@ -205,6 +205,11 @@
                   "ALREADY_APPLIED",
                   "ALREADY_MEMBER",
                   "ALREADY_REVERSED",
+                  "TEAM_REQUIRED",
+                  "NOT_TEAM_EVENT",
+                  "TEAM_FULL",
+                  "TEAM_NAME_TAKEN",
+                  "TEAMS_LOCKED",
                   "REGISTRATION_CLOSED",
                   "DEADLINE_PASSED",
                   "ALREADY_CHECKED_IN",
@@ -381,6 +386,18 @@
               "null"
             ]
           },
+          "teamMinSize": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "teamMaxSize": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "pole": {
             "type": "object",
             "properties": {
@@ -466,6 +483,8 @@
           "posterUrl",
           "customFields",
           "memberPoints",
+          "teamMinSize",
+          "teamMaxSize",
           "pole",
           "canManage",
           "confirmedCount",
@@ -592,6 +611,24 @@
             "maxItems": 10,
             "default": []
           },
+          "teamMinSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 20,
+            "default": null
+          },
+          "teamMaxSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 20,
+            "default": null
+          },
           "memberPoints": {
             "type": [
               "number",
@@ -682,6 +719,22 @@
             },
             "maxItems": 10
           },
+          "teamMinSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 20
+          },
+          "teamMaxSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 20
+          },
           "memberPoints": {
             "type": [
               "number",
@@ -742,6 +795,25 @@
                 }
               ]
             }
+          },
+          "team": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
           },
           "questions": {
             "type": "array",
@@ -814,6 +886,7 @@
           "createdAt",
           "cancelledAt",
           "answers",
+          "team",
           "questions",
           "event"
         ]
@@ -863,6 +936,12 @@
               ]
             }
           },
+          "team": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "user": {
             "type": "object",
             "properties": {
@@ -896,7 +975,107 @@
           "status",
           "createdAt",
           "answers",
+          "team",
           "user"
+        ]
+      },
+      "Team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "joinCode": {
+            "type": "string"
+          },
+          "captainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "promo": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "confirmed",
+                    "waitlisted"
+                  ]
+                }
+              },
+              "required": [
+                "userId",
+                "name",
+                "promo",
+                "status"
+              ]
+            }
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "joinCode",
+          "captainId",
+          "members",
+          "complete"
+        ]
+      },
+      "CreateTeamInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {},
+            "default": {}
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "JoinTeamInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{6}$"
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {},
+            "default": {}
+          }
+        },
+        "required": [
+          "code"
         ]
       },
       "Checkin": {
@@ -3825,6 +4004,277 @@
           },
           "409": {
             "description": "L'événement a commencé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/teams": {
+      "post": {
+        "tags": [
+          "teams"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Équipe créée, capitaine inscrit·e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom ou réponses invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "NOT_TEAM_EVENT, TEAM_NAME_TAKEN, ALREADY_REGISTERED, DEADLINE_PASSED ou REGISTRATION_CLOSED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Équipes de l'événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit de voir les équipes de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/teams/join": {
+      "post": {
+        "tags": [
+          "teams"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinTeamInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Équipe rejointe, inscription créée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Code ou réponses invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement ou équipe introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "NOT_TEAM_EVENT, TEAM_FULL, ALREADY_REGISTERED, DEADLINE_PASSED ou REGISTRATION_CLOSED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/teams/mine": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mon équipe pour cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable ou pas d'équipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "NOT_TEAM_EVENT",
             "content": {
               "application/json": {
                 "schema": {

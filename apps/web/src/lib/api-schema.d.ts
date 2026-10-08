@@ -852,6 +852,263 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/events/{eventId}/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Équipes de l'événement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"][];
+                    };
+                };
+                /** @description Pas le droit de voir les équipes de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateTeamInput"];
+                };
+            };
+            responses: {
+                /** @description Équipe créée, capitaine inscrit·e */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"];
+                    };
+                };
+                /** @description Nom ou réponses invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NOT_TEAM_EVENT, TEAM_NAME_TAKEN, ALREADY_REGISTERED, DEADLINE_PASSED ou REGISTRATION_CLOSED */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/teams/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JoinTeamInput"];
+                };
+            };
+            responses: {
+                /** @description Équipe rejointe, inscription créée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"];
+                    };
+                };
+                /** @description Code ou réponses invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement ou équipe introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NOT_TEAM_EVENT, TEAM_FULL, ALREADY_REGISTERED, DEADLINE_PASSED ou REGISTRATION_CLOSED */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/teams/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mon équipe pour cet événement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable ou pas d'équipe */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NOT_TEAM_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/events/{eventId}/checkin": {
         parameters: {
             query?: never;
@@ -5151,7 +5408,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_REVERSED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -5197,6 +5454,8 @@ export interface components {
             posterUrl: string | null;
             customFields: components["schemas"]["CustomField"][];
             memberPoints: number | null;
+            teamMinSize: number | null;
+            teamMaxSize: number | null;
             pole: {
                 /** Format: uuid */
                 id: string;
@@ -5254,6 +5513,10 @@ export interface components {
             /** @default [] */
             customFields: components["schemas"]["CustomField"][];
             /** @default null */
+            teamMinSize: number | null;
+            /** @default null */
+            teamMaxSize: number | null;
+            /** @default null */
             memberPoints: number | null;
         };
         UpdateEventInput: {
@@ -5275,6 +5538,8 @@ export interface components {
             /** Format: uri */
             posterUrl?: string | null;
             customFields?: components["schemas"]["CustomField"][];
+            teamMinSize?: number | null;
+            teamMaxSize?: number | null;
             memberPoints?: number | null;
         };
         Ticket: {
@@ -5291,6 +5556,11 @@ export interface components {
             answers: {
                 [key: string]: string | number | boolean;
             };
+            team: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
             questions: {
                 label: string;
                 answer: string;
@@ -5325,12 +5595,44 @@ export interface components {
             answers: {
                 [key: string]: string | number | boolean;
             };
+            team: string | null;
             user: {
                 /** Format: uuid */
                 id: string;
                 name: string;
                 email: string;
                 promo: string | null;
+            };
+        };
+        Team: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            joinCode: string;
+            /** Format: uuid */
+            captainId: string;
+            members: {
+                /** Format: uuid */
+                userId: string;
+                name: string;
+                promo: string | null;
+                /** @enum {string} */
+                status: "confirmed" | "waitlisted";
+            }[];
+            complete: boolean;
+        };
+        CreateTeamInput: {
+            name: string;
+            /** @default {} */
+            answers: {
+                [key: string]: unknown;
+            };
+        };
+        JoinTeamInput: {
+            code: string;
+            /** @default {} */
+            answers: {
+                [key: string]: unknown;
             };
         };
         Checkin: {

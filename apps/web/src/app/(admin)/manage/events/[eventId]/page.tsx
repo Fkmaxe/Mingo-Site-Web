@@ -11,8 +11,9 @@ import { eventToForm } from "@/features/events/event-form-values";
 import { EventManageActions } from "@/features/events/event-manage-actions";
 import { manageablePoles } from "@/features/events/manageable-poles";
 import { getEventOr404, listPoles } from "@/features/events/queries";
-import { listAllRegistrants } from "@/features/registrations/queries";
+import { listAllRegistrants, listTeams } from "@/features/registrations/queries";
 import { RegistrantsList } from "@/features/registrations/registrants-table";
+import { TeamsList } from "@/features/registrations/teams-list";
 import { listStaffSlots } from "@/features/staff/queries";
 import { StaffManager } from "@/features/staff/staff-manager";
 import { requireMe } from "@/lib/session";
@@ -29,9 +30,11 @@ export default async function ManageEventPage({
   const [{ eventId }, { created }] = await Promise.all([params, searchParams]);
   const [me, event, poles] = await Promise.all([requireMe(), getEventOr404(eventId), listPoles()]);
   if (!event.canManage) notFound();
-  const [registrants, staffSlots] = await Promise.all([
+  const teamMinSize = event.teamMaxSize !== null ? event.teamMinSize : null;
+  const [registrants, staffSlots, teams] = await Promise.all([
     event.status === "draft" ? [] : listAllRegistrants(event.id),
     listStaffSlots(event.id),
+    event.status === "draft" || teamMinSize === null ? [] : listTeams(event.id),
   ]);
   const editable = event.status === "draft" || event.status === "published";
   // The current pole stays selectable even when the user cannot create events for it.
@@ -68,6 +71,15 @@ export default async function ManageEventPage({
       ) : null}
 
       <EventManageActions event={event} />
+
+      {event.status !== "draft" && teamMinSize !== null ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">
+            Équipes <span className="font-normal text-muted-foreground">({teams.length})</span>
+          </h2>
+          <TeamsList teams={teams} minSize={teamMinSize} />
+        </section>
+      ) : null}
 
       {event.status !== "draft" ? (
         <section className="flex flex-col gap-3">

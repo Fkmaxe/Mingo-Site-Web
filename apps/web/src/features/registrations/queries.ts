@@ -1,7 +1,7 @@
 import "server-only";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Registrant, Ticket } from "./types";
+import type { Registrant, Team, Ticket } from "./types";
 
 export async function listMyTickets(scope: "upcoming" | "past"): Promise<Ticket[]> {
   const { data, response } = await (await api()).GET("/v1/me/tickets", {
@@ -33,4 +33,20 @@ export async function listAllRegistrants(eventId: string): Promise<Registrant[]>
     cursor = data.nextCursor ?? undefined;
   } while (cursor);
   return all;
+}
+
+/** The current user's team for a team event, or null when they are not in one. */
+export async function getMyTeam(eventId: string): Promise<Team | null> {
+  const { data } = await (await api()).GET("/v1/events/{eventId}/teams/mine", {
+    params: { path: { eventId } },
+  });
+  return data ?? null;
+}
+
+export async function listTeams(eventId: string): Promise<Team[]> {
+  const { data, response } = await (await api()).GET("/v1/events/{eventId}/teams", {
+    params: { path: { eventId } },
+  });
+  if (!data) throw new Error(`GET teams a échoué (${response.status})`);
+  return data;
 }

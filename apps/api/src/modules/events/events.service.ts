@@ -5,6 +5,7 @@ import {
   type EventVisibility,
   eventDateIssues,
   type ListEventsQuery,
+  teamSizeIssues,
   type UpdateEventData,
 } from "@bde/shared";
 import { z } from "zod";
@@ -78,6 +79,8 @@ function toDto(ctx: AuthzCtx, row: EventRow, summary: RegistrationSummary, now: 
     posterUrl: row.posterUrl,
     customFields: row.customFieldsSchema,
     memberPoints: row.memberPoints,
+    teamMinSize: row.teamMinSize,
+    teamMaxSize: row.teamMaxSize,
     pole: row.pole,
     canManage: canManage(ctx, row.poleId),
     confirmedCount: summary.confirmedCount,
@@ -191,14 +194,19 @@ export async function updateEvent(
     assertPoleAccess(ctx, input.poleId);
     await getPole(ctx, input.poleId);
   }
-  const issues = eventDateIssues({
-    startsAt: input.startsAt ?? existing.startsAt.toISOString(),
-    endsAt: input.endsAt ?? existing.endsAt.toISOString(),
-    registrationDeadline:
-      input.registrationDeadline === undefined
-        ? existing.registrationDeadline?.toISOString()
-        : input.registrationDeadline,
-  });
+  const teamMinSize = input.teamMinSize === undefined ? existing.teamMinSize : input.teamMinSize;
+  const teamMaxSize = input.teamMaxSize === undefined ? existing.teamMaxSize : input.teamMaxSize;
+  const issues = [
+    ...eventDateIssues({
+      startsAt: input.startsAt ?? existing.startsAt.toISOString(),
+      endsAt: input.endsAt ?? existing.endsAt.toISOString(),
+      registrationDeadline:
+        input.registrationDeadline === undefined
+          ? existing.registrationDeadline?.toISOString()
+          : input.registrationDeadline,
+    }),
+    ...teamSizeIssues({ teamMinSize, teamMaxSize }),
+  ];
   const [firstIssue] = issues;
   if (firstIssue) {
     throw new AppError("VALIDATION_ERROR", 400, firstIssue.message, {
@@ -237,8 +245,11 @@ export async function updateEvent(
         startsAt: startsAt ? new Date(startsAt) : existing.startsAt,
         status: existing.status,
         capacity: input.capacity === undefined ? existing.capacity : input.capacity,
+        teamMinSize,
+        teamMaxSize,
       },
       previousCapacity: existing.capacity,
+      previousTeamMaxSize: existing.teamMaxSize,
     });
   });
   return getEvent(ctx, existing.id);

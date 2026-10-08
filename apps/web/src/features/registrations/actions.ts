@@ -31,3 +31,31 @@ export async function cancelRegistrationAction(registrationId: string): Promise<
   revalidateRegistrations();
   return { ok: true };
 }
+
+export async function createTeamAction(
+  eventId: string,
+  name: string,
+  answers: Record<string, string | number | boolean> = {},
+): Promise<ActionResult> {
+  const { error } = await (await api()).POST("/v1/events/{eventId}/teams", {
+    params: { path: { eventId } },
+    body: { name, answers },
+  });
+  if (error) return fromApiError(error);
+  revalidateRegistrations();
+  return { ok: true };
+}
+
+export async function joinTeamAction(
+  eventId: string,
+  code: string,
+  answers: Record<string, string | number | boolean> = {},
+): Promise<ActionResult> {
+  const { error } = await (await api()).POST("/v1/events/{eventId}/teams/join", {
+    params: { path: { eventId } },
+    body: { code, answers },
+  });
+  if (error) return fromApiError(error);
+  revalidateRegistrations();
+  return { ok: true };
+}

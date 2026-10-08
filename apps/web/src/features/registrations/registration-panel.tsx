@@ -8,18 +8,27 @@ import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/action-result";
 import type { Event } from "../events/types";
-import { cancelRegistrationAction, registerAction } from "./actions";
+import {
+  cancelRegistrationAction,
+  createTeamAction,
+  joinTeamAction,
+  registerAction,
+} from "./actions";
 import { AnswersForm } from "./answers-form";
 import { placesLabel } from "./places";
+import { TeamCard } from "./team-card";
+import { TeamForm, type TeamMode } from "./team-form";
+import type { Team } from "./types";
 
-type Props = { event: Event; signedIn: boolean };
+type Props = { event: Event; signedIn: boolean; team?: Team | null };
 
 /** Registration call to action, kept at the bottom of the screen within thumb reach. */
-export function RegistrationPanel({ event, signedIn }: Props) {
+export function RegistrationPanel({ event, signedIn, team = null }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [teamMode, setTeamMode] = useState<TeamMode | null>(null);
   const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
   const mine = event.myRegistration?.status === "confirmed" ? event.myRegistration : null;
@@ -31,6 +40,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
       const result = await action();
       if (result.ok) {
         setAsking(false);
+        setTeamMode(null);
         setAnswerErrors({});
       } else {
         setError(result.message);
@@ -38,7 +48,11 @@ export function RegistrationPanel({ event, signedIn }: Props) {
         setAnswerErrors(
           Object.fromEntries(
             Object.entries(result.fieldErrors).flatMap(([path, message]) =>
-              path.startsWith("answers.") ? [[path.slice("answers.".length), message]] : [],
+              path.startsWith("answers.")
+                ? [[path.slice("answers.".length), message]]
+                : path === "name" || path === "code"
+                  ? [[path, message]]
+                  : [],
             ),
           ),
         );
@@ -46,6 +60,13 @@ export function RegistrationPanel({ event, signedIn }: Props) {
       setConfirmLeave(false);
       router.refresh();
     });
+
+  const sizes =
+    event.teamMinSize !== null && event.teamMaxSize !== null
+      ? { min: event.teamMinSize, max: event.teamMaxSize }
+      : null;
+  const teamCard =
+    sizes && team ? <TeamCard team={team} minSize={sizes.min} maxSize={sizes.max} /> : null;
 
   let content: React.ReactNode;
   if (mine) {
@@ -55,6 +76,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
           <CheckCircle2 aria-hidden className="size-5" />
           Tu es inscrit·e
         </p>
+        {teamCard}
         <Button asChild size="lg">
           <Link href={`/tickets/${mine.id}`}>
             <Ticket aria-hidden />
@@ -69,7 +91,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
               disabled={pending}
               onClick={() => run(() => cancelRegistrationAction(mine.id))}
             >
-              Confirmer la désinscription
+              {sizes ? "Confirmer : quitter l'équipe" : "Confirmer la désinscription"}
             </Button>
             <Button variant="outline" onClick={() => setConfirmLeave(false)}>
               Retour
@@ -77,7 +99,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
           </div>
         ) : (
           <Button variant="ghost" onClick={() => setConfirmLeave(true)}>
-            Me désinscrire
+            {sizes ? "Quitter l'équipe et me désinscrire" : "Me désinscrire"}
           </Button>
         )}
       </>
@@ -92,6 +114,7 @@ export function RegistrationPanel({ event, signedIn }: Props) {
         <p className="text-muted-foreground text-sm">
           Si une place se libère, tu passes inscrit·e automatiquement et tu reçois un mail.
         </p>
+        {teamCard}
         <Button
           variant="ghost"
           disabled={pending}
@@ -110,6 +133,39 @@ export function RegistrationPanel({ event, signedIn }: Props) {
           Se connecter pour s'inscrire
         </Link>
       </Button>
+    ) : sizes && teamMode ? (
+      <TeamForm
+        key={teamMode}
+        mode={teamMode}
+        fields={event.customFields}
+        pending={pending}
+        serverErrors={answerErrors}
+        onCancel={() => setTeamMode(null)}
+        onSubmit={(value, answers) =>
+          run(() =>
+            teamMode === "create"
+              ? createTeamAction(event.id, value, answers)
+              : joinTeamAction(event.id, value, answers),
+          )
+        }
+      />
+    ) : sizes ? (
+      <>
+        <p className="text-muted-foreground text-sm">
+          Inscription par équipe de {sizesLabel(sizes)}.
+          {event.registrationState === "full"
+            ? " L'événement est complet : les nouveaux inscrits vont sur liste d'attente."
+            : ""}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <Button size="lg" onClick={() => setTeamMode("create")}>
+            Créer une équipe
+          </Button>
+          <Button size="lg" variant="outline" onClick={() => setTeamMode("join")}>
+            Rejoindre
+          </Button>
+        </div>
+      </>
     ) : asking ? (
       <AnswersForm
         fields={event.customFields}
@@ -146,4 +202,8 @@ export function RegistrationPanel({ event, signedIn }: Props) {
       {content}
     </section>
   );
+}
+
+function sizesLabel({ min, max }: { min: number; max: number }): string {
+  return min === max ? `${min} personne${min > 1 ? "s" : ""}` : `${min} à ${max} personnes`;
 }

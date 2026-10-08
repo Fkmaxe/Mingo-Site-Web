@@ -60,6 +60,14 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Champs d'inscription personnalisables par événement (taille de t-shirt, régime alimentaire, pseudo en jeu…), stockés en JSON validé par un schéma défini sur l'événement.
 - Chaque inscription confirmée a un **QR code** (token aléatoire, non devinable) affiché dans l'espace perso.
 
+### Tournois (inscription par équipe)
+
+- Un événement peut se jouer **en équipe** : l'organisateur fixe une taille minimale et maximale.
+- Le capitaine crée l'équipe (nom unique dans l'événement) et reçoit un **code à 6 caractères** à partager ; les coéquipiers rejoignent avec ce code. Pas d'inscription individuelle hors équipe.
+- La capacité de l'événement compte des **personnes**, pas des équipes : chaque membre est confirmé ou en liste d'attente individuellement. Une équipe est « complète » quand elle a au moins le minimum de membres confirmés.
+- Se désinscrire = quitter l'équipe. Si le capitaine part, le plus ancien membre le remplace ; une équipe vide disparaît.
+- Une fois des inscrits, on ne peut plus basculer entre individuel et équipe, ni descendre le maximum sous la plus grande équipe.
+
 ### Côté membres (staff)
 
 - Un événement définit des **créneaux staff** (accueil, bar, installation, rangement) avec un nombre de places.
@@ -104,3 +112,4 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [x] ~~Qui valide les notes~~ : tout le bureau (octobre 2026).
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
 - [x] ~~Paiements (soirées, goodies) dès cette année ?~~ Pas de paiement dans l'appli : un événement payant passera par un prestataire externe (octobre 2026).
+- [ ] Tournois : faut-il réserver des places par équipe entière (une équipe confirmée ou en attente d'un bloc) plutôt que par personne ? Choix actuel : par personne (octobre 2026).

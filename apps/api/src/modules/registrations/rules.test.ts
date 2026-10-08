@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { canUnregister, newQrToken, registrationState } from "./rules";
+import {
+  canUnregister,
+  isTeamEvent,
+  newJoinCode,
+  newQrToken,
+  nextCaptain,
+  registrationState,
+  teamIsComplete,
+  teamIsFull,
+} from "./rules";
 
 const now = new Date("2026-11-01T12:00:00Z");
 const base = {
@@ -45,5 +54,34 @@ describe("newQrToken", () => {
     const token = newQrToken();
     expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(newQrToken()).not.toBe(token);
+  });
+});
+
+describe("teams", () => {
+  it("is a team event only when both sizes are set", () => {
+    expect(isTeamEvent({ teamMinSize: 2, teamMaxSize: 5 })).toBe(true);
+    expect(isTeamEvent({ teamMinSize: null, teamMaxSize: null })).toBe(false);
+  });
+
+  it("makes 6-character join codes without look-alike characters", () => {
+    for (let i = 0; i < 50; i++) expect(newJoinCode()).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
+  });
+
+  it("counts active members for fullness and confirmed ones for completeness", () => {
+    expect(teamIsFull(4, 5)).toBe(false);
+    expect(teamIsFull(5, 5)).toBe(true);
+    expect(teamIsComplete(1, 2)).toBe(false);
+    expect(teamIsComplete(2, 2)).toBe(true);
+  });
+
+  it("gives the captaincy to the earliest remaining member", () => {
+    const at = (h: number) => new Date(Date.UTC(2026, 10, 1, h));
+    expect(
+      nextCaptain([
+        { userId: "late", joinedAt: at(12) },
+        { userId: "early", joinedAt: at(9) },
+      ]),
+    ).toBe("early");
+    expect(nextCaptain([])).toBeNull();
   });
 });

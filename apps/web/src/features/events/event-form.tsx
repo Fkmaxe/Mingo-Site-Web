@@ -136,6 +136,29 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-5">
+        <FormField
+          id="teamMinSize"
+          label="Équipe : minimum"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          hint="Vide : inscription individuelle"
+          error={errors.teamMinSize?.message}
+          {...register("teamMinSize")}
+        />
+        <FormField
+          id="teamMaxSize"
+          label="Équipe : maximum"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          hint="Les places comptent les personnes"
+          error={errors.teamMaxSize?.message}
+          {...register("teamMaxSize")}
+        />
+      </div>
+
       <FormField
         id="memberPoints"
         label="Points de note par présence de membre"

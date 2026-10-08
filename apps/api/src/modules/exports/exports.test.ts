@@ -74,6 +74,17 @@ describe("GET /v1/events/:id/exports/registrations.csv", () => {
     expect(audit).toHaveLength(1);
   });
 
+  it("adds the team column for a team event", async () => {
+    const event = await createEvent({ poleId: sport.id, teamMinSize: 1, teamMaxSize: 4 });
+    const captain = await createUser({ name: "Jeanne Durand" });
+    await call("POST", `/v1/events/${event.id}/teams`, captain.id, { name: "Les Pingouins" });
+
+    const res = await call("GET", `/v1/events/${event.id}/exports/registrations.csv`, board.id);
+    const [header, jeanne] = await rows(res);
+    expect(header?.slice(0, 5)).toEqual(["Nom", "Email", "Promo", "Équipe", "Statut"]);
+    expect(jeanne?.[3]).toBe("Les Pingouins");
+  });
+
   it("is reserved to the board", async () => {
     const event = await createEvent({ poleId: sport.id });
     const lead = await createPersona("pole_lead", { poleId: sport.id });

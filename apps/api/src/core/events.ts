@@ -15,8 +15,14 @@ export type DomainEvents = {
     db: DbOrTx;
     defer: Defer;
     services: Services;
-    event: EventRef & { status: string; capacity: number | null };
+    event: EventRef & {
+      status: string;
+      capacity: number | null;
+      teamMinSize: number | null;
+      teamMaxSize: number | null;
+    };
     previousCapacity: number | null;
+    previousTeamMaxSize: number | null;
   };
   "event.cancelled": { db: DbOrTx; defer: Defer; services: Services; event: EventRef };
   "checkin.recorded": {

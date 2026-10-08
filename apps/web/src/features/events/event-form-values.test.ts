@@ -34,6 +34,24 @@ describe("event form", () => {
   });
 });
 
+describe("team sizes in the event form", () => {
+  it("is individual when both are empty, a team event otherwise", () => {
+    expect(formToInput(filled)).toMatchObject({ teamMinSize: null, teamMaxSize: null });
+    expect(formToInput({ ...filled, teamMinSize: "2", teamMaxSize: "5" })).toMatchObject({
+      teamMinSize: 2,
+      teamMaxSize: 5,
+    });
+  });
+
+  it("reports a missing or inconsistent size", () => {
+    expect(eventFormResolver({ ...filled, teamMaxSize: "5" }).errors.teamMinSize?.message).toBe(
+      "Indique la taille minimale",
+    );
+    const { errors } = eventFormResolver({ ...filled, teamMinSize: "4", teamMaxSize: "2" });
+    expect(errors.teamMaxSize?.message).toBe("Le maximum doit être au moins égal au minimum");
+  });
+});
+
 describe("custom fields in the event form", () => {
   it("keeps existing keys, derives unique keys for new fields, splits choices", () => {
     const input = formToInput({

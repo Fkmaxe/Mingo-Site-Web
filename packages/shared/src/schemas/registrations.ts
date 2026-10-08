@@ -31,6 +31,7 @@ export const TicketDto = z
     createdAt: z.iso.datetime(),
     cancelledAt: z.iso.datetime().nullable(),
     answers: AnswersDto,
+    team: z.object({ id: z.uuid(), name: z.string() }).nullable(),
     /** The answers with the questions' labels, in the event's order, ready to display. */
     questions: z.array(z.object({ label: z.string(), answer: z.string() })),
     event: EventSummary,
@@ -49,6 +50,7 @@ export const RegistrantDto = z
     status: z.enum(REGISTRATION_STATUSES),
     createdAt: z.iso.datetime(),
     answers: AnswersDto,
+    team: z.string().nullable(),
     user: z.object({
       id: z.uuid(),
       name: z.string(),
