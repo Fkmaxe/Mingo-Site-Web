@@ -125,3 +125,23 @@ describe("password reset", () => {
     expect(signInWithNew.status).toBe(200);
   });
 });
+
+describe("confirmation mail sent again", () => {
+  it("is not sent by a second sign-up, but by the resend endpoint", async () => {
+    const app = createTestApp();
+    await signUp(app, "jeanne@myskolae.fr");
+    app.mailer.sent.length = 0;
+
+    // Same address again: same answer, no mail (no account enumeration).
+    await signUp(app, "jeanne@myskolae.fr");
+    expect(app.mailer.lastTo("jeanne@myskolae.fr")).toBeUndefined();
+
+    const res = await post(app, "/send-verification-email", {
+      email: "jeanne@myskolae.fr",
+      callbackURL: "/home",
+    });
+    expect(res.status).toBe(200);
+    const link = linkFromMail(app, "jeanne@myskolae.fr");
+    expect(link.pathname).toContain("verify-email");
+  });
+});

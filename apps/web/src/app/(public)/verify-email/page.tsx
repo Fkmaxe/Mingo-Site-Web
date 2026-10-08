@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard } from "@/features/auth/auth-card";
+import { ResendVerificationButton } from "@/features/auth/resend-verification-button";
 
 export const metadata: Metadata = { title: "Confirme ton adresse" };
 
@@ -28,6 +29,7 @@ export default async function VerifyEmailPage({
         Clique sur le lien du mail pour activer ton compte. Il est valable 1 heure. Pense à regarder
         dans les spams.
       </p>
+      {email ? <ResendVerificationButton email={email} /> : null}
     </AuthCard>
   );
 }
