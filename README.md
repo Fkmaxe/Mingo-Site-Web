@@ -29,27 +29,37 @@ docker compose --profile full up -d --build # db + mailpit + api + web
 
 ## Mise en production
 
-Sur le serveur (Docker + Compose v2.24 ou plus), avec le domaine pointé vers sa IP :
+Tout est dans **`docker-compose.prod.yml`** (un seul fichier). Sur le serveur :
 
 ```bash
-cp .env.example .env    # puis remplir, voir la checklist
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full up -d --build
+git clone <dépôt> && cd <dossier>
+cp .env.example .env && chmod 600 .env   # puis remplir (voir ci-dessous)
+docker compose up -d --build             # COMPOSE_FILE=docker-compose.prod.yml est dans .env
+docker compose ps                        # db, api, web : healthy
 ```
 
-- Seul **Caddy** est exposé (80/443, certificat HTTPS automatique). La base, l'API et le web restent dans le réseau Docker.
-- Les migrations sont appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
-- Checklist `.env` (l'API refuse de démarrer si une valeur de dev est restée) :
-  - `DOMAIN=bde-mingo.fr`, `WEB_ORIGIN` et `BETTER_AUTH_URL` = `https://<domaine>` ;
-  - `BETTER_AUTH_SECRET` généré avec `openssl rand -base64 32` ;
-  - `POSTGRES_PASSWORD` fort (pas `bde`), et `DATABASE_URL` cohérent pour les commandes lancées hors Docker ;
-  - `SMTP_*` et `MAIL_FROM` du BDE ;
-  - notifications push : `pnpm --filter api push:keys` (une seule fois, à garder : changer les clés désabonne tous les appareils), puis `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
-- **Sauvegardes** : le service `backup` écrit chaque jour `backups/bde-AAAA-MM-JJ.dump` (14 jours gardés). Les recopier hors du serveur. Restauration :
+Le `.env` du serveur, en plus des variables de l'exemple :
+
+| Variable | Valeur |
+| --- | --- |
+| `COMPOSE_FILE` | `docker-compose.prod.yml` |
+| `WEB_BIND` | IP de cette machine si le reverse proxy est **ailleurs** (ex. `192.168.1.208`) ; `127.0.0.1` s'il est sur la même machine |
+| `WEB_ORIGIN`, `BETTER_AUTH_URL` | `https://<domaine>`, sans port |
+| `BETTER_AUTH_SECRET` | `openssl rand -hex 32` |
+| `POSTGRES_PASSWORD` | mot de passe fort, avant le premier lancement |
+| `SMTP_*`, `MAIL_FROM` | SMTP du BDE |
+| `VAPID_*` | `pnpm --filter api push:keys`, une seule fois (en changer désabonne tous les appareils) |
+
+L'API refuse de démarrer si une valeur est invalide ou restée à celle de l'exemple : `docker compose logs api` dit laquelle.
+
+**Reverse proxy** (Nginx Proxy Manager, Nginx…) : envoyer `https://<domaine>` vers `http://<WEB_BIND>:3000`, websockets activés. Rien d'autre à régler. Sans reverse proxy : `COMPOSE_PROFILES=caddy` et `DOMAIN=<domaine>` dans `.env`, le Caddy du projet fait le HTTPS sur 80/443.
+
+- Migrations appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
+- Mise à jour : `git pull && docker compose up -d --build`. Arrêt : `docker compose down` (les données restent ; **jamais** `-v`, qui efface la base).
+- **Sauvegardes** : `backups/bde-AAAA-MM-JJ.dump` chaque jour (14 jours gardés), à recopier hors du serveur. Restauration :
   ```bash
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
   ```
-- **Serveur avec un reverse proxy déjà en place** (Nginx, Nginx Proxy Manager…) : ajouter `docker-compose.proxy.yml`. Le Caddy du projet n'est alors pas lancé, et le web écoute sur `127.0.0.1:3000` seulement. Le proxy doit envoyer vers `http://127.0.0.1:3000` (proxy sur une autre machine : `WEB_BIND=<IP de la VM>` dans `.env`, proxy vers `http://<IP de la VM>:3000`, et règle `DOCKER-USER` qui n'ouvre le port 3000 qu'à l'IP du proxy, ufw ne filtrant pas les ports Docker) et **remplacer** `X-Forwarded-For` par l'IP du visiteur (Nginx : `proxy_set_header X-Forwarded-For $remote_addr;`), sinon la limite de tentatives de connexion peut être contournée.
-- Mise à jour : `git pull` puis la même commande `up -d --build`.
 
 ## Ce dossier est prêt pour Claude Code
 

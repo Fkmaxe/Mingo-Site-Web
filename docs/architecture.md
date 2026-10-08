@@ -143,10 +143,11 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 
 ## Déploiement
 
-- Docker Compose : `db`, `mailpit` (dev), `api`, `web` (profil `full`). En prod, `docker-compose.prod.yml` ajoute `caddy` (TLS) et `backup`, et retire les ports publiés des autres services.
+- Dev : `docker-compose.yml` (`db`, `mailpit` ; `api` et `web` avec le profil `full` pour tester les images). Prod : `docker-compose.prod.yml`, autonome : `db`, `api`, `web`, `backup`, et `caddy` en option (profil `caddy`) quand le serveur n'a pas de reverse proxy.
 - Image API : le code et **toutes** ses dépendances sont bundlés par tsup dans `dist/` ; l'image ne contient que Node, `dist/` et `drizzle/` (pas de `node_modules`).
-- Image web : sortie `standalone` de Next. La cible du proxy `/api/auth` est figée au build (`API_URL`, par défaut `http://api:3001`).
-- Seul Caddy est exposé. Il doit poser `X-Forwarded-For` (comportement par défaut de `reverse_proxy`) : le proxy Next le transmet à l'API, qui s'en sert pour le rate limiting de l'auth. Le port de l'API ne doit jamais être public, sinon cet en-tête peut être falsifié. En dev, sans Caddy, Better Auth avertit qu'il ne trouve pas l'IP : sans conséquence.
+- Image web : sortie `standalone` de Next. La cible du proxy `/api/auth` est figée au build (`API_URL`, par défaut `http://api:3001`). Le conteneur web ne reçoit aucun secret.
+- Seul le web est publié (`WEB_BIND:3000`, derrière le reverse proxy) ; la base et l'API restent dans le réseau Docker.
+- IP du visiteur (rate limiting de l'auth) : `X-Forwarded-For`, transmis tel quel par le proxy Next. Better Auth n'accepte qu'une valeur unique, celle qu'écrit le reverse proxy (NPM, Nginx, Caddy) ; une chaîne à plusieurs valeurs (tentative de falsification) n'est pas prise en compte. Le port du web ne doit donc être joignable que par le reverse proxy.
 - Migrations appliquées au démarrage du conteneur API.
 - Sauvegarde quotidienne de la base : service `backup` (`pg_dump -Fc` dans `backups/`, 14 jours), à recopier vers un stockage externe.
 - L'API refuse de démarrer en production avec un secret d'exemple ou des URL non https (sauf sur localhost), pose des en-têtes de sécurité, limite les requêtes à 1 Mo et s'arrête proprement sur `SIGTERM`.
