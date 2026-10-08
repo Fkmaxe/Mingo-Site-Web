@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CalendarDays,
   ChevronRight,
   GraduationCap,
@@ -49,6 +50,13 @@ export default async function ManagePage() {
       description: "Budgets, dépenses et recettes",
       icon: PiggyBank,
       show: me.permissions.includes("budget:read"),
+    },
+    {
+      href: "/manage/stats",
+      title: "Statistiques",
+      description: "L'année en chiffres, implication des membres",
+      icon: BarChart3,
+      show: me.permissions.includes("stats:read"),
     },
   ].filter((link) => link.show);
 

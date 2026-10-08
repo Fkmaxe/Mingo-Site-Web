@@ -20,6 +20,7 @@ import { createPartnersRouter } from "./modules/partners";
 import { createPolesRouter } from "./modules/poles";
 import { createRegistrationsRouter, createTeamsRouter } from "./modules/registrations";
 import { createStaffRouter } from "./modules/staff";
+import { createStatsRouter } from "./modules/stats";
 import { createTasksRouter } from "./modules/tasks";
 import { createTreasuryRouter } from "./modules/treasury";
 
@@ -69,6 +70,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createMembersRouter());
   app.route("/v1", createPartnersRouter());
   app.route("/v1", createTreasuryRouter());
+  app.route("/v1", createStatsRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

@@ -102,6 +102,7 @@
                 "exports:run",
                 "budget:read",
                 "budget:manage",
+                "stats:read",
                 "poles:all",
                 "roles:manage",
                 "settings:manage",
@@ -3131,6 +3132,398 @@
         },
         "required": [
           "budgetCents"
+        ]
+      },
+      "EventStats": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "capacity": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "started": {
+            "type": "boolean"
+          },
+          "registrations": {
+            "type": "object",
+            "properties": {
+              "confirmed": {
+                "type": "integer"
+              },
+              "waitlisted": {
+                "type": "integer"
+              },
+              "cancelled": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "confirmed",
+              "waitlisted",
+              "cancelled"
+            ]
+          },
+          "teams": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "confirmed": {
+                "type": "integer"
+              },
+              "waitlisted": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "confirmed",
+              "waitlisted"
+            ]
+          },
+          "checkedIn": {
+            "type": "integer"
+          },
+          "attendanceRate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "noShows": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "staff": {
+            "type": "object",
+            "properties": {
+              "slots": {
+                "type": "integer"
+              },
+              "places": {
+                "type": "integer"
+              },
+              "validated": {
+                "type": "integer"
+              },
+              "checkedIn": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "slots",
+              "places",
+              "validated",
+              "checkedIn"
+            ]
+          },
+          "openPoints": {
+            "type": "object",
+            "properties": {
+              "pending": {
+                "type": "integer"
+              },
+              "validated": {
+                "type": "integer"
+              },
+              "rejected": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "pending",
+              "validated",
+              "rejected"
+            ]
+          },
+          "registrationsByDay": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "day",
+                "count"
+              ]
+            }
+          }
+        },
+        "required": [
+          "eventId",
+          "capacity",
+          "started",
+          "registrations",
+          "teams",
+          "checkedIn",
+          "attendanceRate",
+          "noShows",
+          "staff",
+          "openPoints",
+          "registrationsByDay"
+        ]
+      },
+      "YearOverview": {
+        "type": "object",
+        "properties": {
+          "schoolYear": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          },
+          "events": {
+            "type": "integer"
+          },
+          "registrations": {
+            "type": "integer"
+          },
+          "checkIns": {
+            "type": "integer"
+          },
+          "uniqueParticipants": {
+            "type": "integer"
+          },
+          "attendanceRate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "byMonth": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}$"
+                },
+                "events": {
+                  "type": "integer"
+                },
+                "checkIns": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "month",
+                "events",
+                "checkIns"
+              ]
+            }
+          },
+          "byPole": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pole": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "events": {
+                  "type": "integer"
+                },
+                "registrations": {
+                  "type": "integer"
+                },
+                "checkIns": {
+                  "type": "integer"
+                },
+                "attendanceRate": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "pole",
+                "events",
+                "registrations",
+                "checkIns",
+                "attendanceRate"
+              ]
+            }
+          }
+        },
+        "required": [
+          "schoolYear",
+          "events",
+          "registrations",
+          "checkIns",
+          "uniqueParticipants",
+          "attendanceRate",
+          "byMonth",
+          "byPole"
+        ]
+      },
+      "MemberInvolvement": {
+        "type": "object",
+        "properties": {
+          "schoolYear": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "poles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "board": {
+                  "type": "boolean"
+                },
+                "staffShifts": {
+                  "type": "integer"
+                },
+                "meetingsAttended": {
+                  "type": "integer"
+                },
+                "meetingsHeld": {
+                  "type": "integer"
+                },
+                "meetingRate": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "user",
+                "poles",
+                "board",
+                "staffShifts",
+                "meetingsAttended",
+                "meetingsHeld",
+                "meetingRate"
+              ]
+            }
+          },
+          "byPole": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pole": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "members": {
+                  "type": "integer"
+                },
+                "staffShifts": {
+                  "type": "integer"
+                },
+                "meetingsAttended": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "pole",
+                "members",
+                "staffShifts",
+                "meetingsAttended"
+              ]
+            }
+          }
+        },
+        "required": [
+          "schoolYear",
+          "members",
+          "byPole"
         ]
       }
     },
@@ -8652,6 +9045,206 @@
           },
           "409": {
             "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/stats": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chiffres de l'événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit de gérer cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats/overview": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "schoolYearId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vue d'ensemble de l'année",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearOverview"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Année scolaire introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats/members": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "schoolYearId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Implication des membres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberInvolvement"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Année scolaire introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
             "content": {
               "application/json": {
                 "schema": {

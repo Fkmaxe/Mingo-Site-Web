@@ -35,6 +35,8 @@
   --brand-magenta: oklch(0.55 0.19 350);
   --brand-violet: oklch(0.48 0.17 300);
   --brand-blue: oklch(0.48 0.2 265);
+  /* Chart marks (validated by the dataviz validator against the card surface). */
+  --chart-1: oklch(0.5 0.21 265);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,6 +67,7 @@
     --brand-magenta: oklch(0.5 0.17 350);
     --brand-violet: oklch(0.42 0.15 300);
     --brand-blue: oklch(0.42 0.18 265);
+    --chart-1: oklch(0.64 0.17 265);
   }
 }
 
@@ -102,6 +105,7 @@
   --color-brand-magenta: var(--brand-magenta);
   --color-brand-violet: var(--brand-violet);
   --color-brand-blue: var(--brand-blue);
+  --color-chart-1: var(--chart-1);
 }
 
 @layer base {

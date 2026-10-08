@@ -22,6 +22,7 @@ export const PERMISSIONS = [
   "exports:run",
   "budget:read",
   "budget:manage",
+  "stats:read",
   /** Acts on every pole. Without it, pole-scoped actions require leading that pole. */
   "poles:all",
   "roles:manage",
@@ -71,6 +72,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "exports:run",
     "partners:manage",
     "budget:read",
+    "stats:read",
     "poles:all",
   ],
   treasurer: ["budget:read", "budget:manage"],

@@ -5369,6 +5369,216 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/events/{eventId}/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Chiffres de l'événement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventStats"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit de gérer cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/stats/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    schoolYearId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Vue d'ensemble de l'année */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearOverview"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé au bureau */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Année scolaire introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/stats/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    schoolYearId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Implication des membres */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MemberInvolvement"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé au bureau */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Année scolaire introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5389,7 +5599,7 @@ export interface components {
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
             roles: ("student" | "member" | "pole_lead" | "board" | "treasurer" | "admin")[];
-            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:read" | "budget:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
+            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:read" | "budget:manage" | "stats:read" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
         };
         Membership: {
             /** Format: uuid */
@@ -6205,6 +6415,98 @@ export interface components {
         };
         SetEventBudgetInput: {
             budgetCents: number | null;
+        };
+        EventStats: {
+            /** Format: uuid */
+            eventId: string;
+            capacity: number | null;
+            started: boolean;
+            registrations: {
+                confirmed: number;
+                waitlisted: number;
+                cancelled: number;
+            };
+            teams: {
+                confirmed: number;
+                waitlisted: number;
+            } | null;
+            checkedIn: number;
+            attendanceRate: number | null;
+            noShows: number | null;
+            staff: {
+                slots: number;
+                places: number;
+                validated: number;
+                checkedIn: number;
+            };
+            openPoints: {
+                pending: number;
+                validated: number;
+                rejected: number;
+            };
+            registrationsByDay: {
+                /** Format: date */
+                day: string;
+                count: number;
+            }[];
+        };
+        YearOverview: {
+            schoolYear: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+            };
+            events: number;
+            registrations: number;
+            checkIns: number;
+            uniqueParticipants: number;
+            attendanceRate: number | null;
+            byMonth: {
+                month: string;
+                events: number;
+                checkIns: number;
+            }[];
+            byPole: {
+                pole: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                };
+                events: number;
+                registrations: number;
+                checkIns: number;
+                attendanceRate: number | null;
+            }[];
+        };
+        MemberInvolvement: {
+            schoolYear: {
+                /** Format: uuid */
+                id: string;
+                label: string;
+            };
+            members: {
+                user: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                };
+                poles: string[];
+                board: boolean;
+                staffShifts: number;
+                meetingsAttended: number;
+                meetingsHeld: number;
+                meetingRate: number | null;
+            }[];
+            byPole: {
+                pole: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                };
+                members: number;
+                staffShifts: number;
+                meetingsAttended: number;
+            }[];
         };
     };
     responses: never;

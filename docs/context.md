@@ -89,6 +89,12 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Partenariats : fiches partenaires, contacts, statut, contreparties. Gérées par le bureau ; le membre référent d'un partenaire peut modifier sa fiche. Les partenaires actifs (nom, site, avantages) sont affichés publiquement.
 - Trésorerie simple : budget par événement, dépenses / recettes, justificatifs.
 
+## Statistiques
+
+- **Par événement** (ses organisateurs : responsable du pôle, bureau) : inscrits, liste d'attente, désinscriptions, présents et taux de présence, absents (inscrits non venus, une fois l'événement commencé), staff validé et pointé, points open générés, inscriptions jour par jour. Équipes inscrites pour un tournoi.
+- **L'année** (bureau, droit `stats:read`) : événements publiés ou terminés, inscriptions, entrées pointées, participants uniques, taux de présence sur les événements commencés ; détail par mois et par pôle.
+- **Implication des membres** (bureau) : créneaux staff pointés et présences en réunion par membre, rapportées aux réunions passées de ses pôles et aux réunions générales ; totaux par pôle.
+
 ## Exports
 
 - Tout ce qui est listable est exportable vers **Google Sheets** (inscrits, présences, points open, notes, membres, budget).

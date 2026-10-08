@@ -42,7 +42,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 
 - [x] Trésorerie : budget par événement, dépenses / recettes (journal), justificatifs
 - [x] Inscriptions d'équipe (tournois)
-- [ ] Statistiques
+- [x] Statistiques
 - [ ] Notifications push
 
 ## Hors périmètre
