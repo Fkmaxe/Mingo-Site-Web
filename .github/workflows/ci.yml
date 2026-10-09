@@ -28,6 +28,9 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+        credentials:
+              username: ${{ secrets.DOCKER_USERNAME }}
+              password: ${{ secrets.DOCKER_TOKEN }}
 
     env:
       DATABASE_URL: postgres://bde:bde@localhost:5432/bde_mingo_test
