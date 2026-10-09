@@ -8,6 +8,8 @@ export async function findUserById(db: DbOrTx, userId: string) {
       id: user.id,
       email: user.email,
       name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       promo: user.promo,
       image: user.image,
       isAdmin: user.isAdmin,
@@ -15,6 +17,14 @@ export async function findUserById(db: DbOrTx, userId: string) {
     .from(user)
     .where(eq(user.id, userId));
   return row;
+}
+
+export async function updateUserNames(
+  db: DbOrTx,
+  userId: string,
+  names: { name: string; firstName: string; lastName: string },
+) {
+  await db.update(user).set(names).where(eq(user.id, userId));
 }
 
 /** Active, non-deleted memberships of the current school year. */

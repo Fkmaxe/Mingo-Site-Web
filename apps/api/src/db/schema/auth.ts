@@ -15,7 +15,10 @@ export const user = pgTable(
   "user",
   {
     id: id(),
+    /** Always `composeName(firstName, lastName)`: kept because Better Auth requires it. */
     name: text().notNull(),
+    firstName: text().notNull(),
+    lastName: text().notNull(),
     email: text().notNull().unique(),
     emailVerified: boolean().notNull().default(false),
     image: text(),

@@ -1,8 +1,11 @@
 import "server-only";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { authHref } from "@/features/auth/safe-next";
 import { api } from "./api";
 import type { components } from "./api-schema";
+import { PATHNAME_HEADER } from "./request-path";
 
 export type Me = components["schemas"]["Me"];
 
@@ -14,8 +17,9 @@ export const getMe = cache(async (): Promise<Me | null> => {
   return data;
 });
 
+/** Current user; visitors are sent to the login page, then back to the page they asked for. */
 export async function requireMe(): Promise<Me> {
   const me = await getMe();
-  if (!me) redirect("/login");
+  if (!me) redirect(authHref("/login", (await headers()).get(PATHNAME_HEADER)));
   return me;
 }

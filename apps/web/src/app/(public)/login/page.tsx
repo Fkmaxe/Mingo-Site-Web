@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
-import { safeNextPath } from "@/features/auth/safe-next";
+import { authHref, safeNextPath } from "@/features/auth/safe-next";
 import { SignInForm } from "@/features/auth/sign-in-form";
 import { getMe } from "@/lib/session";
 
@@ -19,15 +19,15 @@ export default async function LoginPage({
   return (
     <AuthCard
       title="Connexion"
-      description="Avec ton adresse @myskolae.fr."
+      description="Billets, points open, espace membre : tout est là."
       footer={
         <>
           Pas encore de compte ?{" "}
           <Link
-            href="/signup"
+            href={authHref("/signup", next)}
             className="font-medium text-primary underline-offset-4 hover:underline"
           >
-            Crée-le
+            Crée-le en 1 minute
           </Link>
         </>
       }

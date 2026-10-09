@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { BoardPosition, MembershipRole } from "@bde/shared";
+import { type BoardPosition, type MembershipRole, splitName } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "../db/client";
 import { attendance, event, membership, pole, schoolYear, user } from "../db/schema";
@@ -16,11 +16,14 @@ export async function createUser(
   db: DbOrTx = getTestDb(),
 ) {
   const suffix = randomUUID().slice(0, 8);
+  // First and last name follow `name` unless given, like a real sign-up.
+  const name = overrides.name ?? `Test ${suffix}`;
   return first(
     await db
       .insert(user)
       .values({
-        name: `Test ${suffix}`,
+        name,
+        ...splitName(name),
         email: `test.${suffix}@myskolae.fr`,
         emailVerified: true,
         ...overrides,

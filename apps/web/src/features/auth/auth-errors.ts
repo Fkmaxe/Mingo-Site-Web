@@ -10,6 +10,8 @@ const MESSAGES: Record<string, string> = {
   PASSWORD_TOO_SHORT: "Le mot de passe est trop court.",
   PASSWORD_TOO_LONG: "Le mot de passe est trop long.",
   INVALID_TOKEN: "Ce lien a expiré ou a déjà servi. Refais une demande.",
+  INVALID_NAME: "Indique ton prénom et ton nom.",
+  PROFILE_UPDATE_NOT_ALLOWED: "Modifie ton profil depuis la page Profil.",
 };
 
 export type AuthError = { code?: string | undefined; status: number };

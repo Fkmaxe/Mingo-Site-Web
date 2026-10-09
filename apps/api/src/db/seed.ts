@@ -1,3 +1,4 @@
+import { splitName } from "@bde/shared";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { ensureDefaultRolePermissions } from "../core/permissions/defaults";
@@ -163,6 +164,7 @@ export async function seed(db: DbOrTx, now: number = Date.now()) {
       .values({
         email: seedUser.email,
         name: seedUser.name,
+        ...splitName(seedUser.name),
         promo: seedUser.promo ?? null,
         isAdmin: seedUser.isAdmin ?? false,
         emailVerified: true,

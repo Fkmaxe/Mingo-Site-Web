@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import { DisplayTitle, Logo } from "@/components/brand";
@@ -25,9 +26,16 @@ export function AuthCard({
         aria-hidden
         className="absolute inset-x-0 top-32 -z-10 h-48 bg-linear-to-b from-transparent to-background"
       />
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 pt-[max(2rem,env(safe-area-inset-top))] pb-10">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-10">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-full px-2 font-medium text-sm text-white/95 underline-offset-4 hover:underline"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Retour au site
+        </Link>
         <Link href="/" className="self-center rounded-3xl" aria-label="Accueil BDE Mingo">
-          <Logo size={120} priority className="drop-shadow-xl" />
+          <Logo size={112} priority className="drop-shadow-xl" />
         </Link>
         <Card className="gap-5 p-6 shadow-primary/10 shadow-xl">
           <div className="flex flex-col gap-1.5">

@@ -17,7 +17,13 @@ function post(app: TestApp, path: string, body: unknown, headers: Record<string,
 }
 
 function signUp(app: TestApp, email: string) {
-  return post(app, "/sign-up/email", { name: "Jeanne Durand", email, password });
+  return post(app, "/sign-up/email", {
+    name: "Jeanne Durand",
+    firstName: "Jeanne",
+    lastName: "Durand",
+    email,
+    password,
+  });
 }
 
 function signIn(app: TestApp, email: string) {
@@ -46,14 +52,53 @@ describe("sign-up", () => {
     const res = await signUp(app, "jeanne@myskolae.fr");
     expect(res.status).toBe(200);
     const [created] = await getTestDb().select().from(user);
-    expect(created).toMatchObject({ email: "jeanne@myskolae.fr", emailVerified: false });
+    expect(created).toMatchObject({
+      email: "jeanne@myskolae.fr",
+      emailVerified: false,
+      firstName: "Jeanne",
+      lastName: "Durand",
+      name: "Jeanne Durand",
+    });
     expect(app.mailer.lastTo("jeanne@myskolae.fr")?.subject).toContain("Confirme ton adresse");
+  });
+
+  it("stores trimmed names and derives `name` from them, whatever the client sent", async () => {
+    const app = createTestApp();
+    const res = await post(app, "/sign-up/email", {
+      name: "Autre chose",
+      firstName: "  Jean ",
+      lastName: " de La Tour ",
+      email: "jean@myskolae.fr",
+      password,
+    });
+    expect(res.status).toBe(200);
+    const [created] = await getTestDb().select().from(user);
+    expect(created).toMatchObject({
+      firstName: "Jean",
+      lastName: "de La Tour",
+      name: "Jean de La Tour",
+    });
+  });
+
+  it("refuses a sign-up without a last name", async () => {
+    const app = createTestApp();
+    const res = await post(app, "/sign-up/email", {
+      name: "Jeanne",
+      firstName: "Jeanne",
+      lastName: "  ",
+      email: "jeanne@myskolae.fr",
+      password,
+    });
+    expect(res.status).toBe(400);
+    expect(await getTestDb().select().from(user)).toHaveLength(0);
   });
 
   it("ignores privileged fields sent by the client", async () => {
     const app = createTestApp();
     await post(app, "/sign-up/email", {
-      name: "Mallory",
+      name: "Mallory Martin",
+      firstName: "Mallory",
+      lastName: "Martin",
       email: "mallory@myskolae.fr",
       password,
       isAdmin: true,
@@ -143,5 +188,24 @@ describe("confirmation mail sent again", () => {
     expect(res.status).toBe(200);
     const link = linkFromMail(app, "jeanne@myskolae.fr");
     expect(link.pathname).toContain("verify-email");
+  });
+});
+
+describe("update-user", () => {
+  it("is blocked: profile changes go through PATCH /v1/me (audited)", async () => {
+    const app = createTestApp();
+    await signUp(app, "jeanne@myskolae.fr");
+    await getTestDb().update(user).set({ emailVerified: true });
+    const session = await signIn(app, "jeanne@myskolae.fr");
+    const cookie = session.headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
+
+    const res = await post(app, "/update-user", { firstName: "Mallory" }, { cookie });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ code: "PROFILE_UPDATE_NOT_ALLOWED" });
+    const [unchanged] = await getTestDb().select().from(user);
+    expect(unchanged?.firstName).toBe("Jeanne");
   });
 });
