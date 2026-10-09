@@ -31,6 +31,13 @@ const config: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    // The showcase used to live under /fr (separate site): keep its links working.
+    return [
+      { source: "/fr", destination: "/", permanent: true },
+      { source: "/fr/:path*", destination: "/:path*", permanent: true },
+    ];
+  },
   async rewrites() {
     // Better Auth is served through the web origin, so its cookies belong to the web.
     return [{ source: "/api/auth/:path*", destination: `${env.API_URL}/api/auth/:path*` }];
