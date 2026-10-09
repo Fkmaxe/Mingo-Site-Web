@@ -13,7 +13,8 @@ pnpm api:types      # exporte l'OpenAPI de l'API (sans la lancer) puis régénè
 
 ## Structure
 
-- `src/app/(public)` : accueil, événements publics, partenaires. Rendu serveur, mis en cache.
+- `src/app/(site)` : site vitrine (`/`, `/qui-sommes-nous`, `/evenements`, `/contact`, `/mentions-legales`), code dans `features/site`. Ses couleurs et polices sont des jetons redéfinis sous `.site` dans `globals.css` : ne pas les utiliser ailleurs.
+- `src/app/(public)` : connexion, inscription, événements publics, partenaires, ancienne landing (`/preview`). Rendu serveur.
 - `src/app/(app)` : espace connecté (mes billets, mes points, ma note, staff).
 - `src/app/(admin)` : bureau et responsables (gestion événements, check-in, validation, exports).
 - `src/features/<module>/` : composants, hooks et appels API d'un domaine. Miroir des modules de l'API.

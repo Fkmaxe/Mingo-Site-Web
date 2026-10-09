@@ -1,7 +1,7 @@
 import { CalendarDays, Handshake, Sparkles, Ticket } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { DisplayTitle, Logo, Pill } from "@/components/brand";
+import { DisplayTitle, Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { getMe } from "@/lib/session";
 
@@ -27,9 +27,6 @@ export default async function LandingPage() {
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-6 px-5 pt-[max(2.5rem,env(safe-area-inset-top))] pb-8 text-center md:justify-center">
         <Logo size={150} priority className="drop-shadow-xl" />
-        <Pill tone="blue" className="px-4 py-1.5 text-xs uppercase not-italic tracking-[0.2em]">
-          Le BDE de l'ESGI Paris
-        </Pill>
         <DisplayTitle className="text-balance text-[2.6rem] drop-shadow-sm sm:text-5xl">
           Tes soirées, tes billets, tes points
         </DisplayTitle>

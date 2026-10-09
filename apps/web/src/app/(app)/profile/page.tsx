@@ -8,23 +8,16 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
+import { ProfileNameForm } from "@/features/profile/profile-name-form";
 import { NotificationsCard } from "@/features/push/notifications-card";
 import { getPushSetup } from "@/features/push/queries";
+import { initials } from "@/lib/initials";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Profil" };
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 type Row = { href: string; label: string; icon: LucideIcon };
 
@@ -43,7 +36,7 @@ export default async function ProfilePage() {
           aria-hidden
           className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white/20 font-display font-extrabold text-2xl italic ring-2 ring-white/60"
         >
-          {initials(me.name)}
+          {initials(me.firstName, me.lastName)}
         </span>
         <div className="flex min-w-0 flex-col gap-0.5">
           <DisplayTitle className="text-2xl normal-case">{me.name}</DisplayTitle>
@@ -51,6 +44,16 @@ export default async function ProfilePage() {
           {me.promo ? <p className="text-sm text-white/85">Promo {me.promo}</p> : null}
         </div>
       </BrandPanel>
+
+      <Card>
+        <div className="flex flex-col gap-1">
+          <CardTitle>Mon identité</CardTitle>
+          <CardDescription>
+            Ton prénom et ton nom apparaissent sur tes billets et dans les listes du BDE.
+          </CardDescription>
+        </div>
+        <ProfileNameForm firstName={me.firstName} lastName={me.lastName} />
+      </Card>
 
       <Card>
         <CardTitle>Mes rôles</CardTitle>

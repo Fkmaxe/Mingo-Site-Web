@@ -12,7 +12,13 @@ const COOLDOWN_S = 60;
  * Sends the confirmation mail again: for a mail that never arrived, or an account created while
  * mails were failing (signing up again with the same address sends nothing, by design).
  */
-export function ResendVerificationButton({ email }: { email: string }) {
+export function ResendVerificationButton({
+  email,
+  callbackURL = "/home",
+}: {
+  email: string;
+  callbackURL?: string;
+}) {
   const [pending, startTransition] = useTransition();
   const [left, setLeft] = useState(0);
   const [result, setResult] = useState<{ tone: "success" | "error"; text: string } | null>(null);
@@ -27,7 +33,7 @@ export function ResendVerificationButton({ email }: { email: string }) {
   const resend = () =>
     startTransition(async () => {
       setResult(null);
-      const response = await authClient.sendVerificationEmail({ email, callbackURL: "/home" });
+      const response = await authClient.sendVerificationEmail({ email, callbackURL });
       if (response.error) {
         setResult({ tone: "error", text: authErrorMessage(response.error) });
         return;

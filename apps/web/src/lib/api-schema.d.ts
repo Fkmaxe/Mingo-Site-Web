@@ -89,7 +89,48 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateProfileInput"];
+                };
+            };
+            responses: {
+                /** @description Profil modifié */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Me"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/v1/poles": {
@@ -7716,6 +7757,8 @@ export interface components {
             id: string;
             email: string;
             name: string;
+            firstName: string;
+            lastName: string;
             promo: string | null;
             image: string | null;
             isAdmin: boolean;
@@ -7744,6 +7787,10 @@ export interface components {
                 message: string;
                 details?: unknown;
             };
+        };
+        UpdateProfileInput: {
+            firstName: string;
+            lastName: string;
         };
         Pole: {
             /** Format: uuid */

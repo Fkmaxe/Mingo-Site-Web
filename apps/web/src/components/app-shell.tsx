@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
+import { initials } from "@/lib/initials";
 import type { Me } from "@/lib/session";
 import { Logo } from "./brand";
 import { BottomNav, SideNav } from "./nav";
@@ -43,8 +44,20 @@ export function AppShell({ me, children }: { me: Me; children: React.ReactNode }
         <SideNav canManage={canManage} />
       </aside>
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex items-center border-b bg-background/80 px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur-md md:hidden">
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur-md md:hidden">
           <Wordmark />
+          <Link
+            href="/profile"
+            aria-label={`Mon profil (${me.name})`}
+            className="flex size-11 items-center justify-center rounded-full"
+          >
+            <span
+              aria-hidden
+              className="flex size-9 items-center justify-center rounded-full bg-primary font-display font-extrabold text-primary-foreground text-sm italic"
+            >
+              {initials(me.firstName, me.lastName)}
+            </span>
+          </Link>
         </header>
         {/* Bottom padding keeps content above the mobile nav bar. */}
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-10 md:pb-12">
@@ -56,8 +69,14 @@ export function AppShell({ me, children }: { me: Me; children: React.ReactNode }
   );
 }
 
-/** Visitor layout for public pages. */
-export function PublicShell({ children }: { children: React.ReactNode }) {
+/** Visitor layout for public pages. `loginHref` brings the visitor back here after login. */
+export function PublicShell({
+  loginHref = "/login",
+  children,
+}: {
+  loginHref?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="isolate flex min-h-dvh flex-col">
       <Backdrop />
@@ -65,7 +84,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
           <Wordmark />
           <Button asChild size="sm">
-            <Link href="/login">Se connecter</Link>
+            <Link href={loginHref}>Se connecter</Link>
           </Button>
         </div>
       </header>

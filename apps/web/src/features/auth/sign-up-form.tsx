@@ -1,6 +1,6 @@
 "use client";
 
-import { SignUpInput } from "@bde/shared";
+import { ALLOWED_EMAIL_DOMAIN, composeName, PASSWORD_MIN_LENGTH, SignUpInput } from "@bde/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,8 +9,10 @@ import { FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
+import { PasswordField } from "./password-field";
+import { authHref, safeNextPath } from "./safe-next";
 
-export function SignUpForm() {
+export function SignUpForm({ next }: { next?: string | undefined }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const {
@@ -19,47 +21,66 @@ export function SignUpForm() {
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({ resolver: zodResolver(SignUpInput) });
 
-  const onSubmit = handleSubmit(async ({ name, email, password }) => {
+  const onSubmit = handleSubmit(async ({ firstName, lastName, email, password }) => {
     setError(null);
-    const result = await authClient.signUp.email({ name, email, password, callbackURL: "/home" });
+    const result = await authClient.signUp.email({
+      name: composeName(firstName, lastName),
+      firstName,
+      lastName,
+      email,
+      password,
+      // The confirmation link signs the user in and brings them back where they started.
+      callbackURL: safeNextPath(next),
+    });
     if (result.error) {
       setError(authErrorMessage(result.error));
       return;
     }
-    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    router.push(authHref("/verify-email", next, { email }));
   });
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
-      <FormField
-        id="name"
-        label="Prénom et nom"
-        autoComplete="name"
-        error={errors.name?.message}
-        {...register("name")}
-      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField
+          id="firstName"
+          label="Prénom"
+          autoComplete="given-name"
+          error={errors.firstName?.message}
+          {...register("firstName")}
+        />
+        <FormField
+          id="lastName"
+          label="Nom"
+          autoComplete="family-name"
+          error={errors.lastName?.message}
+          {...register("lastName")}
+        />
+      </div>
       <FormField
         id="email"
         label="Adresse email de l'école"
         type="email"
+        inputMode="email"
         autoComplete="email"
-        placeholder="prenom.nom@myskolae.fr"
+        autoCapitalize="none"
+        placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
+        hint={`Seules les adresses @${ALLOWED_EMAIL_DOMAIN} sont acceptées.`}
         error={errors.email?.message}
         {...register("email")}
       />
-      <FormField
+      <PasswordField
         id="password"
-        label="Mot de passe (10 caractères minimum)"
-        type="password"
+        label="Mot de passe"
         autoComplete="new-password"
+        hint={`${PASSWORD_MIN_LENGTH} caractères minimum.`}
         error={errors.password?.message}
         {...register("password")}
       />
-      <FormField
+      <PasswordField
         id="passwordConfirmation"
         label="Confirme le mot de passe"
-        type="password"
         autoComplete="new-password"
         error={errors.passwordConfirmation?.message}
         {...register("passwordConfirmation")}

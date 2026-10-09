@@ -13,6 +13,37 @@ const SchoolEmail = z
   .email("Adresse email invalide")
   .refine(isAllowedEmail, `Utilise ton adresse @${ALLOWED_EMAIL_DOMAIN}`);
 
+export const PERSON_NAME_MAX_LENGTH = 50;
+
+/** Display name stored in `user.name` (Better Auth requires it): always "First Last". */
+export function composeName(firstName: string, lastName: string): string {
+  return `${firstName} ${lastName}`.trim().replace(/\s+/g, " ");
+}
+
+/**
+ * Best-effort split of a full name: first word = first name, the rest = last name.
+ * Same rule as the backfill of migration 0025.
+ */
+export function splitName(name: string): { firstName: string; lastName: string } {
+  const [firstName = "", ...rest] = name.trim().split(/\s+/);
+  return { firstName, lastName: rest.join(" ") };
+}
+
+const personName = (label: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `Le ${label} est obligatoire`)
+    .max(
+      PERSON_NAME_MAX_LENGTH,
+      `Le ${label} doit faire au plus ${PERSON_NAME_MAX_LENGTH} caractères`,
+    );
+
+export const PersonNameFields = {
+  firstName: personName("prénom"),
+  lastName: personName("nom"),
+};
+
 const Password = z
   .string()
   .min(PASSWORD_MIN_LENGTH, `Le mot de passe doit faire au moins ${PASSWORD_MIN_LENGTH} caractères`)
@@ -20,7 +51,7 @@ const Password = z
 
 export const SignUpInput = z
   .object({
-    name: z.string().trim().min(1, "Le nom est obligatoire").max(100),
+    ...PersonNameFields,
     email: SchoolEmail,
     password: Password,
     passwordConfirmation: z.string(),

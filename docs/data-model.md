@@ -14,7 +14,7 @@ Conventions SQL :
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `user` | email (unique, `@myskolae.fr`), name, promo, image, is_admin (admin technique) | check sur le domaine de l'email |
+| `user` | email (unique, `@myskolae.fr`), first_name, last_name, name (toujours « prénom nom », exigé par Better Auth), promo, image, is_admin (admin technique) | check sur le domaine de l'email |
 | `session`, `account`, `verification` | gérées par Better Auth | ne pas modifier à la main |
 | `school_year` | label (`2026-2027`), starts_on, ends_on, is_current | un seul `is_current = true` |
 | `pole` | slug, name, description | slug unique |

@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["API_URL"],
+      "env": ["API_URL", "SITE_URL"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
@@ -11,7 +11,7 @@
       "persistent": true
     },
     "typecheck": {
-      "env": ["API_URL"]
+      "env": ["API_URL", "SITE_URL"]
     },
     "test": {
       "cache": false,

@@ -73,7 +73,8 @@ bde-mingo/
 │       ├── CLAUDE.md
 │       └── src/
 │           ├── app/                  # routes Next (App Router)
-│           │   ├── (public)/
+│           │   ├── (site)/           # site vitrine : /, /qui-sommes-nous, /evenements, /contact, /mentions-legales
+│           │   ├── (public)/         # connexion, inscription, événements publics, partenaires, /preview
 │           │   ├── (app)/            # espace connecté
 │           │   └── (admin)/          # bureau / responsables
 │           ├── features/<module>/    # composants + hooks par domaine
@@ -122,6 +123,15 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 - `BETTER_AUTH_URL` est l'URL **du web** : le web proxifie `/api/auth/*` vers l'API, donc cookies et liens des mails sont sur l'origine du web.
 - Session en cookie httpOnly, partagé avec le web (même domaine parent en prod, proxy Next en dev).
 - Le middleware `requireAuth` charge l'utilisateur et ses permissions dans le contexte Hono.
+- Prénom et nom sont des champs additionnels Better Auth, acceptés seulement à l'inscription ; `name` est toujours recalculé (« Prénom Nom »). `/api/auth/update-user` est bloqué : le profil se modifie par `PATCH /v1/me`, qui écrit dans `audit_log`.
+- Côté web, `src/middleware.ts` ne fait aucune vérification d'auth : il transmet le chemin demandé (en-tête `x-pathname`) pour que `requireMe()` redirige vers `/login?next=…`.
+
+## Site vitrine
+
+- Groupe de routes `(site)` de `apps/web`, code dans `features/site` (contenu légal dans `features/site/content`, source unique de l'identité de l'association).
+- Identité visuelle propre (navy, menthe, rose, Barlow Condensed) : les jetons shadcn sont redéfinis sous la classe `.site` dans `globals.css`, l'espace connecté n'est pas touché. Mode sombre selon le système.
+- Les événements viennent de `GET /v1/events` (scopes `upcoming` et `past`) ; si l'API ne répond pas, la vitrine affiche l'état vide au lieu d'une erreur.
+- `SITE_URL` (URL publique) sert aux liens canoniques, au `sitemap.xml`, au `robots.txt` et aux données structurées. Les anciennes URL `/fr/…` redirigent en 308.
 
 ## Application installable (PWA) et hors ligne
 

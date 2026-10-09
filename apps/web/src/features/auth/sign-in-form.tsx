@@ -1,6 +1,6 @@
 "use client";
 
-import { SignInInput } from "@bde/shared";
+import { ALLOWED_EMAIL_DOMAIN, SignInInput } from "@bde/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,8 @@ import { FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
-import { safeNextPath } from "./safe-next";
+import { PasswordField } from "./password-field";
+import { authHref, safeNextPath } from "./safe-next";
 
 export function SignInForm({ next }: { next?: string | undefined }) {
   const destination = safeNextPath(next);
@@ -29,6 +30,11 @@ export function SignInForm({ next }: { next?: string | undefined }) {
       callbackURL: destination,
     });
     if (result.error) {
+      // Better Auth has just sent a new confirmation mail: show where to look for it.
+      if (result.error.code === "EMAIL_NOT_VERIFIED") {
+        router.push(authHref("/verify-email", next, { email: values.email, resent: "1" }));
+        return;
+      }
       setError(authErrorMessage(result.error));
       return;
     }
@@ -43,22 +49,23 @@ export function SignInForm({ next }: { next?: string | undefined }) {
         id="email"
         label="Adresse email"
         type="email"
-        autoComplete="email"
-        placeholder="prenom.nom@myskolae.fr"
+        inputMode="email"
+        autoComplete="username"
+        autoCapitalize="none"
+        placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
         error={errors.email?.message}
         {...register("email")}
       />
-      <FormField
+      <PasswordField
         id="password"
         label="Mot de passe"
-        type="password"
         autoComplete="current-password"
         error={errors.password?.message}
         {...register("password")}
       />
       <Link
         href="/forgot-password"
-        className="self-end text-primary text-sm underline-offset-4 hover:underline"
+        className="-my-1 self-end py-1 text-primary text-sm underline-offset-4 hover:underline"
       >
         Mot de passe oublié ?
       </Link>

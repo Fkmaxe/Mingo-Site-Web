@@ -106,6 +106,12 @@
   --color-brand-violet: var(--brand-violet);
   --color-brand-blue: var(--brand-blue);
   --color-chart-1: var(--chart-1);
+  /* Showcase site only (defined under .site below). */
+  --color-pastel: var(--pastel);
+  --color-pastel-foreground: var(--pastel-foreground);
+  --color-on-navy: var(--on-navy);
+  --color-on-navy-muted: var(--on-navy-muted);
+  --color-site-navy: var(--site-navy-950);
 }
 
 @layer base {
@@ -114,5 +120,179 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* ==========================================================================
+   Showcase site (route group "(site)": /, /qui-sommes-nous, /evenements…).
+   Its own identity — navy, mint, flamingo pink, Barlow Condensed — scoped to
+   the .site wrapper: the same shadcn tokens are redefined there, so components
+   keep using bg-primary, text-muted-foreground… The signed-in app is untouched.
+   ========================================================================== */
+:root {
+  --site-navy-950: #0b1a30;
+  --site-navy-900: #1a2b45;
+  --site-blue-600: #0041c4;
+  --site-mint-400: #54e5e8;
+  --site-pink-500: #f998cf;
+  --site-mauve-500: #bf749e;
+  --site-pink-300: #f7badc;
+  --site-pink-200: #fcd2df;
+  --site-rose-600: #bd5763;
+  /* Slightly pink white: never pure white on the showcase. */
+  --site-shell: #fffbfe;
+}
+
+.site,
+body:has(> .site) {
+  --background: var(--site-shell);
+  --foreground: var(--site-navy-950);
+  --card: var(--site-pink-200);
+  --card-foreground: var(--site-navy-950);
+  --primary: var(--site-blue-600);
+  --primary-foreground: var(--site-shell);
+  --secondary: var(--site-pink-500);
+  --secondary-foreground: var(--site-navy-950);
+  --accent: var(--site-mint-400);
+  --accent-foreground: var(--site-navy-950);
+  --muted: var(--site-pink-200);
+  /* Mauve alone is below AA on the shell: mixed with navy it reaches 7.7:1. */
+  --muted-foreground: color-mix(in srgb, var(--site-mauve-500) 50%, var(--site-navy-950));
+  /* Control outlines need 3:1 (WCAG 1.4.11). */
+  --border: color-mix(in srgb, var(--site-pink-300) 50%, var(--site-navy-950));
+  --input: color-mix(in srgb, var(--site-pink-300) 50%, var(--site-navy-950));
+  /* Pure mint is invisible as a focus ring on the shell. */
+  --ring: color-mix(in srgb, var(--site-mint-400) 35%, var(--site-navy-950));
+  --destructive: var(--site-rose-600);
+  --pastel: var(--site-pink-300);
+  --pastel-foreground: var(--site-navy-950);
+  /* Navy surfaces (footer, banners, mobile menu) stay navy in both themes. */
+  --on-navy: var(--site-pink-200);
+  --on-navy-muted: var(--site-pink-300);
+}
+
+@media (prefers-color-scheme: dark) {
+  .site,
+  body:has(> .site) {
+    --background: var(--site-navy-950);
+    --foreground: var(--site-pink-200);
+    --card: var(--site-navy-900);
+    --card-foreground: var(--site-pink-200);
+    --primary: var(--site-mint-400);
+    --primary-foreground: var(--site-navy-950);
+    --secondary: var(--site-pink-500);
+    --secondary-foreground: var(--site-navy-950);
+    --accent: var(--site-blue-600);
+    --accent-foreground: var(--site-shell);
+    --muted: var(--site-navy-900);
+    --muted-foreground: var(--site-pink-300);
+    --border: color-mix(in srgb, var(--site-pink-300) 55%, var(--site-navy-950));
+    --input: color-mix(in srgb, var(--site-pink-300) 55%, var(--site-navy-950));
+    --ring: var(--site-pink-500);
+    --pastel: var(--site-navy-900);
+    --pastel-foreground: var(--site-pink-200);
+  }
+}
+
+.site {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.site ::selection {
+  background-color: var(--site-mint-400);
+  color: var(--site-navy-950);
+}
+
+/* Palm pattern: the SVG is a mask, the color comes from currentColor. */
+@utility palm-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mask-image: url("/site/patterns/palms.svg");
+  mask-size: 380px;
+  mask-repeat: repeat;
+  background-color: currentColor;
+  /* A watermark: any stronger and it competes with the text. */
+  opacity: 0.05;
+}
+
+/* Double outline of the logo badge, the showcase's signature. */
+@utility badge-frame {
+  border-radius: 1.75rem;
+  box-shadow:
+    0 0 0 2px var(--site-navy-950),
+    0 0 0 5px var(--site-mint-400);
+}
+
+@utility gradient-tropical {
+  background-image: linear-gradient(160deg, var(--site-navy-950), var(--site-blue-600));
+  color: var(--on-navy);
+}
+
+@utility surface-navy {
+  background-color: var(--site-navy-950);
+  color: var(--on-navy);
+}
+
+@keyframes float-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@utility float-slow {
+  animation: float-drift 6s ease-in-out infinite;
+}
+
+@utility heading-display {
+  font-family: var(--font-barlow), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+@utility eyebrow {
+  font-family: var(--font-barlow), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Scroll reveal. Content is VISIBLE by default: it is only hidden once the
+   client script has set data-reveal-ready on <html>, so never in the server
+   HTML nor without JavaScript. */
+@layer base {
+  html[data-reveal-ready] [data-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  html[data-reveal-ready] [data-reveal] {
+    transition:
+      opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .site :is(h1, h2, h3) {
+    text-wrap: balance;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html[data-reveal-ready] [data-reveal],
+    html[data-reveal-ready] [data-reveal="pending"] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .float-slow {
+      animation: none;
+    }
   }
 }

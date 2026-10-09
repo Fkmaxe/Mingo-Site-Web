@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PersonNameFields } from "../auth";
 import { APP_ROLES, BOARD_POSITIONS, MEMBERSHIP_ROLES } from "../enums";
 import { PERMISSIONS } from "../permissions";
 
@@ -17,6 +18,8 @@ export const MeDto = z
     id: z.uuid(),
     email: z.string(),
     name: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
     promo: z.string().nullable(),
     image: z.string().nullable(),
     isAdmin: z.boolean(),
@@ -28,3 +31,7 @@ export const MeDto = z
   })
   .meta({ id: "Me" });
 export type MeDto = z.infer<typeof MeDto>;
+
+/** The only profile fields a user may change themselves (email, promo and roles are not). */
+export const UpdateProfileInput = z.object(PersonNameFields).meta({ id: "UpdateProfileInput" });
+export type UpdateProfileInput = z.infer<typeof UpdateProfileInput>;

@@ -42,6 +42,12 @@
           "name": {
             "type": "string"
           },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
           "promo": {
             "type": [
               "string",
@@ -117,6 +123,8 @@
           "id",
           "email",
           "name",
+          "firstName",
+          "lastName",
           "promo",
           "image",
           "isAdmin",
@@ -239,6 +247,25 @@
         },
         "required": [
           "error"
+        ]
+      },
+      "UpdateProfileInput": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName"
         ]
       },
       "Pole": {
@@ -4559,6 +4586,52 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "me"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil modifié",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
                 }
               }
             }
