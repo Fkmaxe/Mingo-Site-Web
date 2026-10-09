@@ -1,4 +1,4 @@
-import type { Permission } from "@bde/shared";
+import { PERMISSIONS, type Permission } from "@bde/shared";
 import { createRoute, z } from "@hono/zod-openapi";
 import { describe, expect, it } from "vitest";
 import { authHeaders } from "../../test/auth";
@@ -67,6 +67,13 @@ describe("loadAuthorization", () => {
     const auth = await loadAuthorization(getTestDb(), user.id);
     expect(auth.roles).toEqual(["student"]);
     expect([...auth.permissions]).toEqual(["events:register"]);
+  });
+
+  it("gives the site administrator every permission", async () => {
+    const admin = await createUser({ isAdmin: true });
+    const auth = await loadAuthorization(getTestDb(), admin.id);
+    expect(auth.roles).toContain("admin");
+    expect([...auth.permissions].sort()).toEqual([...PERMISSIONS].sort());
   });
 });
 

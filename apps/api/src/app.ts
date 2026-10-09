@@ -7,6 +7,7 @@ import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import type { Pusher } from "./lib/push";
+import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
 import { createEventsRouter } from "./modules/events";
@@ -82,6 +83,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createTreasuryRouter());
   app.route("/v1", createStatsRouter());
   app.route("/v1", createPushRouter());
+  app.route("/v1", createAdminRouter());
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {

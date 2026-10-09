@@ -7,6 +7,7 @@ export default defineConfig({
     index: "src/index.ts",
     migrate: "src/db/scripts/migrate.ts",
     "mail-test": "src/scripts/mail-test.ts",
+    "make-admin": "src/scripts/make-admin.ts",
   },
   format: "esm",
   platform: "node",

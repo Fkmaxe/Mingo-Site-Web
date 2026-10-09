@@ -4,6 +4,7 @@ import {
   ChevronRight,
   GraduationCap,
   PiggyBank,
+  ShieldCheck,
   Sparkles,
   UserPlus,
 } from "lucide-react";
@@ -57,6 +58,15 @@ export default async function ManagePage() {
       description: "L'année en chiffres, implication des membres",
       icon: BarChart3,
       show: me.permissions.includes("stats:read"),
+    },
+    {
+      href: "/manage/admin",
+      title: "Administration",
+      description: "Rôles des membres, pôles, années scolaires, journal",
+      icon: ShieldCheck,
+      show: (["roles:manage", "settings:manage", "audit:read"] as const).some((p) =>
+        me.permissions.includes(p),
+      ),
     },
   ].filter((link) => link.show);
 

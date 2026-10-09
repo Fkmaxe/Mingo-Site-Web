@@ -12,7 +12,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   pole_lead: "Responsable de pôle",
   board: "Bureau",
   treasurer: "Trésorier",
-  admin: "Admin technique",
+  admin: "Administrateur",
 };
 
 export const MEMBERSHIP_ROLE_LABELS: Record<MembershipRole, string> = {

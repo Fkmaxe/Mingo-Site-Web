@@ -1,4 +1,4 @@
-import { isPermission, type Permission } from "@bde/shared";
+import { isPermission, PERMISSIONS, type Permission } from "@bde/shared";
 import { createMiddleware } from "hono/factory";
 import type { DbOrTx } from "../../db/client";
 import type { AppEnv, Ctx } from "../context";
@@ -22,7 +22,10 @@ export async function loadAuthorization(db: DbOrTx, userId: string): Promise<Aut
   const data = await findAuthorizationData(db, userId);
   if (!data) return NO_AUTHORIZATION;
   const roles = resolveRoles(data, data.memberships);
-  const permissions = new Set((await findPermissionsOfRoles(db, roles)).filter(isPermission));
+  // The site administrator has every permission, whatever the role_permission table says.
+  const permissions = roles.includes("admin")
+    ? new Set<Permission>(PERMISSIONS)
+    : new Set((await findPermissionsOfRoles(db, roles)).filter(isPermission));
   return { roles, permissions, memberships: data.memberships };
 }
 

@@ -56,6 +56,7 @@ Tester l'envoi des mails : `docker compose exec api node dist/mail-test.js toi@e
 
 **Reverse proxy** (Nginx Proxy Manager, Nginx…) : envoyer `https://<domaine>` vers `http://<WEB_BIND>:3000`, websockets activés. Rien d'autre à régler. Sans reverse proxy : `COMPOSE_PROFILES=caddy` et `DOMAIN=<domaine>` dans `.env`, le Caddy du projet fait le HTTPS sur 80/443.
 
+- **Premier administrateur** : crée ton compte sur le site et confirme l'adresse, puis `docker compose exec api node dist/make-admin.js prenom.nom@myskolae.fr` (`--revoke` pour retirer). Reconnecte-toi : Gestion → Administration permet de créer l'année scolaire, les pôles et de donner les rôles.
 - Migrations appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
 - Mise à jour : `git pull && docker compose up -d --build`. Arrêt : `docker compose down` (les données restent ; **jamais** `-v`, qui efface la base).
 - **Sauvegardes** : `backups/bde-AAAA-MM-JJ.dump` chaque jour (14 jours gardés), à recopier hors du serveur. Restauration :

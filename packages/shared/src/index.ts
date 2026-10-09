@@ -3,6 +3,7 @@ export * from "./enums";
 export * from "./env";
 export * from "./errors";
 export * from "./permissions";
+export * from "./schemas/admin";
 export * from "./schemas/applications";
 export * from "./schemas/checkin";
 export * from "./schemas/custom-fields";
