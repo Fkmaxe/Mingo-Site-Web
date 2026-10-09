@@ -34,7 +34,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 - Un ou plusieurs **administrateurs** ont toutes les permissions du site, en plus de leur éventuel rôle au BDE. Le premier est nommé depuis le serveur (`make-admin`, voir README), les suivants depuis le site.
 - Espace **Gestion → Administration** :
-  - **Membres** : donner un rôle pour l'année en cours (membre ou responsable d'un pôle, bureau avec un poste), le changer, le retirer, nommer ou retirer un admin. Une personne doit avoir créé son compte avant. On ne peut pas se retirer ses propres droits d'admin.
+  - **Membres** : donner un rôle pour l'année en cours (membre ou responsable d'un pôle, bureau avec un poste), le changer, le retirer, nommer ou retirer un admin. Les rôles se **cumulent** : par exemple admin et responsable com, ou trésorier, responsable événementiel et membre sport. Une personne a un rôle par pôle (responsable *ou* membre) et un seul poste au bureau. Une personne doit avoir créé son compte avant. On ne peut pas se retirer ses propres droits d'admin.
   - **Pôles** : créer, renommer.
   - **Années scolaires** : créer, choisir l'année en cours (la première créée le devient). Les rôles sont annuels : à la rentrée, on reconduit les membres sur la nouvelle année.
   - **Journal** : toutes les actions sensibles (rôles, notes, points, exports…), avec leur auteur.

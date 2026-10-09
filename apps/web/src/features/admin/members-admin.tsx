@@ -34,6 +34,10 @@ function AddRoleForm({
   const [poleId, setPoleId] = useState(poles[0]?.id ?? "");
   const [position, setPosition] = useState<Position | "">("");
   const board = role === "board";
+  // One role per pole and one board seat per year: picking an existing one changes it.
+  const replaced = user.memberships.find((m) =>
+    board ? m.role === "board" : m.role !== "board" && m.pole?.id === poleId,
+  );
   return (
     <form
       className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-3"
@@ -93,9 +97,17 @@ function AddRoleForm({
           )}
         </FieldShell>
       )}
+      {replaced ? (
+        <p className="text-muted-foreground text-xs">
+          Remplace « {membershipLabel(replaced)} » : une personne a un seul rôle par pôle et un seul
+          poste au bureau. Ses autres rôles sont gardés.
+        </p>
+      ) : user.memberships.length > 0 ? (
+        <p className="text-muted-foreground text-xs">S'ajoute à ses rôles actuels.</p>
+      ) : null}
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending || (!board && !poleId)}>
-          {pending ? "Un instant…" : "Donner ce rôle"}
+          {pending ? "Un instant…" : replaced ? "Remplacer ce rôle" : "Ajouter ce rôle"}
         </Button>
         <Button type="button" variant="outline" onClick={onClose}>
           Annuler

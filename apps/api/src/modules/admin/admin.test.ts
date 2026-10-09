@@ -268,3 +268,36 @@ describe("audit log", () => {
     expect(second.items.map((e) => e.payload?.name)).toEqual(["Pôle Un"]);
   });
 });
+
+describe("several roles for one person", () => {
+  const MeDto = z.object({ roles: z.array(z.string()), permissions: z.array(z.string()) });
+
+  it("combines admin with leading a pole, and treasurer with leading another pole", async () => {
+    await createSchoolYear();
+    const com = await createPole({ name: "Communication" });
+    const events = await createPole({ name: "Événementiel" });
+    const sport = await createPole({ name: "Sport" });
+    const give = (body: Record<string, unknown>) =>
+      call("POST", "/v1/admin/memberships", admin.id, body);
+
+    // Admin + responsable com.
+    await give({ userId: admin.id, role: "pole_lead", poleId: com.id });
+    const me = await readJson(await call("GET", "/v1/me", admin.id), MeDto);
+    expect(me.roles).toEqual(expect.arrayContaining(["admin", "pole_lead", "member"]));
+
+    // Trésorier (bureau) + responsable événementiel + membre sport.
+    const alex = await createUser({ name: "Alex" });
+    await give({ userId: alex.id, role: "board", boardPosition: "treasurer" });
+    await give({ userId: alex.id, role: "pole_lead", poleId: events.id });
+    const roles = await readJson(
+      await give({ userId: alex.id, role: "member", poleId: sport.id }),
+      AdminUserDto,
+    );
+    expect(roles.memberships).toHaveLength(3);
+    const alexMe = await readJson(await call("GET", "/v1/me", alex.id), MeDto);
+    expect(alexMe.roles).toEqual(
+      expect.arrayContaining(["member", "pole_lead", "board", "treasurer"]),
+    );
+    expect(alexMe.permissions).toEqual(expect.arrayContaining(["budget:manage", "events:create"]));
+  });
+});
