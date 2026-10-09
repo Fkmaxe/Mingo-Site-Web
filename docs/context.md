@@ -4,7 +4,7 @@ Ce fichier décrit le fonctionnement réel du BDE. Il prime sur toute suppositio
 
 ## Le BDE Mingo
 
-BDE de l'ESGI Paris (anciennement BDE Sigma). Organisation :
+BDE de l'ESGI Paris. Organisation :
 
 - **Bureau** : président, vice-président, secrétaire, trésorier.
 - **Pôles** : communication, sport, événementiel, partenariat. Chaque pôle a un ou plusieurs **responsables** et des **membres**.
@@ -16,6 +16,16 @@ BDE de l'ESGI Paris (anciennement BDE Sigma). Organisation :
 - L'adresse est **confirmée par mail** avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Mot de passe oublié → lien de réinitialisation par mail.
 - Pas de connexion Microsoft (Entra ID) : le BDE n'a pas accès au tenant de l'école.
 - À l'inscription, le compte est créé avec le rôle **Étudiant**. Le bureau promeut ensuite les membres dans leur pôle.
+- L'étudiant saisit son **prénom** et son **nom** séparément ; il peut les corriger depuis son profil (changement tracé dans l'audit). Email, promo et rôles ne se modifient pas soi-même.
+- Après connexion, on revient sur la page demandée (`/login?next=…`), y compris après la confirmation du mail.
+
+## Site vitrine
+
+- La partie publique (`/`, `/qui-sommes-nous`, `/evenements`, `/contact`, `/mentions-legales`) est le site officiel **bde-mingo.fr** ; elle vit dans `apps/web` (groupe `(site)`) avec sa propre identité visuelle. L'ancien site séparé (`/fr/…`) redirige vers ces pages.
+- Les événements affichés viennent de l'API : en cours et à venir, puis passés. Un visiteur ne voit que les événements publics, un étudiant connecté voit aussi ceux réservés aux étudiants. Chaque carte mène à la page de l'événement (`/events/<slug>`) pour s'inscrire.
+- Connexion et création de compte sont accessibles depuis l'en-tête, le menu mobile et le pied de page.
+- Mentions légales : éditeurs Maxence Grados (auto-entrepreneur, à titre gratuit) et Jérémy Chény ; hébergeur Maxence Grados ; directeur de la publication : le président.
+- L'ancienne landing de l'appli reste visible sur `/preview`.
 
 ## Rôles
 
@@ -146,3 +156,5 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
 - [x] ~~Paiements (soirées, goodies) dès cette année ?~~ Pas de paiement dans l'appli : un événement payant passera par un prestataire externe (octobre 2026).
 - [x] ~~Tournois : places par personne ou par équipe ?~~ Par équipe entière : la capacité compte des équipes (octobre 2026).
+- [ ] Durées de conservation des données personnelles (comptes, inscriptions, sessions, audit) : affichées « à préciser » dans les mentions légales.
+- [ ] Directeur de la publication du site : le président (Sulyvan Sayah) ou un des éditeurs (Maxence Grados, Jérémy Chény) ?
