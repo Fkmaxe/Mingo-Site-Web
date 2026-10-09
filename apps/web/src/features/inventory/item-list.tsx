@@ -61,6 +61,7 @@ export function ItemList({ items, empty }: { items: Item[]; empty: string }) {
               <span className="truncate text-muted-foreground text-xs">
                 {item.code}
                 {item.location ? ` · ${item.location.name}` : " · Lieu non renseigné"}
+                {item.category ? ` · ${item.category.name}` : ""}
               </span>
               <span className="flex flex-wrap items-center gap-2">
                 <ConditionBadge condition={item.condition} />

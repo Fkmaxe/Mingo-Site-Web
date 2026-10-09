@@ -1,4 +1,5 @@
 import {
+  type CategoryDto,
   type CheckoutDto,
   type CreateItemInput,
   type InventoryAction,
@@ -20,7 +21,9 @@ import type { DbOrTx } from "../../db/client";
 import { type PhotoStore, sniffPhotoType } from "../../lib/storage";
 import { getPole } from "../poles";
 import {
+  categoryNameTaken,
   findCategories,
+  findCategory,
   findCheckout,
   findEventTitle,
   findItem,
@@ -30,6 +33,7 @@ import {
   findMovements,
   findOpenCheckouts,
   type ItemRow,
+  insertCategory,
   insertCheckout,
   insertItem,
   insertLocation,
@@ -93,7 +97,7 @@ async function toItems(db: DbOrTx, rows: ItemRow[], now: Date): Promise<ItemDto[
       code: itemCode(r.number),
       name: r.name,
       description: r.description,
-      category: r.category,
+      category: r.category?.id ? r.category : null,
       kind: r.kind,
       quantity: r.quantity,
       available: available(r.quantity, Number(r.out)),
@@ -116,7 +120,7 @@ export async function listItems(
     q?: string | undefined;
     locationId?: string | undefined;
     condition?: ItemCondition | undefined;
-    category?: string | undefined;
+    categoryId?: string | undefined;
     status: "all" | "available" | "out" | "overdue";
     archived: boolean;
   },
@@ -130,7 +134,7 @@ export async function listItems(
       number: q ? parseItemCode(q) : null,
       locationId: query.locationId,
       condition: query.condition,
-      category: query.category,
+      categoryId: query.categoryId,
       status: query.status,
       archived: query.archived,
     },
@@ -151,8 +155,18 @@ export async function listLocations(ctx: Pick<AuthedCtx, "db">): Promise<Locatio
   return (await findLocations(ctx.db)).map((l) => ({ ...l, itemCount: Number(l.itemCount) }));
 }
 
-export async function listCategories(ctx: Pick<AuthedCtx, "db">): Promise<string[]> {
-  return (await findCategories(ctx.db)).flatMap((r) => (r.category ? [r.category] : []));
+export async function listCategories(ctx: Pick<AuthedCtx, "db">): Promise<CategoryDto[]> {
+  return (await findCategories(ctx.db)).map((c) => ({ ...c, itemCount: Number(c.itemCount) }));
+}
+
+export async function createCategory(ctx: AuthedCtx, name: string): Promise<CategoryDto[]> {
+  await inTransaction(ctx.db, async (tx) => {
+    if (await categoryNameTaken(tx, name)) {
+      throw new AppError("ALREADY_EXISTS", 409, `La catégorie « ${name} » existe déjà.`);
+    }
+    await insertCategory(tx, name);
+  });
+  return listCategories(ctx);
 }
 
 // --- Locations ---
@@ -169,12 +183,23 @@ export async function createLocation(ctx: AuthedCtx, name: string): Promise<Loca
 
 async function checkRefs(
   ctx: AuthedCtx,
-  refs: { locationId?: string | null | undefined; poleId?: string | null | undefined },
+  refs: {
+    locationId?: string | null | undefined;
+    categoryId?: string | null | undefined;
+    poleId?: string | null | undefined;
+  },
 ) {
+  if (refs.categoryId && !(await findCategory(ctx.db, refs.categoryId))) {
+    throw new AppError("NOT_FOUND", 404, "Cette catégorie n'existe pas.");
+  }
   if (refs.locationId && !(await findLocation(ctx.db, refs.locationId))) {
     throw new AppError("NOT_FOUND", 404, "Ce lieu n'existe pas.");
   }
   if (refs.poleId) await getPole(ctx, refs.poleId);
+}
+
+async function categoryName(db: DbOrTx, id: unknown): Promise<string | null> {
+  return typeof id === "string" ? ((await findCategory(db, id))?.name ?? null) : null;
 }
 
 async function locationName(db: DbOrTx, id: string | null): Promise<string | null> {
@@ -208,7 +233,7 @@ export async function editItem(
   input: {
     name?: string | undefined;
     description?: string | undefined;
-    category?: string | null | undefined;
+    categoryId?: string | null | undefined;
     condition?: ItemCondition | undefined;
     locationId?: string | null | undefined;
     poleId?: string | null | undefined;
@@ -239,7 +264,18 @@ export async function editItem(
     }
     if (changes.condition) await record(tx, ctx, id, "condition_changed", changes.condition, note);
     if (Object.keys(changes.fields).length > 0) {
-      await record(tx, ctx, id, "updated", changes.fields, note);
+      // Category names, not ids, so the history stays readable.
+      const { categoryId, ...fields } = changes.fields;
+      const details = categoryId
+        ? {
+            ...fields,
+            category: {
+              from: await categoryName(tx, categoryId.from),
+              to: await categoryName(tx, categoryId.to),
+            },
+          }
+        : fields;
+      await record(tx, ctx, id, "updated", details, note);
     }
   });
   return getItem(ctx, id);

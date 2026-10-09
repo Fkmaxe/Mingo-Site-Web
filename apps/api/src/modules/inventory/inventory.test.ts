@@ -1,4 +1,4 @@
-import { ItemDto, LocationDto, MovementDto } from "@bde/shared";
+import { CategoryDto, ItemDto, LocationDto, MovementDto } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -38,6 +38,16 @@ async function history(itemId: string) {
   return page.items.map((m) => m.action);
 }
 
+async function category(name: string) {
+  const list = await readJson(
+    await call("POST", "/v1/inventory/categories", member.id, { name }),
+    z.array(CategoryDto),
+  );
+  const found = list.find((c) => c.name === name);
+  if (!found) throw new Error("category");
+  return found.id;
+}
+
 async function location(name: string) {
   const list = await readJson(
     await call("POST", "/v1/inventory/locations", member.id, { name }),
@@ -73,8 +83,8 @@ describe("items", () => {
   });
 
   it("finds an item by name, category or its label code", async () => {
-    const speaker = await addItem({ name: "Enceinte", category: "Son" });
-    await addItem({ name: "Barnum 3x3", category: "Extérieur" });
+    const speaker = await addItem({ name: "Enceinte", categoryId: await category("Son") });
+    await addItem({ name: "Barnum 3x3", categoryId: await category("Extérieur") });
     const search = async (q: string) =>
       (
         await readJson(
@@ -337,5 +347,66 @@ describe("history", () => {
       Page,
     );
     expect(rest.items.map((m) => m.item.name)).toEqual(["A"]);
+  });
+});
+
+describe("categories", () => {
+  it("are listed with their item count, filter the list, refuse a duplicate name", async () => {
+    const sound = await category("Son");
+    const bar = await category("Bar");
+    await addItem({ name: "Enceinte", categoryId: sound });
+    await addItem({ name: "Micro", categoryId: sound });
+    await addItem({ name: "Tireuse", categoryId: bar });
+
+    const list = await readJson(
+      await call("GET", "/v1/inventory/categories", member.id),
+      z.array(CategoryDto),
+    );
+    expect(list.map((c) => [c.name, c.itemCount])).toEqual([
+      ["Bar", 1],
+      ["Son", 2],
+    ]);
+
+    const filtered = await readJson(
+      await call("GET", `/v1/inventory/items?categoryId=${sound}`, member.id),
+      z.array(ItemDto),
+    );
+    expect(filtered.map((i) => i.name)).toEqual(["Enceinte", "Micro"]);
+    expect(filtered[0]?.category).toEqual({ id: sound, name: "Son" });
+
+    const duplicate = await call("POST", "/v1/inventory/categories", member.id, { name: "son" });
+    expect((await readError(duplicate)).code).toBe("ALREADY_EXISTS");
+  });
+
+  it("records a category change with the names, refuses an unknown category", async () => {
+    const sound = await category("Son");
+    const light = await category("Lumière");
+    const item = await addItem({ name: "Projecteur", categoryId: sound });
+    await call("PATCH", `/v1/inventory/items/${item.id}`, member.id, { categoryId: light });
+    const page = await readJson(
+      await call("GET", `/v1/inventory/history?itemId=${item.id}`, member.id),
+      Page,
+    );
+    expect(page.items.find((m) => m.action === "updated")?.details).toEqual({
+      category: { from: "Son", to: "Lumière" },
+    });
+    const unknown = await call("POST", "/v1/inventory/items", member.id, {
+      name: "X",
+      categoryId: "00000000-0000-4000-8000-000000000000",
+    });
+    expect(unknown.status).toBe(404);
+  });
+});
+
+describe("locations", () => {
+  it("count the items stored there", async () => {
+    const cave = await location("Cave");
+    await addItem({ name: "Barnum", locationId: cave });
+    await addItem({ name: "Tables", kind: "stock", quantity: 10, locationId: cave });
+    const list = await readJson(
+      await call("GET", "/v1/inventory/locations", member.id),
+      z.array(LocationDto),
+    );
+    expect(list.find((l) => l.id === cave)?.itemCount).toBe(2);
   });
 });

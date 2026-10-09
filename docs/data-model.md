@@ -50,7 +50,8 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
 | `inventory_location` | name | nom unique (insensible à la casse) |
-| `inventory_item` | number (code INV-xxxx), name, description, category, kind (`unique`, `stock`), quantity, condition, location_id, pole_id, photo, archived_at | quantity ≥ 0 ; un objet unique a une quantité de 1 |
+| `inventory_category` | name | nom unique (insensible à la casse) |
+| `inventory_item` | number (code INV-xxxx), name, description, category_id, kind (`unique`, `stock`), quantity, condition, location_id, pole_id, photo, archived_at | quantity ≥ 0 ; un objet unique a une quantité de 1 |
 | `inventory_checkout` | item_id, quantity, holder, event_id, due_at, out_at/by, returned_at/by, return_condition | quantité > 0 ; return_condition ssi returned_at |
 | `inventory_movement` | item_id, action, actor_user_id, details (jsonb), note | **ajout seul** ; date `clock_timestamp()` pour garder l'ordre dans une transaction |
 

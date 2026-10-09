@@ -25,6 +25,15 @@ export const CreateLocationInput = z
   .object({ name: z.string().trim().min(2, "Nom trop court").max(60, "60 caractères maximum") })
   .meta({ id: "CreateLocationInput" });
 
+export const CategoryDto = z
+  .object({ id: z.uuid(), name: z.string(), itemCount: z.int() })
+  .meta({ id: "InventoryCategory" });
+export type CategoryDto = z.infer<typeof CategoryDto>;
+
+export const CreateCategoryInput = z
+  .object({ name: z.string().trim().min(2, "Nom trop court").max(60, "60 caractères maximum") })
+  .meta({ id: "CreateCategoryInput" });
+
 export const CheckoutDto = z
   .object({
     id: z.uuid(),
@@ -48,7 +57,7 @@ export const ItemDto = z
     code: z.string(),
     name: z.string(),
     description: z.string(),
-    category: z.string().nullable(),
+    category: Ref.nullable(),
     kind: z.enum(ITEM_KINDS),
     quantity: z.int(),
     /** Quantity not taken out. */
@@ -71,7 +80,7 @@ export const CreateItemInput = z
   .object({
     name: z.string().trim().min(1, "Donne un nom").max(120, "120 caractères maximum"),
     description: z.string().trim().max(2000, "2000 caractères maximum").default(""),
-    category: z.string().trim().max(60, "60 caractères maximum").nullable().default(null),
+    categoryId: z.uuid().nullable().default(null),
     kind: z.enum(ITEM_KINDS).default("unique"),
     quantity: z.int("Quantité invalide").min(0).max(100_000).default(1),
     condition: Condition.default("good"),
@@ -90,7 +99,7 @@ export const UpdateItemInput = z
   .object({
     name: z.string().trim().min(1, "Donne un nom").max(120),
     description: z.string().trim().max(2000),
-    category: z.string().trim().max(60).nullable(),
+    categoryId: z.uuid().nullable(),
     condition: Condition,
     locationId: z.uuid().nullable(),
     poleId: z.uuid().nullable(),
@@ -136,7 +145,7 @@ export const ListItemsQuery = z.object({
   q: z.string().trim().max(100).optional(),
   locationId: z.uuid().optional(),
   condition: Condition.optional(),
-  category: z.string().trim().max(60).optional(),
+  categoryId: z.uuid().optional(),
   status: z.enum(ITEM_STATUS_FILTERS).default("all"),
   archived: z.stringbool().default(false),
 });

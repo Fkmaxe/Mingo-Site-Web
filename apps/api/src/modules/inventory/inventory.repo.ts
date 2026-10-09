@@ -15,6 +15,7 @@ import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "../../db/client";
 import {
   event,
+  inventoryCategory,
   inventoryCheckout,
   inventoryItem,
   inventoryLocation,
@@ -30,8 +31,9 @@ export function findLocations(db: DbOrTx) {
     .select({
       id: inventoryLocation.id,
       name: inventoryLocation.name,
-      itemCount: sql<number>`(select count(*) from ${inventoryItem}
-        where ${inventoryItem.locationId} = ${inventoryLocation.id} and ${inventoryItem.archivedAt} is null)`,
+      // Qualified by hand: inside a sub-select Drizzle writes bare column names.
+      itemCount: sql<number>`(select count(*) from "inventory_item" i
+        where i."location_id" = "inventory_location"."id" and i."archived_at" is null)`,
     })
     .from(inventoryLocation)
     .orderBy(asc(sql`lower(${inventoryLocation.name})`));
@@ -61,19 +63,21 @@ export async function insertLocation(db: DbOrTx, name: string) {
 
 // --- Items ---
 
-const outQuantity = sql<number>`coalesce((select sum(${inventoryCheckout.quantity}) from ${inventoryCheckout}
-  where ${inventoryCheckout.itemId} = ${inventoryItem.id} and ${inventoryCheckout.returnedAt} is null), 0)`;
+// Sub-selects qualified by hand (Drizzle may write bare column names in them).
+const outQuantity = sql<number>`coalesce((select sum(c."quantity") from "inventory_checkout" c
+  where c."item_id" = "inventory_item"."id" and c."returned_at" is null), 0)`;
 
-const overdue = (now: Date) => sql<boolean>`exists (select 1 from ${inventoryCheckout}
-  where ${inventoryCheckout.itemId} = ${inventoryItem.id} and ${inventoryCheckout.returnedAt} is null
-    and ${inventoryCheckout.dueAt} < ${now.toISOString()}::timestamptz)`;
+const overdue = (now: Date) => sql<boolean>`exists (select 1 from "inventory_checkout" c
+  where c."item_id" = "inventory_item"."id" and c."returned_at" is null
+    and c."due_at" < ${now.toISOString()}::timestamptz)`;
 
 const itemSelection = (now: Date) => ({
   id: inventoryItem.id,
   number: inventoryItem.number,
   name: inventoryItem.name,
   description: inventoryItem.description,
-  category: inventoryItem.category,
+  categoryId: inventoryItem.categoryId,
+  category: { id: inventoryCategory.id, name: inventoryCategory.name },
   kind: inventoryItem.kind,
   quantity: inventoryItem.quantity,
   condition: inventoryItem.condition,
@@ -102,7 +106,7 @@ export function findItems(
     number: number | null;
     locationId: string | undefined;
     condition: (typeof inventoryItem.$inferSelect)["condition"] | undefined;
-    category: string | undefined;
+    categoryId: string | undefined;
     status: "all" | "available" | "out" | "overdue";
     archived: boolean;
   },
@@ -115,14 +119,12 @@ export function findItems(
           filters.number !== null ? eq(inventoryItem.number, filters.number) : undefined,
           ilike(inventoryItem.name, contains(filters.q)),
           ilike(inventoryItem.description, contains(filters.q)),
-          ilike(inventoryItem.category, contains(filters.q)),
+          ilike(inventoryCategory.name, contains(filters.q)),
         )
       : undefined,
     filters.locationId ? eq(inventoryItem.locationId, filters.locationId) : undefined,
     filters.condition ? eq(inventoryItem.condition, filters.condition) : undefined,
-    filters.category
-      ? sql`lower(${inventoryItem.category}) = lower(${filters.category})`
-      : undefined,
+    filters.categoryId ? eq(inventoryItem.categoryId, filters.categoryId) : undefined,
     filters.status === "available" ? sql`${inventoryItem.quantity} > ${outQuantity}` : undefined,
     filters.status === "out" ? sql`${outQuantity} > 0` : undefined,
     filters.status === "overdue" ? overdue(now) : undefined,
@@ -131,6 +133,7 @@ export function findItems(
     .select(itemSelection(now))
     .from(inventoryItem)
     .leftJoin(inventoryLocation, eq(inventoryLocation.id, inventoryItem.locationId))
+    .leftJoin(inventoryCategory, eq(inventoryCategory.id, inventoryItem.categoryId))
     .leftJoin(pole, eq(pole.id, inventoryItem.poleId))
     .where(and(...conditions))
     .orderBy(asc(sql`lower(${inventoryItem.name})`), asc(inventoryItem.number))
@@ -142,6 +145,7 @@ export async function findItem(db: DbOrTx, id: string, now: Date = new Date()) {
     .select(itemSelection(now))
     .from(inventoryItem)
     .leftJoin(inventoryLocation, eq(inventoryLocation.id, inventoryItem.locationId))
+    .leftJoin(inventoryCategory, eq(inventoryCategory.id, inventoryItem.categoryId))
     .leftJoin(pole, eq(pole.id, inventoryItem.poleId))
     .where(eq(inventoryItem.id, id));
   return row;
@@ -185,12 +189,41 @@ export async function updateItem(
   await db.update(inventoryItem).set(values).where(eq(inventoryItem.id, id));
 }
 
+// --- Categories (same shape as locations) ---
+
 export function findCategories(db: DbOrTx) {
   return db
-    .selectDistinct({ category: inventoryItem.category })
-    .from(inventoryItem)
-    .where(and(isNotNull(inventoryItem.category), isNull(inventoryItem.archivedAt)))
-    .orderBy(asc(inventoryItem.category));
+    .select({
+      id: inventoryCategory.id,
+      name: inventoryCategory.name,
+      // Qualified by hand: inside a sub-select Drizzle writes bare column names.
+      itemCount: sql<number>`(select count(*) from "inventory_item" i
+        where i."category_id" = "inventory_category"."id" and i."archived_at" is null)`,
+    })
+    .from(inventoryCategory)
+    .orderBy(asc(sql`lower(${inventoryCategory.name})`));
+}
+
+export async function findCategory(db: DbOrTx, id: string) {
+  const [row] = await db.select().from(inventoryCategory).where(eq(inventoryCategory.id, id));
+  return row;
+}
+
+export async function categoryNameTaken(db: DbOrTx, name: string) {
+  const [row] = await db
+    .select({ id: inventoryCategory.id })
+    .from(inventoryCategory)
+    .where(sql`lower(${inventoryCategory.name}) = lower(${name})`);
+  return row !== undefined;
+}
+
+export async function insertCategory(db: DbOrTx, name: string) {
+  const [row] = await db
+    .insert(inventoryCategory)
+    .values({ name })
+    .returning({ id: inventoryCategory.id });
+  if (!row) throw new Error("insertCategory: aucune ligne insérée");
+  return row.id;
 }
 
 // --- Checkouts ---

@@ -9,7 +9,12 @@ import { listEvents, listPoles } from "@/features/events/queries";
 import { ConditionBadge } from "@/features/inventory/condition-badge";
 import { HistoryList } from "@/features/inventory/history-list";
 import { ItemActions } from "@/features/inventory/item-actions";
-import { getItemOr404, listHistory, listLocations } from "@/features/inventory/queries";
+import {
+  getItemOr404,
+  listCategories,
+  listHistory,
+  listLocations,
+} from "@/features/inventory/queries";
 import { QrCode } from "@/features/registrations/qr-code";
 import { requireMe } from "@/lib/session";
 
@@ -32,9 +37,10 @@ export default async function ItemPage({
 }) {
   const [{ itemId }, { cursor }, me] = await Promise.all([params, searchParams, requireMe()]);
   if (!me.permissions.includes("inventory:manage")) notFound();
-  const [item, locations, poles, events, history] = await Promise.all([
+  const [item, locations, categories, poles, events, history] = await Promise.all([
     getItemOr404(itemId),
     listLocations(),
+    listCategories(),
     listPoles(),
     listEvents({ limit: 50 }),
     listHistory({ itemId, ...(cursor ? { cursor } : {}) }),
@@ -70,7 +76,7 @@ export default async function ItemPage({
           <ConditionBadge condition={item.condition} />
           <span className="text-muted-foreground">
             {item.location?.name ?? "Lieu non renseigné"}
-            {item.category ? ` · ${item.category}` : ""}
+            {item.category ? ` · ${item.category.name}` : ""}
             {item.pole ? ` · Pôle ${item.pole.name}` : ""}
           </span>
         </div>
@@ -88,6 +94,7 @@ export default async function ItemPage({
       <ItemActions
         item={item}
         locations={locations}
+        categories={categories}
         poles={poles}
         events={events.items.map((e) => ({ id: e.id, title: e.title }))}
         myName={me.name}

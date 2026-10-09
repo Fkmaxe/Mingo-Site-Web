@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
-import { createLocationAction } from "./actions";
+import { createCategoryAction, createLocationAction } from "./actions";
 import { CONDITION_LABELS } from "./labels";
 import { resizePhoto } from "./resize-photo";
 import type { ItemCondition } from "./types";
@@ -52,19 +52,32 @@ export function ConditionPicker({
   );
 }
 
-/** Location select, with a new location created on the spot. */
-export function LocationPicker({
+type Ref = { id: string; name: string };
+type CreateResult = { ok: true; list?: Ref[] | undefined } | { ok: false; message: string };
+
+/** A select of shared entries (locations, categories), with a new entry created on the spot. */
+function RefPicker({
   id,
-  locations: initial,
+  label,
+  emptyLabel,
+  placeholder,
+  addLabel,
+  options: initial,
   value,
   onChange,
+  create,
 }: {
   id: string;
-  locations: { id: string; name: string }[];
+  label: string;
+  emptyLabel: string;
+  placeholder: string;
+  addLabel: string;
+  options: Ref[];
   value: string;
   onChange: (value: string) => void;
+  create: (name: string) => Promise<CreateResult>;
 }) {
-  const [locations, setLocations] = useState(initial);
+  const [options, setOptions] = useState(initial);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -73,18 +86,18 @@ export function LocationPicker({
   const add = () =>
     startTransition(async () => {
       setError(null);
-      const result = await createLocationAction(name.trim());
+      const result = await create(name.trim());
       if (!result.ok) return setError(result.message);
-      const list = result.locations ?? locations;
-      setLocations(list);
-      const created = list.find((l) => l.name.toLowerCase() === name.trim().toLowerCase());
+      const list = result.list ?? options;
+      setOptions(list);
+      const created = list.find((o) => o.name.toLowerCase() === name.trim().toLowerCase());
       if (created) onChange(created.id);
       setName("");
       setAdding(false);
     });
 
   return (
-    <FieldShell id={id} label="Lieu de rangement" error={error ?? undefined}>
+    <FieldShell id={id} label={label} error={error ?? undefined}>
       {(aria) =>
         adding ? (
           <div className="flex gap-2">
@@ -92,7 +105,8 @@ export function LocationPicker({
               {...aria}
               value={name}
               autoFocus
-              placeholder="Local BDE, cave, salle B12…"
+              maxLength={60}
+              placeholder={placeholder}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -117,10 +131,10 @@ export function LocationPicker({
         ) : (
           <div className="flex gap-2">
             <NativeSelect {...aria} value={value} onChange={(e) => onChange(e.target.value)}>
-              <option value="">Non renseigné</option>
-              {locations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
+              <option value="">{emptyLabel}</option>
+              {options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
                 </option>
               ))}
             </NativeSelect>
@@ -128,7 +142,7 @@ export function LocationPicker({
               type="button"
               variant="outline"
               size="icon"
-              aria-label="Nouveau lieu"
+              aria-label={addLabel}
               onClick={() => setAdding(true)}
             >
               <Plus aria-hidden />
@@ -137,6 +151,46 @@ export function LocationPicker({
         )
       }
     </FieldShell>
+  );
+}
+
+type PickerProps = {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+};
+
+export function LocationPicker({ locations, ...props }: PickerProps & { locations: Ref[] }) {
+  return (
+    <RefPicker
+      {...props}
+      label="Lieu de rangement"
+      emptyLabel="Non renseigné"
+      placeholder="Local BDE, cave, salle B12…"
+      addLabel="Nouveau lieu"
+      options={locations}
+      create={async (name) => {
+        const r = await createLocationAction(name);
+        return r.ok ? { ok: true, list: r.locations } : { ok: false, message: r.message };
+      }}
+    />
+  );
+}
+
+export function CategoryPicker({ categories, ...props }: PickerProps & { categories: Ref[] }) {
+  return (
+    <RefPicker
+      {...props}
+      label="Catégorie"
+      emptyLabel="Sans catégorie"
+      placeholder="Son, déco, bar, cuisine…"
+      addLabel="Nouvelle catégorie"
+      options={categories}
+      create={async (name) => {
+        const r = await createCategoryAction(name);
+        return r.ok ? { ok: true, list: r.categories } : { ok: false, message: r.message };
+      }}
+    />
   );
 }
 

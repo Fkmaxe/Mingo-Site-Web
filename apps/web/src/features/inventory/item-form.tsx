@@ -8,12 +8,12 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { createItemAction, uploadPhotoAction } from "./actions";
-import { ConditionPicker, LocationPicker, PhotoPicker } from "./pickers";
+import { CategoryPicker, ConditionPicker, LocationPicker, PhotoPicker } from "./pickers";
 import type { ItemCondition } from "./types";
 
 type Props = {
   locations: { id: string; name: string }[];
-  categories: string[];
+  categories: { id: string; name: string }[];
   poles: { id: string; name: string }[];
 };
 
@@ -29,7 +29,7 @@ export function ItemForm({ locations, categories, poles }: Props) {
   const [quantity, setQuantity] = useState("1");
   const [condition, setCondition] = useState<ItemCondition>("good");
   const [locationId, setLocationId] = useState("");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [poleId, setPoleId] = useState("");
   const [description, setDescription] = useState("");
 
@@ -40,7 +40,7 @@ export function ItemForm({ locations, categories, poles }: Props) {
       const result = await createItemAction({
         name: name.trim(),
         description: description.trim(),
-        category: category.trim() || null,
+        categoryId: categoryId || null,
         kind,
         quantity: kind === "stock" ? Number(quantity) : 1,
         condition,
@@ -131,26 +131,12 @@ export function ItemForm({ locations, categories, poles }: Props) {
         onChange={setLocationId}
       />
 
-      <FieldShell id="item-category" label="Catégorie (facultatif)">
-        {(aria) => (
-          <>
-            <input
-              {...aria}
-              list="item-categories"
-              value={category}
-              maxLength={60}
-              placeholder="Son, déco, cuisine…"
-              onChange={(e) => setCategory(e.target.value)}
-              className="flex h-11 w-full rounded-xl border border-input bg-card px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            />
-            <datalist id="item-categories">
-              {categories.map((c) => (
-                <option key={c} value={c} />
-              ))}
-            </datalist>
-          </>
-        )}
-      </FieldShell>
+      <CategoryPicker
+        id="item-category"
+        categories={categories}
+        value={categoryId}
+        onChange={setCategoryId}
+      />
 
       <details className="flex flex-col gap-4">
         <summary className="cursor-pointer font-semibold text-primary text-sm">

@@ -35,6 +35,7 @@ const FIELD_LABELS: Record<string, string> = {
   name: "nom",
   description: "description",
   category: "catégorie",
+  categoryId: "catégorie",
   poleId: "pôle",
 };
 

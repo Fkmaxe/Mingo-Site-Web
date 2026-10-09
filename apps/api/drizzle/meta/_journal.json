@@ -162,6 +162,20 @@
       "when": 1791570301082,
       "tag": "0022_inventory_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791572586798,
+      "tag": "0023_inventory_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791572587419,
+      "tag": "0024_drop_text_category",
+      "breakpoints": true
     }
   ]
 }

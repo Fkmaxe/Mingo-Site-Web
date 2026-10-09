@@ -45,7 +45,7 @@ export function isOverdue(dueAt: Date | null, now: Date): boolean {
 type Editable = {
   name: string;
   description: string;
-  category: string | null;
+  categoryId: string | null;
   condition: ItemCondition;
   locationId: string | null;
   poleId: string | null;
@@ -66,7 +66,7 @@ export function changesOf(
   const changed = <K extends keyof Editable>(key: K) =>
     input[key] !== undefined && input[key] !== before[key];
   const fields: Record<string, { from: unknown; to: unknown }> = {};
-  for (const key of ["name", "description", "category", "poleId"] as const) {
+  for (const key of ["name", "description", "categoryId", "poleId"] as const) {
     if (changed(key)) fields[key] = { from: before[key], to: input[key] };
   }
   return {

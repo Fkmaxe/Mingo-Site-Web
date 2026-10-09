@@ -43,7 +43,7 @@ describe("history of an edit", () => {
   const before = {
     name: "Enceinte",
     description: "",
-    category: "Son",
+    categoryId: "son",
     condition: "good" as const,
     locationId: "local",
     poleId: null,

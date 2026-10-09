@@ -1,6 +1,8 @@
 import {
   AdjustQuantityInput,
+  CategoryDto,
   CheckoutInput,
+  CreateCategoryInput,
   CreateItemInput,
   CreateLocationInput,
   HistoryQuery,
@@ -23,6 +25,7 @@ import {
   adjustQuantity,
   archiveItem,
   checkoutItem,
+  createCategory,
   createItem,
   createLocation,
   editItem,
@@ -212,7 +215,21 @@ const categoriesRoute = createRoute({
   path: "/inventory/categories",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  responses: { 200: json(z.array(z.string()), "Catégories déjà utilisées"), ...common },
+  responses: { 200: json(z.array(CategoryDto), "Catégories"), ...common },
+});
+
+const createCategoryRoute = createRoute({
+  method: "post",
+  path: "/inventory/categories",
+  tags: ["inventory"],
+  middleware: [requirePermission("inventory:manage")] as const,
+  request: body(CreateCategoryInput),
+  responses: {
+    201: json(z.array(CategoryDto), "Catégorie ajoutée"),
+    ...common,
+    400: errorResponse("Nom invalide"),
+    409: errorResponse("ALREADY_EXISTS"),
+  },
 });
 
 export function createInventoryRouter(photos: PhotoStore) {
@@ -298,5 +315,8 @@ export function createInventoryRouter(photos: PhotoStore) {
     )
     .openapi(categoriesRoute, async (c) =>
       c.json(await listCategories(authedCtx(c.get("ctx"))), 200),
+    )
+    .openapi(createCategoryRoute, async (c) =>
+      c.json(await createCategory(authedCtx(c.get("ctx")), c.req.valid("json").name), 201),
     );
 }

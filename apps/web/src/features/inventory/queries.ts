@@ -1,12 +1,13 @@
 import "server-only";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Item, Location, Movement } from "./types";
+import type { Category, Item, Location, Movement } from "./types";
 
 export type ItemFilters = {
   q?: string | undefined;
   status?: "all" | "available" | "out" | "overdue" | undefined;
   locationId?: string | undefined;
+  categoryId?: string | undefined;
   archived?: boolean | undefined;
 };
 
@@ -18,6 +19,7 @@ export async function listItems(filters: ItemFilters): Promise<Item[]> {
         archived: filters.archived ? "true" : "false",
         ...(filters.q ? { q: filters.q } : {}),
         ...(filters.locationId ? { locationId: filters.locationId } : {}),
+        ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
       },
     },
   });
@@ -39,9 +41,10 @@ export async function listLocations(): Promise<Location[]> {
   return data;
 }
 
-export async function listCategories(): Promise<string[]> {
-  const { data } = await (await api()).GET("/v1/inventory/categories");
-  return data ?? [];
+export async function listCategories(): Promise<Category[]> {
+  const { data, response } = await (await api()).GET("/v1/inventory/categories");
+  if (!data) throw new Error(`GET /v1/inventory/categories a échoué (${response.status})`);
+  return data;
 }
 
 export async function listHistory(params: { itemId?: string; cursor?: string; limit?: number }) {

@@ -33,6 +33,17 @@ export const inventoryLocation = pgTable(
   (t) => [uniqueIndex("inventory_location_name_unique").on(sql`lower(${t.name})`)],
 );
 
+/** Kinds of equipment (sound, decoration, bar…), shared by everyone like locations. */
+export const inventoryCategory = pgTable(
+  "inventory_category",
+  {
+    id: id(),
+    name: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("inventory_category_name_unique").on(sql`lower(${t.name})`)],
+);
+
 export const inventoryItem = pgTable(
   "inventory_item",
   {
@@ -41,7 +52,7 @@ export const inventoryItem = pgTable(
     number: serial().notNull().unique("inventory_item_number_unique"),
     name: text().notNull(),
     description: text().notNull().default(""),
-    category: text(),
+    categoryId: uuid().references(() => inventoryCategory.id, { onDelete: "set null" }),
     kind: itemKind().notNull().default("unique"),
     /** 1 for a unique item. */
     quantity: integer().notNull().default(1),
@@ -60,6 +71,7 @@ export const inventoryItem = pgTable(
   (t) => [
     index("inventory_item_location_id_idx").on(t.locationId),
     index("inventory_item_pole_id_idx").on(t.poleId),
+    index("inventory_item_category_id_idx").on(t.categoryId),
     check("inventory_item_quantity_check", sql`${t.quantity} >= 0`),
     check("inventory_item_unique_quantity_check", sql`${t.kind} = 'stock' or ${t.quantity} = 1`),
   ],

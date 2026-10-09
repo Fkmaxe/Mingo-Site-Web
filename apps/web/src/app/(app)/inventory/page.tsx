@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ItemList } from "@/features/inventory/item-list";
-import { listItems, listLocations } from "@/features/inventory/queries";
+import { listCategories, listItems, listLocations } from "@/features/inventory/queries";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -24,27 +24,48 @@ type Status = (typeof STATUSES)[number][0];
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; lieu?: string; archives?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    lieu?: string;
+    categorie?: string;
+    archives?: string;
+  }>;
 }) {
   const [me, params] = await Promise.all([requireMe(), searchParams]);
   if (!me.permissions.includes("inventory:manage")) notFound();
   const q = params.q?.trim() || undefined;
   const status = (STATUSES.find(([v]) => v === params.status)?.[0] ?? "all") as Status;
   const archived = params.archives === "1";
-  const [items, locations] = await Promise.all([
-    listItems({ q, status, locationId: params.lieu || undefined, archived }),
+  const [items, locations, categories] = await Promise.all([
+    listItems({
+      q,
+      status,
+      locationId: params.lieu || undefined,
+      categoryId: params.categorie || undefined,
+      archived,
+    }),
     listLocations(),
+    listCategories(),
   ]);
   const link = (patch: Record<string, string | undefined>) => {
     const next = new URLSearchParams();
-    const merged = { q, status, lieu: params.lieu, archives: archived ? "1" : undefined, ...patch };
+    const merged = {
+      q,
+      status,
+      lieu: params.lieu,
+      categorie: params.categorie,
+      archives: archived ? "1" : undefined,
+      ...patch,
+    };
     for (const [k, v] of Object.entries(merged)) if (v && v !== "all") next.set(k, v);
     const s = next.toString();
     return s ? `/inventory?${s}` : "/inventory";
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    // Bottom padding: the floating "Ajouter" button never hides the last item.
+    <div className="flex flex-col gap-4 pb-16">
       <PageHeader
         title="Inventaire"
         description={`${items.length} objet${items.length > 1 ? "s" : ""}${archived ? " archivés" : ""}`}
@@ -75,17 +96,37 @@ export default async function InventoryPage({
             <Search aria-hidden />
           </Button>
         </div>
-        <label htmlFor="inventory-location" className="sr-only">
-          Lieu
-        </label>
-        <NativeSelect id="inventory-location" name="lieu" defaultValue={params.lieu ?? ""}>
-          <option value="">Tous les lieux</option>
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name} ({l.itemCount})
-            </option>
-          ))}
-        </NativeSelect>
+        <div className="grid grid-cols-2 gap-2">
+          <label htmlFor="inventory-location" className="sr-only">
+            Lieu
+          </label>
+          <NativeSelect id="inventory-location" name="lieu" defaultValue={params.lieu ?? ""}>
+            <option value="">Tous les lieux</option>
+            {locations.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name} ({l.itemCount})
+              </option>
+            ))}
+          </NativeSelect>
+          <label htmlFor="inventory-category" className="sr-only">
+            Catégorie
+          </label>
+          <NativeSelect
+            id="inventory-category"
+            name="categorie"
+            defaultValue={params.categorie ?? ""}
+          >
+            <option value="">Toutes catégories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.itemCount})
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+        <Button type="submit" variant="outline" size="sm" className="self-start">
+          Filtrer
+        </Button>
       </form>
 
       <nav aria-label="Filtre" className="flex flex-wrap gap-2">
@@ -115,7 +156,7 @@ export default async function InventoryPage({
       <ItemList
         items={items}
         empty={
-          q || params.lieu || status !== "all"
+          q || params.lieu || params.categorie || status !== "all"
             ? "Rien ne correspond."
             : "L'inventaire est vide : ajoute le premier objet."
         }

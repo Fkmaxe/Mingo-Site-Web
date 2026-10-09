@@ -15,7 +15,7 @@ const refresh = (id?: string) => {
 export async function createItemAction(input: {
   name: string;
   description: string;
-  category: string | null;
+  categoryId: string | null;
   kind: "unique" | "stock";
   quantity: number;
   condition: ItemCondition;
@@ -33,7 +33,7 @@ export async function editItemAction(
   input: {
     name?: string;
     description?: string;
-    category?: string | null;
+    categoryId?: string | null;
     condition?: ItemCondition;
     locationId?: string | null;
     poleId?: string | null;
@@ -119,6 +119,15 @@ export async function createLocationAction(
   if (error) return fromApiError(error);
   refresh();
   return { ok: true, locations: data };
+}
+
+export async function createCategoryAction(
+  name: string,
+): Promise<ActionResult & { categories?: { id: string; name: string }[] }> {
+  const { data, error } = await (await api()).POST("/v1/inventory/categories", { body: { name } });
+  if (error) return fromApiError(error);
+  refresh();
+  return { ok: true, categories: data };
 }
 
 /** The photo is already resized by the browser (resize-photo.ts). */

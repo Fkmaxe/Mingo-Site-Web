@@ -30,7 +30,7 @@ import {
   returnAction,
   uploadPhotoAction,
 } from "./actions";
-import { ConditionPicker, LocationPicker, PhotoPicker } from "./pickers";
+import { CategoryPicker, ConditionPicker, LocationPicker, PhotoPicker } from "./pickers";
 import type { Item, ItemCondition } from "./types";
 
 type Panel = "move" | "condition" | "checkout" | "stock" | "photo" | "edit" | "archive" | null;
@@ -38,6 +38,7 @@ type Panel = "move" | "condition" | "checkout" | "stock" | "photo" | "edit" | "a
 type Props = {
   item: Item;
   locations: { id: string; name: string }[];
+  categories: { id: string; name: string }[];
   poles: { id: string; name: string }[];
   events: { id: string; title: string }[];
   myName: string;
@@ -65,7 +66,15 @@ function NoteField({
   );
 }
 
-export function ItemActions({ item, locations, poles, events, myName, canArchive }: Props) {
+export function ItemActions({
+  item,
+  locations,
+  categories,
+  poles,
+  events,
+  myName,
+  canArchive,
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [panel, setPanel] = useState<Panel>(null);
@@ -99,7 +108,7 @@ export function ItemActions({ item, locations, poles, events, myName, canArchive
   const [delta, setDelta] = useState(1);
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [name, setName] = useState(item.name);
-  const [category, setCategory] = useState(item.category ?? "");
+  const [categoryId, setCategoryId] = useState(item.category?.id ?? "");
   const [description, setDescription] = useState(item.description);
   const [poleId, setPoleId] = useState(item.pole?.id ?? "");
   const [returning, setReturning] = useState<string | null>(null);
@@ -402,12 +411,11 @@ export function ItemActions({ item, locations, poles, events, myName, canArchive
                 maxLength={120}
                 onChange={(e) => setName(e.target.value)}
               />
-              <FormField
+              <CategoryPicker
                 id="edit-category"
-                label="Catégorie"
-                value={category}
-                maxLength={60}
-                onChange={(e) => setCategory(e.target.value)}
+                categories={categories}
+                value={categoryId}
+                onChange={setCategoryId}
               />
               <FieldShell id="edit-pole" label="Pôle">
                 {(aria) => (
@@ -442,7 +450,7 @@ export function ItemActions({ item, locations, poles, events, myName, canArchive
                   run(() =>
                     editItemAction(item.id, {
                       name: name.trim(),
-                      category: category.trim() || null,
+                      categoryId: categoryId || null,
                       description: description.trim(),
                       poleId: poleId || null,
                     }),

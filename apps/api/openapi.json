@@ -3944,8 +3944,21 @@
           },
           "category": {
             "type": [
-              "string",
+              "object",
               "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
             ]
           },
           "kind": {
@@ -4158,12 +4171,12 @@
             "maxLength": 2000,
             "default": ""
           },
-          "category": {
+          "categoryId": {
             "type": [
               "string",
               "null"
             ],
-            "maxLength": 60,
+            "format": "uuid",
             "default": null
           },
           "kind": {
@@ -4224,12 +4237,12 @@
             "type": "string",
             "maxLength": 2000
           },
-          "category": {
+          "categoryId": {
             "type": [
               "string",
               "null"
             ],
-            "maxLength": 60
+            "format": "uuid"
           },
           "condition": {
             "type": "string",
@@ -4456,6 +4469,39 @@
         ]
       },
       "CreateLocationInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "InventoryCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "itemCount"
+        ]
+      },
+      "CreateCategoryInput": {
         "type": "object",
         "properties": {
           "name": {
@@ -11128,10 +11174,10 @@
           {
             "schema": {
               "type": "string",
-              "maxLength": 60
+              "format": "uuid"
             },
             "required": false,
-            "name": "category",
+            "name": "categoryId",
             "in": "query"
           },
           {
@@ -12342,13 +12388,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Catégories déjà utilisées",
+            "description": "Catégories",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/InventoryCategory"
                   }
                 }
               }
@@ -12366,6 +12412,76 @@
           },
           "403": {
             "description": "Réservé aux membres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Catégorie ajoutée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryCategory"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé aux membres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
             "content": {
               "application/json": {
                 "schema": {

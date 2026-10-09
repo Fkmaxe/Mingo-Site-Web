@@ -6503,7 +6503,7 @@ export interface paths {
                     q?: string;
                     locationId?: string;
                     condition?: "new" | "good" | "worn" | "damaged" | "broken";
-                    category?: string;
+                    categoryId?: string;
                     status?: "all" | "available" | "out" | "overdue";
                     archived?: string;
                 };
@@ -7605,13 +7605,13 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Catégories déjà utilisées */
+                /** @description Catégories */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": string[];
+                        "application/json": components["schemas"]["InventoryCategory"][];
                     };
                 };
                 /** @description Pas de session */
@@ -7635,7 +7635,66 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateCategoryInput"];
+                };
+            };
+            responses: {
+                /** @description Catégorie ajoutée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InventoryCategory"][];
+                    };
+                };
+                /** @description Nom invalide */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé aux membres */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description ALREADY_EXISTS */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -8687,7 +8746,11 @@ export interface components {
             code: string;
             name: string;
             description: string;
-            category: string | null;
+            category: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
             /** @enum {string} */
             kind: "unique" | "stock";
             quantity: number;
@@ -8740,8 +8803,11 @@ export interface components {
             name: string;
             /** @default  */
             description: string;
-            /** @default null */
-            category: string | null;
+            /**
+             * Format: uuid
+             * @default null
+             */
+            categoryId: string | null;
             /**
              * @default unique
              * @enum {string}
@@ -8768,7 +8834,8 @@ export interface components {
         UpdateItemInput: {
             name?: string;
             description?: string;
-            category?: string | null;
+            /** Format: uuid */
+            categoryId?: string | null;
             /** @enum {string} */
             condition?: "new" | "good" | "worn" | "damaged" | "broken";
             /** Format: uuid */
@@ -8840,6 +8907,15 @@ export interface components {
             itemCount: number;
         };
         CreateLocationInput: {
+            name: string;
+        };
+        InventoryCategory: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            itemCount: number;
+        };
+        CreateCategoryInput: {
             name: string;
         };
     };
