@@ -2,9 +2,14 @@ import "server-only";
 import { api } from "@/lib/api";
 import type { AdminUser, AuditEntry, SchoolYear } from "./types";
 
-export async function listAdminUsers(q: string | undefined): Promise<AdminUser[]> {
+export type UserScope = "all" | "roles" | "unverified";
+
+export async function listAdminUsers(
+  q: string | undefined,
+  scope: UserScope,
+): Promise<{ items: AdminUser[]; total: number }> {
   const { data, response } = await (await api()).GET("/v1/admin/users", {
-    params: { query: q ? { q } : {} },
+    params: { query: { scope, ...(q ? { q } : {}) } },
   });
   if (!data) throw new Error(`GET /v1/admin/users a échoué (${response.status})`);
   return data;

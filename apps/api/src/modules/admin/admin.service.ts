@@ -16,6 +16,7 @@ import { slugify, uniqueSlug } from "../events/slug";
 import { getPole } from "../poles";
 import { currentSchoolYear, requireCurrentSchoolYear } from "../school-years";
 import {
+  countUsers,
   findActiveMemberships,
   findAuditEntries,
   findMembership,
@@ -36,6 +37,7 @@ import {
   reviveMembership,
   schoolYearLabelExists,
   setUserAdmin,
+  type UserScope,
   updatePole,
 } from "./admin.repo";
 
@@ -153,6 +155,7 @@ async function withMemberships(
     : [];
   return users.map((u) => ({
     ...u,
+    createdAt: u.createdAt.toISOString(),
     memberships: memberships
       .filter((m) => m.userId === u.id)
       .map(({ userId: _, ...m }) => ({ ...m, pole: m.pole?.id ? m.pole : null })),
@@ -161,14 +164,12 @@ async function withMemberships(
 
 export async function listUsers(
   ctx: AuthedCtx,
-  query: { q?: string | undefined },
-): Promise<AdminUserDto[]> {
+  query: { q?: string | undefined; scope: UserScope },
+): Promise<{ items: AdminUserDto[]; total: number }> {
   const year = await currentSchoolYear(ctx);
-  const users = await findUsers(ctx.db, {
-    q: query.q || undefined,
-    schoolYearId: year?.id ?? null,
-  });
-  return withMemberships(ctx.db, users, year?.id ?? null);
+  const params = { q: query.q || undefined, scope: query.scope, schoolYearId: year?.id ?? null };
+  const [users, total] = await Promise.all([findUsers(ctx.db, params), countUsers(ctx.db, params)]);
+  return { items: await withMemberships(ctx.db, users, year?.id ?? null), total };
 }
 
 async function getAdminUser(ctx: AuthedCtx, userId: string): Promise<AdminUserDto> {

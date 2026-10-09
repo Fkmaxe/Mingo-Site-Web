@@ -94,6 +94,8 @@ const userSelection = {
   email: user.email,
   promo: user.promo,
   isAdmin: user.isAdmin,
+  emailVerified: user.emailVerified,
+  createdAt: user.createdAt,
 };
 
 /** Wildcards of the search are escaped. */
@@ -101,26 +103,49 @@ function contains(text: string) {
   return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
 
-/**
- * With a search: users whose name or email contains it. Without: the year's members and the
- * administrators, i.e. the people who hold a role.
- */
-export function findUsers(
-  db: DbOrTx,
-  params: { q: string | undefined; schoolYearId: string | null },
-) {
-  let condition: SQL | undefined;
-  if (params.q) {
-    condition = or(ilike(user.name, contains(params.q)), ilike(user.email, contains(params.q)));
-  } else {
+export type UserScope = "all" | "roles" | "unverified";
+
+function usersWhere(params: {
+  q: string | undefined;
+  scope: UserScope;
+  schoolYearId: string | null;
+}) {
+  const search = params.q
+    ? or(ilike(user.name, contains(params.q)), ilike(user.email, contains(params.q)))
+    : undefined;
+  let scope: SQL | undefined;
+  if (params.scope === "roles") {
     const isMember = params.schoolYearId
       ? sql`exists (select 1 from ${membership} where ${membership.userId} = ${user.id}
           and ${membership.schoolYearId} = ${params.schoolYearId}
           and ${membership.isActive} and ${membership.deletedAt} is null)`
       : sql`false`;
-    condition = or(eq(user.isAdmin, true), isMember);
+    scope = or(eq(user.isAdmin, true), isMember);
+  } else if (params.scope === "unverified") {
+    scope = eq(user.emailVerified, false);
   }
-  return db.select(userSelection).from(user).where(condition).orderBy(asc(user.name)).limit(100);
+  return and(search, scope);
+}
+
+/** Accounts of the scope (and search): newest first, or by name for role holders. 100 at most. */
+export function findUsers(
+  db: DbOrTx,
+  params: { q: string | undefined; scope: UserScope; schoolYearId: string | null },
+) {
+  return db
+    .select(userSelection)
+    .from(user)
+    .where(usersWhere(params))
+    .orderBy(params.scope === "roles" ? asc(user.name) : desc(user.createdAt), asc(user.id))
+    .limit(100);
+}
+
+export async function countUsers(
+  db: DbOrTx,
+  params: { q: string | undefined; scope: UserScope; schoolYearId: string | null },
+): Promise<number> {
+  const [row] = await db.select({ n: sql<number>`count(*)` }).from(user).where(usersWhere(params));
+  return Number(row?.n ?? 0);
 }
 
 export async function findUser(db: DbOrTx, id: string) {

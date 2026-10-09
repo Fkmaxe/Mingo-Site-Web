@@ -137,6 +137,14 @@ function UserCard({ user, poles, meId }: { user: AdminUser; poles: Pole[]; meId:
             {user.email}
             {user.promo ? ` · ${user.promo}` : ""}
           </span>
+          <span className="text-muted-foreground text-xs">
+            Compte créé le {new Date(user.createdAt).toLocaleDateString("fr-FR")}
+            {user.emailVerified ? null : (
+              <span className="ml-1.5 rounded-full bg-warning/15 px-2 py-0.5 font-semibold text-warning">
+                Adresse non confirmée
+              </span>
+            )}
+          </span>
         </div>
         {self ? (
           <span className="shrink-0 text-muted-foreground text-xs">C'est toi</span>
@@ -237,7 +245,7 @@ export function MembersAdmin({
   if (users.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed p-6 text-center text-muted-foreground text-sm">
-        Personne ne correspond. La personne doit d'abord créer son compte sur le site.
+        Aucun compte ne correspond. La personne doit d'abord créer son compte sur le site.
       </p>
     );
   }

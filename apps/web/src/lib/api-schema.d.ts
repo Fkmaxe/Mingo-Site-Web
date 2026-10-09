@@ -6170,6 +6170,7 @@ export interface paths {
             parameters: {
                 query?: {
                     q?: string;
+                    scope?: "all" | "roles" | "unverified";
                 };
                 header?: never;
                 path?: never;
@@ -6177,13 +6178,13 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Comptes et rôles de l'année */
+                /** @description Comptes (100 au plus) et rôles de l'année */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AdminUser"][];
+                        "application/json": components["schemas"]["AdminUsers"];
                     };
                 };
                 /** @description Pas de session */
@@ -7463,6 +7464,10 @@ export interface components {
             /** @default null */
             description: string | null;
         };
+        AdminUsers: {
+            items: components["schemas"]["AdminUser"][];
+            total: number;
+        };
         AdminUser: {
             /** Format: uuid */
             id: string;
@@ -7470,6 +7475,9 @@ export interface components {
             email: string;
             promo: string | null;
             isAdmin: boolean;
+            emailVerified: boolean;
+            /** Format: date-time */
+            createdAt: string;
             memberships: {
                 /** Format: uuid */
                 id: string;

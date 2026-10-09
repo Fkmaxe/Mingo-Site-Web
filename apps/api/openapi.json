@@ -3689,6 +3689,24 @@
           "name"
         ]
       },
+      "AdminUsers": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUser"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
       "AdminUser": {
         "type": "object",
         "properties": {
@@ -3710,6 +3728,13 @@
           },
           "isAdmin": {
             "type": "boolean"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "memberships": {
             "type": "array",
@@ -3776,6 +3801,8 @@
           "email",
           "promo",
           "isAdmin",
+          "emailVerified",
+          "createdAt",
           "memberships"
         ]
       },
@@ -10174,18 +10201,29 @@
             "required": false,
             "name": "q",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "roles",
+                "unverified"
+              ],
+              "default": "all"
+            },
+            "required": false,
+            "name": "scope",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Comptes et rôles de l'année",
+            "description": "Comptes (100 au plus) et rôles de l'année",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AdminUser"
-                  }
+                  "$ref": "#/components/schemas/AdminUsers"
                 }
               }
             }

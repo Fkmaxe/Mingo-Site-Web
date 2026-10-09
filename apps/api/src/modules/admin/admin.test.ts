@@ -203,23 +203,33 @@ describe("members and roles", () => {
     expect((await readError(noYear)).code).toBe("NO_CURRENT_SCHOOL_YEAR");
   });
 
-  it("lists the people with a role, and finds anyone by name or email", async () => {
+  it("lists every account by default (newest first, unconfirmed ones included)", async () => {
     await createSchoolYear();
     const pole = await createPole();
     const member = await createPersona("member", { poleId: pole.id });
     const student = await createUser({ name: "Zoé Inconnue", email: "zoe.inconnue@myskolae.fr" });
+    const pending = await createUser({ name: "Pas Confirmé", emailVerified: false });
+    const Users = z.object({ items: z.array(AdminUserDto), total: z.number() });
+
+    const all = await readJson(await call("GET", "/v1/admin/users", admin.id), Users);
+    expect(all.total).toBe(4);
+    expect(all.items[0]?.id).toBe(pending.id);
+    expect(all.items.find((u) => u.id === pending.id)?.emailVerified).toBe(false);
 
     const holders = await readJson(
-      await call("GET", "/v1/admin/users", admin.id),
-      z.array(AdminUserDto),
+      await call("GET", "/v1/admin/users?scope=roles", admin.id),
+      Users,
     );
-    expect(holders.map((u) => u.id).sort()).toEqual([admin.id, member.id].sort());
+    expect(holders.items.map((u) => u.id).sort()).toEqual([admin.id, member.id].sort());
 
-    const found = await readJson(
-      await call("GET", "/v1/admin/users?q=inconnue", admin.id),
-      z.array(AdminUserDto),
+    const unverified = await readJson(
+      await call("GET", "/v1/admin/users?scope=unverified", admin.id),
+      Users,
     );
-    expect(found.map((u) => u.id)).toEqual([student.id]);
+    expect(unverified.items.map((u) => u.id)).toEqual([pending.id]);
+
+    const found = await readJson(await call("GET", "/v1/admin/users?q=inconnue", admin.id), Users);
+    expect(found).toMatchObject({ total: 1, items: [{ id: student.id }] });
   });
 
   it("grants the administrator right, but not removing one's own", async () => {

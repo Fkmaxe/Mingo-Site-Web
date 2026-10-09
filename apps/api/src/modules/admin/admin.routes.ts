@@ -1,5 +1,6 @@
 import {
   AdminUserDto,
+  AdminUsersDto,
   AdminUsersQuery,
   AuditEntryDto,
   AuditQuery,
@@ -117,7 +118,7 @@ const usersRoute = createRoute({
   tags: ["admin"],
   middleware: [requirePermission("roles:manage")] as const,
   request: { query: AdminUsersQuery },
-  responses: { 200: json(z.array(AdminUserDto), "Comptes et rôles de l'année"), ...common },
+  responses: { 200: json(AdminUsersDto, "Comptes (100 au plus) et rôles de l'année"), ...common },
 });
 
 const setMembershipRoute = createRoute({

@@ -22,6 +22,8 @@ const alex: AdminUser = {
   email: "alex@myskolae.fr",
   promo: null,
   isAdmin: true,
+  emailVerified: true,
+  createdAt: "2026-10-08T10:00:00.000Z",
   memberships: [
     { id: "m1", role: "board", boardPosition: "treasurer", pole: null },
     {

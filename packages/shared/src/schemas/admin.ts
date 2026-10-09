@@ -57,16 +57,31 @@ export const AdminUserDto = z
     email: z.string(),
     promo: z.string().nullable(),
     isAdmin: z.boolean(),
+    /** False until the person clicked the link of the confirmation mail. */
+    emailVerified: z.boolean(),
+    createdAt: z.iso.datetime(),
     /** Active memberships of the current school year. */
     memberships: z.array(AdminMembershipDto),
   })
   .meta({ id: "AdminUser" });
 export type AdminUserDto = z.infer<typeof AdminUserDto>;
 
+export const ADMIN_USER_SCOPES = ["all", "roles", "unverified"] as const;
+
 export const AdminUsersQuery = z.object({
-  /** Name or email. Empty: this year's members and the administrators. */
+  /** Name or email, within the scope. */
   q: z.string().trim().max(100).optional(),
+  /** all: every account, newest first; roles: this year's role holders and the admins. */
+  scope: z.enum(ADMIN_USER_SCOPES).default("all"),
 });
+
+export const AdminUsersDto = z
+  .object({
+    items: z.array(AdminUserDto),
+    /** Accounts matching, beyond the 100 listed. */
+    total: z.int(),
+  })
+  .meta({ id: "AdminUsers" });
 
 /** Gives someone a role for the current school year (creates or updates the membership). */
 export const SetMembershipInput = z
