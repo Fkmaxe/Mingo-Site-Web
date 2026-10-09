@@ -4,6 +4,7 @@ export * from "./audit";
 export * from "./auth";
 export * from "./events";
 export * from "./grades";
+export * from "./inventory";
 export * from "./meetings";
 export * from "./open-points";
 export * from "./organization";

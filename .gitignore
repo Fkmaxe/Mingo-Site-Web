@@ -16,3 +16,6 @@ next-env.d.ts
 
 # Sauvegardes de la base (docker-compose.prod.yml)
 backups/
+
+# Photos envoyées en dev (UPLOAD_DIR)
+apps/api/uploads/

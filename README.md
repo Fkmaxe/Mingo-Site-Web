@@ -59,7 +59,7 @@ Tester l'envoi des mails : `docker compose exec api node dist/mail-test.js toi@e
 - **Premier administrateur** : crée ton compte sur le site et confirme l'adresse, puis `docker compose exec api node dist/make-admin.js prenom.nom@myskolae.fr` (`--revoke` pour retirer). Reconnecte-toi : Gestion → Administration permet de créer l'année scolaire, les pôles et de donner les rôles.
 - Migrations appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
 - Mise à jour : `git pull && docker compose up -d --build`. Arrêt : `docker compose down` (les données restent ; **jamais** `-v`, qui efface la base).
-- **Sauvegardes** : `backups/bde-AAAA-MM-JJ.dump` chaque jour (14 jours gardés), à recopier hors du serveur. Restauration :
+- **Sauvegardes** : `backups/bde-AAAA-MM-JJ.dump` (base) et `backups/photos-AAAA-MM-JJ.tar.gz` (photos de l'inventaire) chaque jour, 14 jours gardés, à recopier hors du serveur. Restauration de la base :
   ```bash
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
   ```

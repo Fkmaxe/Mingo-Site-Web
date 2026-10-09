@@ -1,6 +1,7 @@
 import { type AppDeps, createApp } from "../app";
 import { createMemoryMailer, type MemoryMailer } from "../lib/mailer";
 import { createMemoryPusher, type MemoryPusher } from "../lib/push";
+import { createMemoryPhotoStore } from "../lib/storage";
 import { createNotifier } from "../modules/push";
 import { getTestDb } from "./db";
 
@@ -16,6 +17,7 @@ export const testMailer = createMemoryMailer();
 export const testPusher = createMemoryPusher();
 /** Notifications of the test apps and jobs, through the memory pusher. */
 export const testNotifier = createNotifier(getTestDb(), testPusher);
+export const testPhotos = createMemoryPhotoStore();
 
 export function createTestApp(
   overrides: Partial<Omit<AppDeps, "mailer" | "pusher">> & {
@@ -25,6 +27,13 @@ export function createTestApp(
 ) {
   const mailer = overrides.mailer ?? testMailer;
   const pusher = overrides.pusher ?? testPusher;
-  const app = createApp({ env: testEnv, db: getTestDb(), ...overrides, mailer, pusher });
+  const app = createApp({
+    env: testEnv,
+    db: getTestDb(),
+    photos: testPhotos,
+    ...overrides,
+    mailer,
+    pusher,
+  });
   return Object.assign(app, { mailer });
 }

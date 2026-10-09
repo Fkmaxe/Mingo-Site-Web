@@ -30,6 +30,15 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 | Bureau | Tout, sur tous les pôles + valider notes et points open, exporter. Le trésorier gère le budget |
 | Admin technique | Configuration, rôles, intégrations, logs |
 
+## Inventaire
+
+- Le matériel du BDE (son, déco, barnums, gobelets…) : **tous les membres** ajoutent, modifient, déplacent, sortent et rendent ; responsables et bureau peuvent **archiver** (perdu, jeté, vendu), l'historique est gardé et l'objet restaurable.
+- Une fiche = un **objet unique** (une enceinte) ou un **stock** avec quantité (200 gobelets), ajusté en + / − (jamais sous ce qui est sorti).
+- Chaque fiche : nom (seul champ obligatoire), photo prise au téléphone, **état** (neuf, bon, usé, abîmé, HS), **lieu** de rangement, catégorie, pôle, description, et un **code d'étiquette** `INV-0042` avec QR à coller : le scanner ouvre la fiche.
+- **Sorties** (facultatives) : qui l'a, pour quel événement, retour prévu ; au retour on note l'état (qui devient celui d'un objet unique). Ce qui est en retard est signalé.
+- **Historique complet**, en ajout seul : ajout, modification, déplacement, état, stock, photo, sortie, retour, archivage, avec l'auteur, la date et une note facultative. Par objet et pour tout l'inventaire.
+- Rapide : « Enregistrer et en ajouter un autre » garde le lieu, la catégorie et le pôle ; recherche par nom ou par code.
+
 ## Administration du site
 
 - Un ou plusieurs **administrateurs** ont toutes les permissions du site, en plus de leur éventuel rôle au BDE. Le premier est nommé depuis le serveur (`make-admin`, voir README), les suivants depuis le site.

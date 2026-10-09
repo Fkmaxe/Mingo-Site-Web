@@ -148,6 +148,20 @@
       "when": 1791453510261,
       "tag": "0020_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791570300518,
+      "tag": "0021_inventory",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791570301082,
+      "tag": "0022_inventory_permissions",
+      "breakpoints": true
     }
   ]
 }

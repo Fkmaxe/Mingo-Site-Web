@@ -36,6 +36,8 @@ const EnvSchema = z
         isMailbox,
         "doit être une adresse mail, ex. « BDE Mingo <no-reply@bde-mingo.fr> » ou « no-reply@bde-mingo.fr »",
       ),
+    /** Directory of uploaded files (inventory photos). In Docker: a volume. */
+    UPLOAD_DIR: z.string().min(1).default("uploads"),
     /** Name announced to the SMTP server (EHLO). Default: the domain of MAIL_FROM. */
     SMTP_EHLO_NAME: optionalText(z.string()),
     /** Web Push (VAPID). All three or none: without them, notifications are off. */

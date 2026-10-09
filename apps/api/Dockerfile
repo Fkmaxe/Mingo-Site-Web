@@ -22,6 +22,8 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /repo/apps/api/dist ./dist
 COPY --from=build --chown=node:node /repo/apps/api/drizzle ./drizzle
+# Uploaded files (inventory photos): a volume in compose, writable by the node user.
+RUN mkdir -p /app/uploads && chown node:node /app/uploads
 USER node
 EXPOSE 3001
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=5 \

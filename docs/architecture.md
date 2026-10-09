@@ -134,6 +134,13 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 - `apps/api/src/jobs/scheduler.ts` : planificateur dans le processus de l'API (une seule instance), lancé par `index.ts`.
 - Rappels J-1 toutes les 15 minutes : inscrits confirmés et staffs validés des événements / créneaux qui commencent dans les 24 h. Chaque rappel est « réservé » (`reminder_sent_at`, `FOR UPDATE SKIP LOCKED`) avant l'envoi, après le commit : jamais envoyé deux fois.
 
+## Fichiers envoyés (photos de l'inventaire)
+
+- Réduites **dans le navigateur** (1600 px, JPEG) avant l'envoi : rapide sur un réseau faible, pas de bibliothèque d'image côté serveur.
+- L'API vérifie le vrai type par les premiers octets (JPEG, PNG, WebP), limite à 3 Mo, génère le nom du fichier (aucun chemin fourni par l'utilisateur) et les stocke dans `UPLOAD_DIR` (volume Docker `uploads`).
+- Le web les sert sous `/inventory/photos/…` en relayant la session : les membres seulement, le navigateur ne parle jamais à l'API.
+- Le service `backup` archive aussi ce dossier chaque jour (`photos-AAAA-MM-JJ.tar.gz`).
+
 ## Notifications push
 
 - Web Push standard (VAPID), sans service tiers à configurer : clés générées avec `pnpm --filter api push:keys`, dans `.env` (`VAPID_*`). Sans clés, le push est désactivé et l'appli marche normalement.

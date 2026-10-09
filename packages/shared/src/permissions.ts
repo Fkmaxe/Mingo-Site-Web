@@ -23,6 +23,10 @@ export const PERMISSIONS = [
   "budget:read",
   "budget:manage",
   "stats:read",
+  /** Add, edit, move, take out and return equipment. */
+  "inventory:manage",
+  /** Archive equipment (it leaves the list, its history stays). */
+  "inventory:archive",
   /** Acts on every pole. Without it, pole-scoped actions require leading that pole. */
   "poles:all",
   "roles:manage",
@@ -43,7 +47,7 @@ export function isPermission(value: string): value is Permission {
  */
 export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = {
   student: ["events:register"],
-  member: ["staff:register", "members:read"],
+  member: ["staff:register", "members:read", "inventory:manage"],
   pole_lead: [
     "events:create",
     "events:update",
@@ -54,6 +58,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "tasks:manage",
     "meetings:manage",
     "grades:propose",
+    "inventory:archive",
   ],
   board: [
     "events:create",
@@ -73,6 +78,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "partners:manage",
     "budget:read",
     "stats:read",
+    "inventory:archive",
     "poles:all",
   ],
   treasurer: ["budget:read", "budget:manage"],

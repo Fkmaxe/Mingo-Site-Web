@@ -1,6 +1,7 @@
 import {
   ClipboardList,
   type LucideIcon,
+  Package,
   Sparkles,
   Ticket,
   UserPlus,
@@ -24,7 +25,7 @@ function Shortcuts({ items }: { items: Shortcut[] }) {
   return (
     <ul
       className={
-        items.length === 4 ? "grid grid-cols-2 gap-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3"
+        items.length >= 4 ? "grid grid-cols-2 gap-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3"
       }
     >
       {items.map(({ href, label, hint, icon: Icon }) => (
@@ -58,6 +59,7 @@ export default async function HomePage() {
         { href: "/tasks", label: "Mes tâches", hint: "Le tableau du pôle", icon: ClipboardList },
         { href: "/meetings", label: "Réunions", hint: "Ordres du jour, CR", icon: Video },
         { href: "/team", label: "L'équipe", hint: "Annuaire, partenaires", icon: Users },
+        { href: "/inventory", label: "Inventaire", hint: "Matériel du BDE", icon: Package },
       ]
     : [
         { href: "/tickets", label: "Mes billets", hint: "QR code à l'entrée", icon: Ticket },

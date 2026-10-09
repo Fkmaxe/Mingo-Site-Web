@@ -15,6 +15,8 @@ const config: NextConfig = {
   // Biome lints the whole monorepo.
   eslint: { ignoreDuringBuilds: true },
   poweredByHeader: false,
+  // Inventory photos go through a server action (already resized by the browser).
+  experimental: { serverActions: { bodySizeLimit: "4mb" } },
   async headers() {
     return [
       {

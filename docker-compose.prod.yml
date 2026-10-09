@@ -35,6 +35,9 @@ services:
       NODE_ENV: production
       PORT: "3001"
       DATABASE_URL: postgres://${POSTGRES_USER:-bde}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-bde_mingo}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -54,7 +57,8 @@ services:
       api:
         condition: service_healthy
 
-  # Sauvegarde quotidienne (pg_dump, 14 jours gardés) dans ./backups, à recopier hors du serveur.
+  # Sauvegarde quotidienne de la base (pg_dump) et des photos (tar), 14 jours gardés, dans
+  # ./backups : à recopier hors du serveur.
   backup:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -65,6 +69,7 @@ services:
       PGDATABASE: ${POSTGRES_DB:-bde_mingo}
     volumes:
       - ./backups:/backups
+      - uploads:/uploads:ro
     entrypoint:
       - sh
       - -c
@@ -78,7 +83,9 @@ services:
             rm -f "$$file.tmp"
             echo "Sauvegarde en échec" >&2
           fi
-          find /backups -name 'bde-*.dump' -mtime +14 -delete
+          tar -czf "/backups/photos-$$(date +%Y-%m-%d).tar.gz" -C /uploads . \
+            && echo "Photos sauvegardées" || echo "Sauvegarde des photos en échec" >&2
+          find /backups \( -name 'bde-*.dump' -o -name 'photos-*.tar.gz' \) -mtime +14 -delete
           sleep 86400
         done
     depends_on:
@@ -106,5 +113,6 @@ services:
 
 volumes:
   db-data:
+  uploads:
   caddy-data:
   caddy-config:

@@ -5,6 +5,7 @@ import { loadEnv } from "./env";
 import { startScheduler } from "./jobs/scheduler";
 import { createSmtpMailer } from "./lib/mailer";
 import { createDisabledPusher, createWebPusher } from "./lib/push";
+import { createDiskPhotoStore } from "./lib/storage";
 import { createNotifier } from "./modules/push";
 
 const env = loadEnv();
@@ -19,7 +20,8 @@ const pusher =
       })
     : createDisabledPusher();
 if (!pusher.enabled) console.log("Notifications push désactivées (pas de clés VAPID).");
-const app = createApp({ env, db, mailer, pusher });
+const photos = createDiskPhotoStore(env.UPLOAD_DIR);
+const app = createApp({ env, db, mailer, pusher, photos });
 
 const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   console.log(`API BDE Mingo sur http://localhost:${info.port}`);

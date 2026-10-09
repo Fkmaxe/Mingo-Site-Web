@@ -56,3 +56,26 @@ export const PARTNER_STATUSES = [
   "ended",
 ] as const;
 export type PartnerStatus = (typeof PARTNER_STATUSES)[number];
+
+/** State of an inventory item, from best to worst. */
+export const ITEM_CONDITIONS = ["new", "good", "worn", "damaged", "broken"] as const;
+export type ItemCondition = (typeof ITEM_CONDITIONS)[number];
+
+/** unique: one object (a speaker); stock: a quantity of the same thing (cups). */
+export const ITEM_KINDS = ["unique", "stock"] as const;
+export type ItemKind = (typeof ITEM_KINDS)[number];
+
+/** Entries of the inventory history (append-only). */
+export const INVENTORY_ACTIONS = [
+  "created",
+  "updated",
+  "moved",
+  "condition_changed",
+  "quantity_adjusted",
+  "photo_changed",
+  "checked_out",
+  "returned",
+  "archived",
+  "restored",
+] as const;
+export type InventoryAction = (typeof INVENTORY_ACTIONS)[number];

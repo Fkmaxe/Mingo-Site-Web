@@ -35,6 +35,8 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER:-bde}:${POSTGRES_PASSWORD:-bde}@db:5432/${POSTGRES_DB:-bde_mingo}
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -60,3 +62,4 @@ services:
 
 volumes:
   db-data:
+  uploads:

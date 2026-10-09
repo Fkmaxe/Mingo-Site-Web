@@ -44,6 +44,7 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [x] Inscriptions d'équipe (tournois)
 - [x] Statistiques
 - [x] Notifications push
+- [x] Inventaire du matériel (état, lieu, photo, sorties, historique)
 
 ## Hors périmètre
 

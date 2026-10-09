@@ -1,5 +1,7 @@
+import { PHOTO_MAX_BYTES } from "@bde/shared";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
+import type { Context } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
@@ -7,6 +9,7 @@ import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import type { Pusher } from "./lib/push";
+import type { PhotoStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
@@ -14,6 +17,7 @@ import { createEventsRouter } from "./modules/events";
 import { createExportsRouter } from "./modules/exports";
 import { createGradesRouter } from "./modules/grades";
 import { createHealthRouter } from "./modules/health";
+import { createInventoryRouter } from "./modules/inventory";
 import { createMeRouter } from "./modules/me";
 import { createMeetingsRouter } from "./modules/meetings";
 import { createMembersRouter } from "./modules/members";
@@ -27,12 +31,15 @@ import { createStatsRouter } from "./modules/stats";
 import { createTasksRouter } from "./modules/tasks";
 import { createTreasuryRouter } from "./modules/treasury";
 
-export type AppDeps = AuthDeps & { pusher: Pusher };
+export type AppDeps = AuthDeps & { pusher: Pusher; photos: PhotoStore };
 
 export const OPENAPI_CONFIG = {
   openapi: "3.1.0",
   info: { title: "API BDE Mingo", version: "1.0.0" },
 };
+
+const tooLargeError = (c: Context) =>
+  c.json(errorBody("VALIDATION_ERROR", "La requête est trop volumineuse."), 413);
 
 export function createApp(deps: AppDeps) {
   const { env, db } = deps;
@@ -41,14 +48,16 @@ export function createApp(deps: AppDeps) {
 
   app.use("*", secureHeaders());
   app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }));
-  // JSON only (files are links): anything bigger is a mistake or an attack.
-  app.use(
-    "*",
-    bodyLimit({
-      maxSize: 1024 * 1024,
-      onError: (c) =>
-        c.json(errorBody("VALIDATION_ERROR", "La requête est trop volumineuse."), 413),
-    }),
+  // JSON requests stay small; only inventory photos (images, resized by the browser) are bigger.
+  const tooLarge = bodyLimit({ maxSize: 1024 * 1024, onError: (c) => tooLargeError(c) });
+  const photoLimit = bodyLimit({
+    maxSize: PHOTO_MAX_BYTES + 64 * 1024,
+    onError: (c) => tooLargeError(c),
+  });
+  app.use("*", (c, next) =>
+    /^\/v1\/inventory\/items\/[^/]+\/photo$/.test(c.req.path)
+      ? photoLimit(c, next)
+      : tooLarge(c, next),
   );
   app.onError(onError);
   app.notFound(onNotFound);
@@ -84,6 +93,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createStatsRouter());
   app.route("/v1", createPushRouter());
   app.route("/v1", createAdminRouter());
+  app.route("/v1", createInventoryRouter(deps.photos));
 
   app.doc31("/v1/openapi.json", OPENAPI_CONFIG);
   if (env.NODE_ENV !== "production") {
