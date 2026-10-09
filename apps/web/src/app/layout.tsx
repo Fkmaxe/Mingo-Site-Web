@@ -26,7 +26,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(env.SITE_URL),
   title: { default: "BDE Mingo", template: "%s · BDE Mingo" },
   appleWebApp: { capable: true, title: "BDE Mingo", statusBarStyle: "default" },
-  icons: { icon: "/icons/192", apple: "/icons/192" },
   description: "Événements, billets et points open du BDE Mingo (ESGI Paris).",
 };
 
