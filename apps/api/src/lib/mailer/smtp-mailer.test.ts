@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ehloName } from "./smtp-mailer";
+import { ehloName, maskAddress } from "./smtp-mailer";
 
 describe("ehloName", () => {
   it("uses the domain of MAIL_FROM, with or without a display name", () => {
@@ -12,5 +12,11 @@ describe("ehloName", () => {
       "mingo.grados.fr",
     );
     expect(ehloName({ MAIL_FROM: "BDE Mingo" })).toBeUndefined();
+  });
+});
+
+describe("maskAddress", () => {
+  it("keeps the first letter and the domain", () => {
+    expect(maskAddress("m.grados@myskolae.fr")).toBe("m***@myskolae.fr");
   });
 });

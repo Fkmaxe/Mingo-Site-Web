@@ -3,6 +3,7 @@
 //   Docker : docker compose exec api node dist/mail-test.js toi@exemple.fr
 import nodemailer from "nodemailer";
 import { z } from "zod";
+import { verificationEmail } from "../core/auth/emails";
 import { loadEnv } from "../env";
 import { smtpOptions } from "../lib/mailer/smtp-mailer";
 
@@ -71,9 +72,17 @@ async function main() {
       subject: "Test d'envoi : BDE Mingo",
       text: "Si tu lis ce mail, l'envoi depuis le serveur fonctionne.",
     });
-    console.log(`✔ Mail accepté par le serveur (${info.response})`);
+    console.log(`✔ Mail simple accepté par le serveur (${info.response})`);
+    // The real confirmation mail (HTML, button, link): filtered more often than plain text.
+    const sample = verificationEmail(
+      { email: to, name: "Test" },
+      `${env.BETTER_AUTH_URL}/api/auth/verify-email?token=exemple-de-test`,
+    );
+    const info2 = await transport.sendMail({ from: env.MAIL_FROM, ...sample });
+    console.log(`✔ Mail de confirmation (modèle réel) accepté (${info2.response})`);
+    console.log("  Deux mails envoyés. Si seul le mail simple arrive : filtrage à l'arrivée");
     console.log(
-      "  Pas reçu ? Regarde les indésirables, puis la configuration SPF/DKIM du domaine.",
+      "  (indésirables, quarantaine Microsoft 365 de l'école), voir SPF/DKIM du domaine.",
     );
   } catch (error) {
     console.error("✘ Échec :", error instanceof Error ? error.message : error);

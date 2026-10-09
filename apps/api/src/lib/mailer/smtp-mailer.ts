@@ -38,11 +38,25 @@ export function smtpOptions(config: SmtpConfig) {
   };
 }
 
+/** "m***@myskolae.fr": enough to follow a mail in the logs, without the full address. */
+export function maskAddress(address: string): string {
+  const [local = "", domain = ""] = address.split("@");
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
+/** Every mail is logged (sent with the server's queue id, or failed), so a lost mail can be traced. */
 export function createSmtpMailer(config: SmtpConfig): Mailer {
   const transport = nodemailer.createTransport(smtpOptions(config));
   return {
     async send(mail: Mail) {
-      await transport.sendMail({ from: config.MAIL_FROM, ...mail });
+      const to = maskAddress(mail.to);
+      try {
+        const info = await transport.sendMail({ from: config.MAIL_FROM, ...mail });
+        console.log(`Mail envoyé : « ${mail.subject} » → ${to} (${info.response})`);
+      } catch (error) {
+        console.error(`Mail en échec : « ${mail.subject} » → ${to}`, error);
+        throw error;
+      }
     },
   };
 }
