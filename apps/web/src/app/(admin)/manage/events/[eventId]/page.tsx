@@ -11,6 +11,8 @@ import { eventToForm } from "@/features/events/event-form-values";
 import { EventManageActions } from "@/features/events/event-manage-actions";
 import { manageablePoles } from "@/features/events/manageable-poles";
 import { getEventOr404, listPoles } from "@/features/events/queries";
+import { LeagueManager } from "@/features/league/league-manager";
+import { getEventLeague } from "@/features/league/queries";
 import { listAllRegistrants, listTeams } from "@/features/registrations/queries";
 import { RegistrantsList } from "@/features/registrations/registrants-table";
 import { TeamsList } from "@/features/registrations/teams-list";
@@ -33,11 +35,12 @@ export default async function ManageEventPage({
   const [me, event, poles] = await Promise.all([requireMe(), getEventOr404(eventId), listPoles()]);
   if (!event.canManage) notFound();
   const teamMinSize = event.teamMaxSize !== null ? event.teamMinSize : null;
-  const [registrants, staffSlots, teams, stats] = await Promise.all([
+  const [registrants, staffSlots, teams, stats, league] = await Promise.all([
     event.status === "draft" ? [] : listAllRegistrants(event.id),
     listStaffSlots(event.id),
     event.status === "draft" || teamMinSize === null ? [] : listTeams(event.id),
     event.status === "draft" ? null : getEventStats(event.id),
+    event.status === "draft" || event.status === "cancelled" ? null : getEventLeague(event.id),
   ]);
   const editable = event.status === "draft" || event.status === "published";
   // The current pole stays selectable even when the user cannot create events for it.
@@ -81,6 +84,13 @@ export default async function ManageEventPage({
         <section className="flex flex-col gap-3">
           <h2 className="font-bold font-display text-lg">Chiffres</h2>
           <EventStatsView stats={stats} />
+        </section>
+      ) : null}
+
+      {league ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-bold font-display text-lg">Ligue & tournoi</h2>
+          <LeagueManager eventId={event.id} league={league} />
         </section>
       ) : null}
 

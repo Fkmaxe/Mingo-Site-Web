@@ -36,12 +36,24 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité ; en équipes pour un événement par équipe), registration_deadline, open_points_value, custom_fields_schema (jsonb), team_min_size, team_max_size (Lot 4, les deux null = inscription individuelle), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at ; tailles d'équipe toutes deux nulles ou 1 ≤ min ≤ max |
+| `event` | pole_id, title, slug, description, poster_url, location, starts_at, ends_at, visibility, capacity (nullable = illimité ; en équipes pour un événement par équipe), registration_deadline, open_points_value, custom_fields_schema (jsonb), team_min_size, team_max_size (Lot 4, les deux null = inscription individuelle), league_sport_id (compte pour la ligue si renseigné), status (`draft`, `published`, `cancelled`, `done`) | ends_at > starts_at ; tailles d'équipe toutes deux nulles ou 1 ≤ min ≤ max |
 | `registration` | event_id, user_id, status (`confirmed`, `waitlisted`, `cancelled`), waitlist_position, answers (jsonb, Lot 2), qr_token (unique), team_id (Lot 4, vidé à l'annulation), cancelled_at | unique (event_id, user_id) ; cancelled_at ssi cancelled ; waitlist_position ssi waitlisted |
 | `team` | event_id, name, join_code (6 caractères, unique), captain_user_id, status (`confirmed`, `waitlisted`), waitlist_position | unique (event_id, lower(name)) ; les membres sont les inscriptions qui pointent vers l'équipe et partagent son statut et sa position ; waitlist_position ssi waitlisted |
 | `staff_slot` | event_id, label, starts_at, ends_at, capacity | |
 | `staff_assignment` | staff_slot_id, membership_id, status (`proposed`, `validated`, `declined`) | unique (staff_slot_id, membership_id) |
 | `attendance` | event_id, user_id, kind (`participant`, `staff`, `meeting`), checked_in_at, checked_in_by | unique (event_id, user_id, kind) |
+
+### Ligue sportive
+
+| Table | Colonnes clés | Contraintes |
+| --- | --- | --- |
+| `sport` | name | unique lower(name) ; six sports insérés par la migration |
+| `league_season` | school_year_id, name, prizes, placement_points (int[], défaut {10,7,5,3,2}), participation_points (défaut 1) | une par année ; 1 à 10 places ; valeurs par défaut tant que le bureau n'a rien enregistré |
+| `tournament` | event_id, format (`pools_bracket`, `pools`, `bracket`), pool_count, qualifiers_per_pool, third_place, status (`pools`, `bracket`, `done`) | un par événement |
+| `tournament_entrant` | tournament_id, user_id **ou** team_id, seed, pool | exactement l'un des deux ; unique (tournament_id, seed / user_id / team_id) |
+| `tournament_match` | tournament_id, phase (`pool`, `bracket`, `third_place`), pool, round, position, entrant_a_id, entrant_b_id, winner_id, draw, score_a, score_b | un emplacement unique par (tournoi, phase, poule, tour, position) ; nul seulement en poule ; deux scores ou aucun |
+| `league_result` | event_id, place, user_id **ou** team_id | classement validé courant (remplacé à la correction) ; unique (event_id, place) |
+| `league_points` | school_year_id, event_id, user_id, points, reason (`participation`, `placement`, `reversal`), place | **journal** : jamais modifié ni supprimé ; points ≠ 0 ; un solde = une somme |
 
 ### Points open et notes
 

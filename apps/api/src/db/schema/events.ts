@@ -15,6 +15,7 @@ import {
 import { user } from "./auth";
 import { createdAt, id, updatedAt } from "./columns";
 import { pole } from "./organization";
+import { sport } from "./sports";
 
 export const eventVisibility = pgEnum("event_visibility", EVENT_VISIBILITIES);
 export const eventStatus = pgEnum("event_status", EVENT_STATUSES);
@@ -46,6 +47,8 @@ export const event = pgTable(
     teamMaxSize: integer(),
     /** Grade points of a member's presence; null: the grade period's default. */
     memberPoints: numeric({ precision: 7, scale: 2, mode: "number" }),
+    /** Counts for the internal sports league, in this sport, when set. */
+    leagueSportId: uuid().references(() => sport.id, { onDelete: "restrict" }),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -55,6 +58,7 @@ export const event = pgTable(
     index("event_pole_id_idx").on(t.poleId),
     index("event_created_by_idx").on(t.createdBy),
     index("event_starts_at_idx").on(t.startsAt, t.id),
+    index("event_league_sport_id_idx").on(t.leagueSportId),
     check("event_dates_check", sql`${t.endsAt} > ${t.startsAt}`),
     check(
       "event_deadline_check",

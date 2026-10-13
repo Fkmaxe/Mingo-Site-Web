@@ -45,6 +45,9 @@ Ne pas implémenter un lot avant que le précédent soit fini et testé. Cocher 
 - [x] Statistiques
 - [x] Notifications push
 - [x] Inventaire du matériel (état, lieu, photo, sorties, historique)
+- [x] Classes (année + filière) et photo de profil ; logo du BDE dans les mails
+- [x] Connexion par code envoyé par mail et par passkey
+- [x] Ligue sportive interne : tournois (poules, arbre, petite finale), points en journal, classement général
 
 ## Hors périmètre
 

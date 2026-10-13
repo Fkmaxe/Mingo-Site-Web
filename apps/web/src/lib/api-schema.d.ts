@@ -6215,6 +6215,937 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/league": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    levelId?: string;
+                    trackId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Saison, classement général et résultats */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["League"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LeagueSeasonInput"];
+                };
+            };
+            responses: {
+                /** @description Réglages enregistrés */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["League"];
+                    };
+                };
+                /** @description Entrée invalide */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé au bureau */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description ALREADY_EXISTS */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/league/sports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SportInput"];
+                };
+            };
+            responses: {
+                /** @description Sport ajouté */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["League"];
+                    };
+                };
+                /** @description Entrée invalide */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé au bureau */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description ALREADY_EXISTS */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/league/sports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SportInput"];
+                };
+            };
+            responses: {
+                /** @description Sport renommé */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["League"];
+                    };
+                };
+                /** @description Entrée invalide */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Réservé au bureau */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description ALREADY_EXISTS */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventRef}/league": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventRef: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ligue, tournoi et résultats de l'événement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/league": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetLeagueSportInput"];
+                };
+            };
+            responses: {
+                /** @description Sport de ligue enregistré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/tournament": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateTournamentInput"];
+                };
+            };
+            responses: {
+                /** @description Tournoi créé, poules ou arbre tirés */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Tournoi supprimé */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/tournament/bracket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Arbre tiré depuis les poules */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tournament-matches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecordMatchInput"];
+                };
+            };
+            responses: {
+                /** @description Résultat enregistré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/events/{eventId}/league/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ValidateLeagueResultsInput"];
+                };
+            };
+            responses: {
+                /** @description Classement validé, points de ligue écrits */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventLeague"];
+                    };
+                };
+                /** @description Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas organisateur de cet événement */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Événement, tournoi ou match introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/push/config": {
         parameters: {
             query?: never;
@@ -8369,7 +9300,7 @@ export interface components {
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
             roles: ("student" | "member" | "pole_lead" | "board" | "treasurer" | "admin")[];
-            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:read" | "budget:manage" | "stats:read" | "inventory:manage" | "inventory:archive" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
+            permissions: ("events:register" | "staff:register" | "members:read" | "events:create" | "events:update" | "events:delete" | "registrations:read" | "checkin:scan" | "members:manage" | "tasks:manage" | "meetings:manage" | "partners:manage" | "grades:propose" | "grades:validate" | "grades:publish" | "open-points:validate" | "open-points:adjust" | "exports:run" | "budget:read" | "budget:manage" | "stats:read" | "inventory:manage" | "inventory:archive" | "league:manage" | "poles:all" | "roles:manage" | "settings:manage" | "audit:read")[];
         };
         Membership: {
             /** Format: uuid */
@@ -8388,7 +9319,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -9309,6 +10240,239 @@ export interface components {
                 members: number;
                 staffShifts: number;
                 meetingsAttended: number;
+            }[];
+        };
+        League: {
+            season: {
+                schoolYear: string;
+                name: string;
+                prizes: string;
+                placementPoints: number[];
+                participationPoints: number;
+            };
+            sports: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                eventCount: number;
+            }[];
+            standings: {
+                rank: number;
+                user: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    promo: string | null;
+                    avatarUrl: string | null;
+                };
+                points: number;
+                events: number;
+            }[];
+            events: {
+                /** Format: uuid */
+                id: string;
+                slug: string;
+                title: string;
+                /** Format: date-time */
+                startsAt: string;
+                sport: string;
+                podium: {
+                    place: number;
+                    name: string;
+                }[];
+            }[];
+            canManage: boolean;
+        };
+        LeagueSeasonInput: {
+            name: string;
+            prizes: string;
+            placementPoints: number[];
+            participationPoints: number;
+        };
+        SportInput: {
+            name: string;
+        };
+        EventLeague: {
+            sport: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
+            canManage: boolean;
+            teamEvent: boolean;
+            tournament: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                format: "pools_bracket" | "pools" | "bracket";
+                poolCount: number;
+                qualifiersPerPool: number;
+                thirdPlace: boolean;
+                /** @enum {string} */
+                status: "pools" | "bracket" | "done";
+                entrants: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    /** Format: uuid */
+                    userId: string | null;
+                    /** Format: uuid */
+                    teamId: string | null;
+                    seed: number;
+                    pool: number | null;
+                }[];
+                pools: {
+                    index: number;
+                    name: string;
+                    standings: {
+                        /** Format: uuid */
+                        entrantId: string;
+                        name: string;
+                        played: number;
+                        won: number;
+                        drawn: number;
+                        lost: number;
+                        points: number;
+                        diff: number;
+                        qualified: boolean;
+                    }[];
+                    matches: {
+                        /** Format: uuid */
+                        id: string;
+                        /** @enum {string} */
+                        phase: "pool" | "bracket" | "third_place";
+                        pool: number | null;
+                        round: number;
+                        position: number;
+                        a: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                        } | null;
+                        b: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                        } | null;
+                        /** Format: uuid */
+                        winnerId: string | null;
+                        draw: boolean;
+                        scoreA: number | null;
+                        scoreB: number | null;
+                        editable: boolean;
+                    }[];
+                }[];
+                rounds: {
+                    round: number;
+                    name: string;
+                    matches: {
+                        /** Format: uuid */
+                        id: string;
+                        /** @enum {string} */
+                        phase: "pool" | "bracket" | "third_place";
+                        pool: number | null;
+                        round: number;
+                        position: number;
+                        a: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                        } | null;
+                        b: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                        } | null;
+                        /** Format: uuid */
+                        winnerId: string | null;
+                        draw: boolean;
+                        scoreA: number | null;
+                        scoreB: number | null;
+                        editable: boolean;
+                    }[];
+                }[];
+                thirdPlaceMatch: {
+                    /** Format: uuid */
+                    id: string;
+                    /** @enum {string} */
+                    phase: "pool" | "bracket" | "third_place";
+                    pool: number | null;
+                    round: number;
+                    position: number;
+                    a: {
+                        /** Format: uuid */
+                        id: string;
+                        name: string;
+                    } | null;
+                    b: {
+                        /** Format: uuid */
+                        id: string;
+                        name: string;
+                    } | null;
+                    /** Format: uuid */
+                    winnerId: string | null;
+                    draw: boolean;
+                    scoreA: number | null;
+                    scoreB: number | null;
+                    editable: boolean;
+                } | null;
+                ranking: string[];
+            } | null;
+            results: {
+                placements: {
+                    place: number;
+                    name: string;
+                    /** Format: uuid */
+                    userId: string | null;
+                    /** Format: uuid */
+                    teamId: string | null;
+                }[];
+            } | null;
+            rewardedPlaces: number;
+            sports: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            }[];
+            candidates: {
+                /** Format: uuid */
+                userId: string | null;
+                /** Format: uuid */
+                teamId: string | null;
+                name: string;
+            }[];
+        };
+        SetLeagueSportInput: {
+            /** Format: uuid */
+            sportId: string | null;
+        };
+        CreateTournamentInput: {
+            /** @enum {string} */
+            format: "pools_bracket" | "pools" | "bracket";
+            /** @enum {string} */
+            source: "checked_in" | "registered";
+            /** @default 2 */
+            poolCount: number;
+            /** @default 2 */
+            qualifiersPerPool: number;
+            /** @default true */
+            thirdPlace: boolean;
+        };
+        RecordMatchInput: {
+            /** @enum {string|null} */
+            result: "a" | "b" | "draw" | null;
+            /** @default null */
+            scoreA: number | null;
+            /** @default null */
+            scoreB: number | null;
+        };
+        ValidateLeagueResultsInput: {
+            placements: {
+                place: number;
+                /** Format: uuid */
+                userId?: string;
+                /** Format: uuid */
+                teamId?: string;
             }[];
         };
         PushConfig: {

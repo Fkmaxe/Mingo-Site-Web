@@ -27,6 +27,8 @@ export const PERMISSIONS = [
   "inventory:manage",
   /** Archive equipment (it leaves the list, its history stays). */
   "inventory:archive",
+  /** League season settings (scale, prizes) and the list of sports. */
+  "league:manage",
   /** Acts on every pole. Without it, pole-scoped actions require leading that pole. */
   "poles:all",
   "roles:manage",
@@ -79,6 +81,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = 
     "budget:read",
     "stats:read",
     "inventory:archive",
+    "league:manage",
     "poles:all",
   ],
   treasurer: ["budget:read", "budget:manage"],

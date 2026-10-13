@@ -11,6 +11,7 @@ export * from "./schemas/custom-fields";
 export * from "./schemas/events";
 export * from "./schemas/grades";
 export * from "./schemas/inventory";
+export * from "./schemas/league";
 export * from "./schemas/me";
 export * from "./schemas/meetings";
 export * from "./schemas/open-points";

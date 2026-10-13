@@ -149,6 +149,7 @@
                 "stats:read",
                 "inventory:manage",
                 "inventory:archive",
+                "league:manage",
                 "poles:all",
                 "roles:manage",
                 "settings:manage",
@@ -271,6 +272,16 @@
                   "MANUAL_ADJUSTMENT_REQUIRES_REASON",
                   "MEMBERS_HAVE_NO_OPEN_POINTS",
                   "NO_CURRENT_SCHOOL_YEAR",
+                  "TOURNAMENT_EXISTS",
+                  "INVALID_TOURNAMENT",
+                  "BRACKET_EXISTS",
+                  "POOLS_NOT_FINISHED",
+                  "MATCH_LOCKED",
+                  "MATCH_NOT_READY",
+                  "DRAW_NOT_ALLOWED",
+                  "NOT_A_LEAGUE_EVENT",
+                  "PLACE_OUT_OF_SCALE",
+                  "NOT_A_PARTICIPANT",
                   "INTERNAL_ERROR"
                 ]
               },
@@ -3715,6 +3726,1005 @@
           "schoolYear",
           "members",
           "byPole"
+        ]
+      },
+      "League": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "object",
+            "properties": {
+              "schoolYear": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "prizes": {
+                "type": "string"
+              },
+              "placementPoints": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "participationPoints": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "schoolYear",
+              "name",
+              "prizes",
+              "placementPoints",
+              "participationPoints"
+            ]
+          },
+          "sports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "eventCount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "eventCount"
+              ]
+            }
+          },
+          "standings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rank": {
+                  "type": "integer"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "promo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "avatarUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "promo",
+                    "avatarUrl"
+                  ]
+                },
+                "points": {
+                  "type": "integer"
+                },
+                "events": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "rank",
+                "user",
+                "points",
+                "events"
+              ]
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "startsAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "sport": {
+                  "type": "string"
+                },
+                "podium": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "place": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "place",
+                      "name"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "title",
+                "startsAt",
+                "sport",
+                "podium"
+              ]
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "season",
+          "sports",
+          "standings",
+          "events",
+          "canManage"
+        ]
+      },
+      "LeagueSeasonInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "prizes": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "placementPoints": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "minItems": 1,
+            "maxItems": 10
+          },
+          "participationPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "name",
+          "prizes",
+          "placementPoints",
+          "participationPoints"
+        ]
+      },
+      "SportInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "EventLeague": {
+        "type": "object",
+        "properties": {
+          "sport": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "teamEvent": {
+            "type": "boolean"
+          },
+          "tournament": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "pools_bracket",
+                  "pools",
+                  "bracket"
+                ]
+              },
+              "poolCount": {
+                "type": "integer"
+              },
+              "qualifiersPerPool": {
+                "type": "integer"
+              },
+              "thirdPlace": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pools",
+                  "bracket",
+                  "done"
+                ]
+              },
+              "entrants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "userId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "teamId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "seed": {
+                      "type": "integer"
+                    },
+                    "pool": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "userId",
+                    "teamId",
+                    "seed",
+                    "pool"
+                  ]
+                }
+              },
+              "pools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "standings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entrantId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "played": {
+                            "type": "integer"
+                          },
+                          "won": {
+                            "type": "integer"
+                          },
+                          "drawn": {
+                            "type": "integer"
+                          },
+                          "lost": {
+                            "type": "integer"
+                          },
+                          "points": {
+                            "type": "integer"
+                          },
+                          "diff": {
+                            "type": "integer"
+                          },
+                          "qualified": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "entrantId",
+                          "name",
+                          "played",
+                          "won",
+                          "drawn",
+                          "lost",
+                          "points",
+                          "diff",
+                          "qualified"
+                        ]
+                      }
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "phase": {
+                            "type": "string",
+                            "enum": [
+                              "pool",
+                              "bracket",
+                              "third_place"
+                            ]
+                          },
+                          "pool": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "round": {
+                            "type": "integer"
+                          },
+                          "position": {
+                            "type": "integer"
+                          },
+                          "a": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          },
+                          "b": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          },
+                          "winnerId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "uuid"
+                          },
+                          "draw": {
+                            "type": "boolean"
+                          },
+                          "scoreA": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "scoreB": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "editable": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "phase",
+                          "pool",
+                          "round",
+                          "position",
+                          "a",
+                          "b",
+                          "winnerId",
+                          "draw",
+                          "scoreA",
+                          "scoreB",
+                          "editable"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "index",
+                    "name",
+                    "standings",
+                    "matches"
+                  ]
+                }
+              },
+              "rounds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "round": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "phase": {
+                            "type": "string",
+                            "enum": [
+                              "pool",
+                              "bracket",
+                              "third_place"
+                            ]
+                          },
+                          "pool": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "round": {
+                            "type": "integer"
+                          },
+                          "position": {
+                            "type": "integer"
+                          },
+                          "a": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          },
+                          "b": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          },
+                          "winnerId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "uuid"
+                          },
+                          "draw": {
+                            "type": "boolean"
+                          },
+                          "scoreA": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "scoreB": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "editable": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "phase",
+                          "pool",
+                          "round",
+                          "position",
+                          "a",
+                          "b",
+                          "winnerId",
+                          "draw",
+                          "scoreA",
+                          "scoreB",
+                          "editable"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "round",
+                    "name",
+                    "matches"
+                  ]
+                }
+              },
+              "thirdPlaceMatch": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "phase": {
+                    "type": "string",
+                    "enum": [
+                      "pool",
+                      "bracket",
+                      "third_place"
+                    ]
+                  },
+                  "pool": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "round": {
+                    "type": "integer"
+                  },
+                  "position": {
+                    "type": "integer"
+                  },
+                  "a": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "b": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "winnerId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "draw": {
+                    "type": "boolean"
+                  },
+                  "scoreA": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "scoreB": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "editable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "phase",
+                  "pool",
+                  "round",
+                  "position",
+                  "a",
+                  "b",
+                  "winnerId",
+                  "draw",
+                  "scoreA",
+                  "scoreB",
+                  "editable"
+                ]
+              },
+              "ranking": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "format",
+              "poolCount",
+              "qualifiersPerPool",
+              "thirdPlace",
+              "status",
+              "entrants",
+              "pools",
+              "rounds",
+              "thirdPlaceMatch",
+              "ranking"
+            ]
+          },
+          "results": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "placements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "place": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "userId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "teamId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "place",
+                    "name",
+                    "userId",
+                    "teamId"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "placements"
+            ]
+          },
+          "rewardedPlaces": {
+            "type": "integer"
+          },
+          "sports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
+                },
+                "teamId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "teamId",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "sport",
+          "canManage",
+          "teamEvent",
+          "tournament",
+          "results",
+          "rewardedPlaces",
+          "sports",
+          "candidates"
+        ]
+      },
+      "SetLeagueSportInput": {
+        "type": "object",
+        "properties": {
+          "sportId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "sportId"
+        ]
+      },
+      "CreateTournamentInput": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pools_bracket",
+              "pools",
+              "bracket"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "checked_in",
+              "registered"
+            ]
+          },
+          "poolCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "default": 2
+          },
+          "qualifiersPerPool": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8,
+            "default": 2
+          },
+          "thirdPlace": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "format",
+          "source"
+        ]
+      },
+      "RecordMatchInput": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "a",
+              "b",
+              "draw",
+              null
+            ]
+          },
+          "scoreA": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 999,
+            "default": null
+          },
+          "scoreB": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 999,
+            "default": null
+          }
+        },
+        "required": [
+          "result"
+        ]
+      },
+      "ValidateLeagueResultsInput": {
+        "type": "object",
+        "properties": {
+          "placements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                },
+                "userId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "teamId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "place"
+              ]
+            },
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "placements"
         ]
       },
       "PushConfig": {
@@ -11045,6 +12055,979 @@
           },
           "422": {
             "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/league": {
+      "get": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "levelId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "trackId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saison, classement général et résultats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/League"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "league"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeagueSeasonInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réglages enregistrés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/League"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/league/sports": {
+      "post": {
+        "tags": [
+          "league"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sport ajouté",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/League"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/league/sports/{id}": {
+      "put": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sport renommé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/League"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé au bureau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventRef}/league": {
+      "get": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "eventRef",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ligue, tournoi et résultats de l'événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/league": {
+      "put": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLeagueSportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sport de ligue enregistré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/tournament": {
+      "post": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTournamentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tournoi créé, poules ou arbre tirés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournoi supprimé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/tournament/bracket": {
+      "post": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arbre tiré depuis les poules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tournament-matches/{id}": {
+      "put": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMatchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Résultat enregistré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}/league/results": {
+      "post": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateLeagueResultsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Classement validé, points de ligue écrits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
             "content": {
               "application/json": {
                 "schema": {

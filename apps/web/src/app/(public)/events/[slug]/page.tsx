@@ -5,6 +5,8 @@ import { BrandPanel, DisplayTitle, Pill } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/events/event-badges";
 import { getEventOr404 } from "@/features/events/queries";
+import { EventLeagueSection } from "@/features/league/event-league-section";
+import { getEventLeague } from "@/features/league/queries";
 import { getMyTeam } from "@/features/registrations/queries";
 import { RegistrationPanel } from "@/features/registrations/registration-panel";
 import { listStaffSlots } from "@/features/staff/queries";
@@ -23,9 +25,10 @@ export default async function EventPage({ params }: Props) {
   const [event, me] = await Promise.all([getEventOr404((await params).slug), getMe()]);
   const isMember = me?.roles.includes("member") ?? false;
   const isTeamEvent = event.teamMinSize !== null && event.teamMaxSize !== null;
-  const [staffSlots, team] = await Promise.all([
+  const [staffSlots, team, league] = await Promise.all([
     isMember && event.status === "published" ? listStaffSlots(event.id) : [],
     isTeamEvent && event.myRegistration ? getMyTeam(event.id) : null,
+    me && event.status !== "draft" ? getEventLeague(event.id) : null,
   ]);
   return (
     <article className="flex flex-col gap-5">
@@ -112,6 +115,8 @@ export default async function EventPage({ params }: Props) {
       {event.status !== "draft" ? (
         <RegistrationPanel event={event} signedIn={me !== null} team={team} />
       ) : null}
+
+      {league ? <EventLeagueSection league={league} /> : null}
 
       <StaffVolunteerPanel slots={staffSlots} />
 

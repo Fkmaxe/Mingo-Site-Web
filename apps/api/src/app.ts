@@ -19,6 +19,7 @@ import { createExportsRouter } from "./modules/exports";
 import { createGradesRouter } from "./modules/grades";
 import { createHealthRouter } from "./modules/health";
 import { createInventoryRouter } from "./modules/inventory";
+import { createLeagueRouter } from "./modules/league";
 import { createMeRouter } from "./modules/me";
 import { createMeetingsRouter } from "./modules/meetings";
 import { createMembersRouter } from "./modules/members";
@@ -93,6 +94,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createPartnersRouter());
   app.route("/v1", createTreasuryRouter());
   app.route("/v1", createStatsRouter());
+  app.route("/v1", createLeagueRouter());
   app.route("/v1", createPushRouter());
   app.route("/v1", createAdminRouter());
   app.route("/v1", createInventoryRouter(deps.photos));

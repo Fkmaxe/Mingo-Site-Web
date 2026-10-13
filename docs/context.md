@@ -135,6 +135,21 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - **Nouvel événement publié** : envoyé aux appareils qui l'acceptent (case « Me prévenir des nouveaux événements », cochée par défaut), seulement à ceux qui peuvent voir l'événement (événements « membres » : membres de l'année), jamais à la personne qui publie.
 - Se déconnecter désabonne l'appareil : un téléphone prêté ne reçoit pas les notifications d'un autre compte.
 
+## Ligue sportive
+
+- La **Ligue Sportive Interne** dure une année scolaire. Le classement général est mis à jour à chaque événement validé ; les 3 premiers gagnent des lots (PS5, Switch 2, carte Amazon 100 € en 2026-2027), affichés sur la page `/ligue`.
+- Un événement **compte pour la ligue** quand son organisateur (responsable du pôle, bureau) choisit son **sport** dans la gestion de l'événement : tennis de table, badminton, five, padel, basket, paintball au départ ; le bureau ajoute ou renomme les sports. Les événements inter-écoles ne comptent pas : on ne choisit pas de sport.
+- **Points** (réglables par le bureau, pour la saison) : 1 point de participation, plus un bonus par place : 1er +10, 2e +7, 3e +5, 4e +3, 5e +2. Le 1er marque donc 11 points, le 5e 3 points, les autres 1 point.
+- La participation va à chaque personne **pointée à l'entrée**, et aussi à une personne classée qui ne l'aurait pas été (elle a joué). En équipe, **chaque membre** de l'équipe classée reçoit les points de la place.
+- **Tournoi** intégré à l'événement (facultatif) : participants = personnes (ou équipes) pointées à l'entrée, ou tous les inscrits confirmés ; têtes de série dans l'ordre d'inscription. Trois formats :
+  - **poules + arbre** : chacun contre chacun en poule (répartition en serpentin), puis les N premiers de chaque poule en élimination directe, poules croisées (1er A contre 2e B) ;
+  - **arbre seul** : élimination directe, les meilleures têtes de série sont exemptées du premier tour si le nombre n'est pas une puissance de 2 ;
+  - **poules seules** : classement aux points.
+- Poules : victoire 3 points, nul 1, défaite 0 ; à égalité, différence de score, confrontation directe, score marqué, puis tête de série. Pas de match nul en phase finale. **Petite finale** pour la 3e place (au choix).
+- L'organisateur saisit chaque match en un tap sur le vainqueur, score facultatif. Une correction est possible tant que le match suivant n'est pas joué. Les résultats des poules sont figés une fois l'arbre tiré.
+- **Classement de l'événement** proposé d'après le tournoi : vainqueur, finaliste, petite finale, puis éliminés au même tour départagés par leur bilan de poule (puis tête de série). L'organisateur le corrige si besoin et clique « Valider le classement » : les points sont écrits dans un **journal** (ajout seul). Une nouvelle validation annule les points de l'événement par des mouvements inverses puis écrit les nouveaux. Tout est tracé dans l'audit.
+- Le classement général (ex aequo = même rang) est visible par tous les étudiants connectés, filtrable par année et filière ; le tournoi (poules, arbre) est visible en direct sur la page de l'événement.
+
 ## Statistiques
 
 - **Par événement** (ses organisateurs : responsable du pôle, bureau) : inscrits, liste d'attente, désinscriptions, présents et taux de présence, absents (inscrits non venus, une fois l'événement commencé), staff validé et pointé, points open générés, inscriptions jour par jour. Équipes inscrites pour un tournoi.
@@ -165,5 +180,6 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - [ ] Événements ouverts aux externes (hors myskolae.fr) ?
 - [x] ~~Paiements (soirées, goodies) dès cette année ?~~ Pas de paiement dans l'appli : un événement payant passera par un prestataire externe (octobre 2026).
 - [x] ~~Tournois : places par personne ou par équipe ?~~ Par équipe entière : la capacité compte des équipes (octobre 2026).
+- [ ] Ligue : une personne classée mais non pointée à l'entrée reçoit le point de participation (choix par défaut). À confirmer par le bureau.
 - [ ] Durées de conservation des données personnelles (comptes, inscriptions, sessions, audit) : affichées « à préciser » dans les mentions légales.
 - [ ] Directeur de la publication du site : le président (Sulyvan Sayah) ou un des éditeurs (Maxence Grados, Jérémy Chény) ?

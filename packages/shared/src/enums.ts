@@ -79,3 +79,18 @@ export const INVENTORY_ACTIONS = [
   "restored",
 ] as const;
 export type InventoryAction = (typeof INVENTORY_ACTIONS)[number];
+
+/** Pools then knockout bracket, pools only, or knockout bracket only. */
+export const TOURNAMENT_FORMATS = ["pools_bracket", "pools", "bracket"] as const;
+export type TournamentFormat = (typeof TOURNAMENT_FORMATS)[number];
+
+/** Pool matches being played, knockout matches being played, all matches played. */
+export const TOURNAMENT_STATUSES = ["pools", "bracket", "done"] as const;
+export type TournamentStatus = (typeof TOURNAMENT_STATUSES)[number];
+
+export const TOURNAMENT_PHASES = ["pool", "bracket", "third_place"] as const;
+export type TournamentPhase = (typeof TOURNAMENT_PHASES)[number];
+
+/** League ledger: a correction cancels the previous points of the event (`reversal`). */
+export const LEAGUE_POINTS_REASONS = ["participation", "placement", "reversal"] as const;
+export type LeaguePointsReason = (typeof LEAGUE_POINTS_REASONS)[number];
