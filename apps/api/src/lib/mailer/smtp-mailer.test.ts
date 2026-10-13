@@ -20,3 +20,22 @@ describe("maskAddress", () => {
     expect(maskAddress("m.grados@myskolae.fr")).toBe("m***@myskolae.fr");
   });
 });
+
+describe("messageOf", () => {
+  it("attaches the logo inline only when the HTML uses it", async () => {
+    const { buildMail, LOGO_CID } = await import("./layout");
+    const { messageOf } = await import("./smtp-mailer");
+    const branded = buildMail({
+      to: "a@myskolae.fr",
+      subject: "s",
+      title: "t",
+      paragraphs: [],
+      action: { label: "l", url: "https://x.fr" },
+    });
+    expect(messageOf("BDE <a@bde-mingo.fr>", branded).attachments).toMatchObject([
+      { cid: LOGO_CID, contentType: "image/png" },
+    ]);
+    const plain = { to: "a@myskolae.fr", subject: "s", text: "t", html: "<p>t</p>" };
+    expect(messageOf("BDE <a@bde-mingo.fr>", plain).attachments).toEqual([]);
+  });
+});

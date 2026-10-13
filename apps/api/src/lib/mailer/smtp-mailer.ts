@@ -1,6 +1,16 @@
 import nodemailer from "nodemailer";
 import type { Env } from "../../env";
+import { LOGO_CID } from "./layout";
+import { LOGO_PNG_BASE64 } from "./logo";
 import type { Mail, Mailer } from "./mailer";
+
+const LOGO_ATTACHMENT = {
+  filename: "bde-mingo.png",
+  content: LOGO_PNG_BASE64,
+  encoding: "base64",
+  cid: LOGO_CID,
+  contentType: "image/png",
+};
 
 type SmtpConfig = Pick<
   Env,
@@ -38,6 +48,15 @@ export function smtpOptions(config: SmtpConfig) {
   };
 }
 
+/** What nodemailer sends: the mail, its sender and the inline logo when the layout uses it. */
+export function messageOf(from: string, mail: Mail) {
+  return {
+    from,
+    ...mail,
+    attachments: mail.html.includes(`cid:${LOGO_CID}`) ? [LOGO_ATTACHMENT] : [],
+  };
+}
+
 /** "m***@myskolae.fr": enough to follow a mail in the logs, without the full address. */
 export function maskAddress(address: string): string {
   const [local = "", domain = ""] = address.split("@");
@@ -51,7 +70,7 @@ export function createSmtpMailer(config: SmtpConfig): Mailer {
     async send(mail: Mail) {
       const to = maskAddress(mail.to);
       try {
-        const info = await transport.sendMail({ from: config.MAIL_FROM, ...mail });
+        const info = await transport.sendMail(messageOf(config.MAIL_FROM, mail));
         console.log(`Mail envoyé : « ${mail.subject} » → ${to} (${info.response})`);
       } catch (error) {
         console.error(`Mail en échec : « ${mail.subject} » → ${to}`, error);

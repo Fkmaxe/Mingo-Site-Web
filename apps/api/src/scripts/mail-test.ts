@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 import { verificationEmail } from "../core/auth/emails";
 import { loadEnv } from "../env";
-import { smtpOptions } from "../lib/mailer/smtp-mailer";
+import { messageOf, smtpOptions } from "../lib/mailer/smtp-mailer";
 
 const SmtpFailure = z.object({
   code: z.string().optional(),
@@ -78,7 +78,7 @@ async function main() {
       { email: to, name: "Test" },
       `${env.BETTER_AUTH_URL}/api/auth/verify-email?token=exemple-de-test`,
     );
-    const info2 = await transport.sendMail({ from: env.MAIL_FROM, ...sample });
+    const info2 = await transport.sendMail(messageOf(env.MAIL_FROM, sample));
     console.log(`✔ Mail de confirmation (modèle réel) accepté (${info2.response})`);
     console.log("  Deux mails envoyés. Si seul le mail simple arrive : filtrage à l'arrivée");
     console.log(
