@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/avatar";
 import type { Team } from "./types";
 
 /** Teams of a team event, for organisers: completeness and members at a glance. */
@@ -26,12 +27,18 @@ export function TeamsList({ teams, minSize }: { teams: Team[]; minSize: number }
                     : `Incomplète (${team.members.length}/${minSize})`}
               </span>
             </div>
-            <span className="text-muted-foreground text-xs">
-              Code {team.joinCode} ·{" "}
-              {team.members
-                .map((m) => `${m.name}${m.userId === team.captainId ? " (capitaine)" : ""}`)
-                .join(", ")}
-            </span>
+            <span className="text-muted-foreground text-xs">Code {team.joinCode}</span>
+            <ul className="flex flex-wrap gap-x-3 gap-y-1.5 pt-1">
+              {team.members.map((m) => (
+                <li key={m.userId} className="flex items-center gap-1.5 text-xs">
+                  <Avatar name={m.name} url={m.avatarUrl} size={24} />
+                  {m.name}
+                  {m.userId === team.captainId ? (
+                    <span className="text-muted-foreground">(capitaine)</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
           </li>
         );
       })}

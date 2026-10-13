@@ -94,3 +94,7 @@ export type TournamentPhase = (typeof TOURNAMENT_PHASES)[number];
 /** League ledger: a correction cancels the previous points of the event (`reversal`). */
 export const LEAGUE_POINTS_REASONS = ["participation", "placement", "reversal"] as const;
 export type LeaguePointsReason = (typeof LEAGUE_POINTS_REASONS)[number];
+
+/** Initial training or work-study (alternance). From some years on, work-study only. */
+export const STUDY_RHYTHMS = ["initial", "alternance"] as const;
+export type StudyRhythm = (typeof STUDY_RHYTHMS)[number];

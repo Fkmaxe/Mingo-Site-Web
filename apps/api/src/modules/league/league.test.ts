@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { EventLeagueDto, LeagueDto, type TournamentMatchDto } from "@bde/shared";
+import { EventLeagueDto, LeagueDto, MyLeagueDto, type TournamentMatchDto } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { auditLog, leaguePoints, registration, sport, team } from "../../db/schema";
 import { getTestDb } from "../../test/db";
+import { testPusher } from "../../test/env";
 import {
   createAttendance,
   createEvent,
@@ -574,5 +575,82 @@ describe("POST /v1/events/{id}/league/results", () => {
         )
       ).standings,
     ).toEqual([]);
+  });
+});
+
+describe("GET /v1/league/me", () => {
+  it("gives the signed-in person's rank, points and events, with their team's place", async () => {
+    const solo = await leagueEvent(3);
+    await call("POST", `/v1/events/${solo.ev.id}/league/results`, lead.id, {
+      placements: [
+        { place: 1, userId: solo.players[1]?.id },
+        { place: 2, userId: solo.players[0]?.id },
+      ],
+    });
+    const ev = await createEvent({
+      poleId,
+      leagueSportId: sportId,
+      teamMinSize: 1,
+      teamMaxSize: 2,
+    });
+    const me = solo.players[0];
+    if (!me) throw new Error("player");
+    const [row] = await getTestDb()
+      .insert(team)
+      .values({ eventId: ev.id, name: "Les Flamants", joinCode: "FLAM01", captainUserId: me.id })
+      .returning();
+    await register(ev.id, me.id, row?.id ?? null);
+    await call("POST", `/v1/events/${ev.id}/league/results`, lead.id, {
+      placements: [{ place: 1, teamId: row?.id }],
+    });
+
+    const mine = await readJson(await call("GET", "/v1/league/me", me.id), MyLeagueDto);
+    expect(mine).toMatchObject({
+      seasonName: "Ligue Sportive Interne",
+      rank: 1,
+      points: 19,
+      ranked: 3,
+    });
+    expect(mine.events.map((e) => [e.id, e.points, e.place])).toEqual(
+      expect.arrayContaining([
+        [solo.ev.id, 8, 2],
+        [ev.id, 11, 1],
+      ]),
+    );
+    const nobody = await readJson(await call("GET", "/v1/league/me", student.id), MyLeagueDto);
+    expect(nobody).toMatchObject({ rank: null, points: 0, ranked: 3, events: [] });
+    expect((await call("GET", "/v1/league/me")).status).toBe(401);
+  });
+});
+
+describe("league results notification", () => {
+  it("tells each person who scored their points and place, after the commit", async () => {
+    const { ev, players } = await leagueEvent(2);
+    const [winner, other] = players;
+    if (!winner || !other) throw new Error("players");
+    const endpoints: string[] = [];
+    for (const [i, u] of [winner, other].entries()) {
+      const endpoint = `https://fcm.googleapis.com/fcm/send/league-${i}-${randomUUID()}`;
+      endpoints.push(endpoint);
+      await call("POST", "/v1/me/push/subscriptions", u.id, {
+        endpoint,
+        keys: { p256dh: "BPublicKeyOfTheBrowser", auth: "authSecret" },
+        newEvents: false,
+      });
+    }
+    await call("POST", `/v1/events/${ev.id}/league/results`, lead.id, {
+      placements: [{ place: 1, userId: winner.id }],
+    });
+    const to = (endpoint: string | undefined) =>
+      testPusher.sent.filter((s) => s.endpoint === endpoint).map((s) => s.message);
+    expect(to(endpoints[0])).toEqual([
+      {
+        title: `Ligue : résultats de ${ev.title}`,
+        body: "+11 points (1re place). Regarde ta place au classement.",
+        url: "/ligue",
+        tag: `league-${ev.slug}`,
+      },
+    ]);
+    expect(to(endpoints[1])[0]?.body).toBe("+1 point. Regarde ta place au classement.");
   });
 });

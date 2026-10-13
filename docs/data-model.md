@@ -27,10 +27,11 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `class_level` | name, position | nom unique (insensible à la casse) |
+| `class_level` | name, position, alternance_only | nom unique (insensible à la casse) |
+| `class_level_track` | level_id, track_id | filières proposées dans l'année ; aucune ligne = toutes |
 | `track` | name | nom unique (insensible à la casse) |
 
-`user.level_id` / `user.track_id` (nullables) ; `user.promo` est le **libellé calculé** (« 3A · Dev »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
+`user.level_id` / `user.track_id` / `user.rhythm` (`initial`, `alternance`, nullables ; toujours `alternance` dans une année `alternance_only`) ; `user.promo` est le **libellé calculé** (« 1A · MCSI · Alternance », « 3A · Sécurité »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
 
 ### Événements
 

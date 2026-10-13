@@ -2,6 +2,7 @@
 
 import { Check, Copy, Crown } from "lucide-react";
 import { useState } from "react";
+import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
 import type { Team } from "./types";
 
@@ -70,12 +71,11 @@ export function TeamCard({ team, minSize, maxSize }: Props) {
         <ul className="flex flex-col gap-1 text-sm">
           {team.members.map((m) => (
             <li key={m.userId} className="flex items-center gap-2">
+              <Avatar name={m.name} url={m.avatarUrl} size={28} />
+              <span className="truncate">{m.name}</span>
               {m.userId === team.captainId ? (
                 <Crown aria-label="Capitaine" className="size-4 shrink-0 text-primary" />
-              ) : (
-                <span aria-hidden className="size-4 shrink-0" />
-              )}
-              <span className="truncate">{m.name}</span>
+              ) : null}
             </li>
           ))}
         </ul>

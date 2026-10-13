@@ -4,6 +4,7 @@ import {
   LeagueDto,
   LeagueQuery,
   LeagueSeasonInput,
+  MyLeagueDto,
   RecordMatchInput,
   SetLeagueSportInput,
   SportInput,
@@ -21,6 +22,7 @@ import {
   editSport,
   getEventLeague,
   getLeague,
+  getMyLeague,
   recordMatch,
   removeTournament,
   saveSeason,
@@ -68,6 +70,17 @@ const leagueRoute = createRoute({
     200: json(LeagueDto, "Saison, classement général et résultats"),
     401: errorResponse("Pas de session"),
     422: errorResponse("NO_CURRENT_SCHOOL_YEAR"),
+  },
+});
+
+const myLeagueRoute = createRoute({
+  method: "get",
+  path: "/league/me",
+  tags: ["league"],
+  middleware: [requireAuth] as const,
+  responses: {
+    200: json(MyLeagueDto, "Rang, points et événements de la personne connectée"),
+    401: errorResponse("Pas de session"),
   },
 });
 
@@ -170,6 +183,7 @@ export function createLeagueRouter() {
     .openapi(leagueRoute, async (c) =>
       c.json(await getLeague(c.get("ctx"), c.req.valid("query")), 200),
     )
+    .openapi(myLeagueRoute, async (c) => c.json(await getMyLeague(authedCtx(c.get("ctx"))), 200))
     .openapi(saveSeasonRoute, async (c) =>
       c.json(
         await saveSeason(authedCtx(c.get("ctx")), LeagueSeasonInput.parse(await c.req.json())),

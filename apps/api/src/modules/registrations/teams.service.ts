@@ -4,6 +4,7 @@ import { AppError } from "../../core/errors";
 import { inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
 import { type EventRow, findManageableEvent, findVisibleEvent } from "../events";
+import { avatarPath } from "../me";
 import { findRegistration, lockEventRegistrations } from "./registrations.repo";
 import { enrol, parseAnswers } from "./registrations.service";
 import { isTeamEvent, newJoinCode, teamIsComplete, teamIsFull } from "./rules";
@@ -36,7 +37,12 @@ async function toTeamDtos(db: DbOrTx, teams: TeamRow[], minSize: number): Promis
   return teams.map((t) => {
     const own = members
       .filter((m) => m.teamId === t.id)
-      .map((m) => ({ userId: m.userId, name: m.name, promo: m.promo }));
+      .map((m) => ({
+        userId: m.userId,
+        name: m.name,
+        promo: m.promo,
+        avatarUrl: m.image ? avatarPath(m.image) : null,
+      }));
     return {
       id: t.id,
       name: t.name,

@@ -6,6 +6,7 @@ import {
   type EventLeagueDto,
   type LeagueDto,
   type LeagueSeasonInput,
+  type MyLeagueDto,
   type RecordMatchData,
   type TournamentDto,
   type TournamentMatchDto,
@@ -14,11 +15,12 @@ import {
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx, Ctx } from "../../core/context";
 import { AppError } from "../../core/errors";
-import { inTransaction } from "../../core/tx";
+import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
 import type { tournamentMatch } from "../../db/schema";
 import { canManageEvent, type EventRow, findManageableEvent, findVisibleEvent } from "../events";
 import { avatarPath } from "../me";
+import { leagueResultPush } from "../push";
 import { currentSchoolYear, requireCurrentSchoolYear } from "../school-years";
 import {
   deleteTournament,
@@ -30,6 +32,7 @@ import {
   findMatches,
   findMatchWithEvent,
   findMembersOfTeams,
+  findMyEvents,
   findResults,
   findSeason,
   findSport,
@@ -139,6 +142,26 @@ export async function getLeague(
         .map((r) => ({ place: r.place, name: r.name })),
     })),
     canManage: ctx.permissions.has("league:manage"),
+  };
+}
+
+/** Rank, points and events of the signed-in person this season (home page, profile). */
+export async function getMyLeague(ctx: AuthedCtx): Promise<MyLeagueDto> {
+  const year = await currentSchoolYear(ctx);
+  if (!year) return { seasonName: null, rank: null, points: 0, ranked: 0, events: [] };
+  const [season, standings, events] = await Promise.all([
+    seasonOf(ctx.db, year.id),
+    findStandings(ctx.db, year.id, {}),
+    findMyEvents(ctx.db, year.id, ctx.user.id),
+  ]);
+  const ranks = competitionRanks(standings.map((s) => s.points));
+  const index = standings.findIndex((s) => s.id === ctx.user.id);
+  return {
+    seasonName: season.name,
+    rank: index === -1 ? null : (ranks[index] ?? null),
+    points: index === -1 ? 0 : (standings[index]?.points ?? 0),
+    ranked: standings.length,
+    events: events.map((e) => ({ ...e, startsAt: e.startsAt.toISOString() })),
   };
 }
 
@@ -710,7 +733,7 @@ export async function validateResults(
   }
   const points = eventPoints(season, await findCheckedIn(ctx.db, row.id), placements);
 
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     const previous = await findEventPointTotals(tx, row.id);
     await insertLeaguePoints(
       tx,
@@ -775,6 +798,28 @@ export async function validateResults(
         people: points.size,
         corrected: previous.length > 0,
       },
+    });
+    // After the commit: one notification per person who scored, grouped by identical text.
+    defer(async () => {
+      const groups = new Map<string, { points: number; place: number | null; userIds: string[] }>();
+      for (const [userId, p] of points) {
+        const total = p.participation + p.placement;
+        if (total <= 0) continue;
+        const key = `${total}-${p.place}`;
+        const group = groups.get(key) ?? {
+          points: total,
+          place: p.placement > 0 ? p.place : null,
+          userIds: [],
+        };
+        group.userIds.push(userId);
+        groups.set(key, group);
+      }
+      for (const g of groups.values()) {
+        await ctx.services.notifier.notifyUsers(
+          g.userIds,
+          leagueResultPush(row, g.points, g.place),
+        );
+      }
     });
   });
   return getEventLeague(ctx, row.id);

@@ -13,8 +13,13 @@ export async function findUserById(db: DbOrTx, userId: string) {
       promo: user.promo,
       image: user.image,
       isAdmin: user.isAdmin,
-      level: { id: classLevel.id, name: classLevel.name },
+      level: {
+        id: classLevel.id,
+        name: classLevel.name,
+        alternanceOnly: classLevel.alternanceOnly,
+      },
       track: { id: track.id, name: track.name },
+      rhythm: user.rhythm,
     })
     .from(user)
     .leftJoin(classLevel, eq(classLevel.id, user.levelId))

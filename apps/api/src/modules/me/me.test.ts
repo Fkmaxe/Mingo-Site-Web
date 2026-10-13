@@ -29,6 +29,7 @@ describe("GET /v1/me", () => {
       promo: "3A",
       level: null,
       track: null,
+      rhythm: null,
       avatarUrl: null,
       isAdmin: false,
       memberships: [],

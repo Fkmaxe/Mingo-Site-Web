@@ -1,7 +1,7 @@
 import { ClassesDto, MeDto } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
-import { user } from "../../db/schema";
+import { auditLog, user } from "../../db/schema";
 import { authHeaders } from "../../test/auth";
 import { getTestDb } from "../../test/db";
 import { createTestApp, testPhotos } from "../../test/env";
@@ -86,6 +86,99 @@ describe("a student's class", () => {
     const res = await call("PUT", "/v1/me/class", student.id, {
       levelId: "00000000-0000-4000-8000-000000000000",
       trackId: null,
+    });
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("ESGI rules: programmes per year, work-study", () => {
+  async function levelWith(name: string, alternanceOnly: boolean, trackIds: string[]) {
+    const res = await call("POST", "/v1/admin/levels", admin.id, {
+      name,
+      alternanceOnly,
+      trackIds,
+    });
+    const dto = await readJson(res, ClassesDto);
+    const found = dto.levels.find((l) => l.name === name);
+    if (!found) throw new Error("level");
+    return found;
+  }
+
+  it("offers only the year's programmes and lets 1A students choose their rhythm", async () => {
+    const tronc = await track("Tronc commun");
+    const mcsi = await track("MCSI");
+    const secu = await track("Sécurité");
+    const first = await levelWith("1A", false, [tronc, mcsi]);
+    expect(first).toMatchObject({ alternanceOnly: false });
+    expect([...first.trackIds].sort()).toEqual([tronc, mcsi].sort());
+
+    const me = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: first.id,
+        trackId: mcsi,
+        rhythm: "alternance",
+      }),
+      MeDto,
+    );
+    expect(me).toMatchObject({
+      promo: "1A · MCSI · Alternance",
+      rhythm: "alternance",
+      level: { alternanceOnly: false },
+    });
+
+    const refused = await call("PUT", "/v1/me/class", student.id, {
+      levelId: first.id,
+      trackId: secu,
+      rhythm: "initial",
+    });
+    expect(refused.status).toBe(422);
+    expect(await readError(refused)).toMatchObject({
+      code: "TRACK_NOT_OFFERED",
+      message: "Cette filière n'est pas proposée en 1A.",
+    });
+  });
+
+  it("puts every 3A student in work-study, without repeating it in the label", async () => {
+    const secu = await track("Sécurité");
+    const third = await levelWith("3A", true, [secu]);
+    const me = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: third.id,
+        trackId: secu,
+        rhythm: "initial",
+      }),
+      MeDto,
+    );
+    expect(me).toMatchObject({ promo: "3A · Sécurité", rhythm: "alternance" });
+  });
+
+  it("moves a year's students to work-study when it becomes alternance-only", async () => {
+    const fourth = await levelWith("4A", false, []);
+    await call("PUT", "/v1/me/class", student.id, {
+      levelId: fourth.id,
+      trackId: null,
+      rhythm: "initial",
+    });
+    let [row] = await getTestDb().select().from(user).where(eq(user.id, student.id));
+    expect(row?.promo).toBe("4A · Initial");
+
+    await call("PUT", `/v1/admin/levels/${fourth.id}`, admin.id, {
+      name: "4A",
+      alternanceOnly: true,
+    });
+    [row] = await getTestDb().select().from(user).where(eq(user.id, student.id));
+    expect(row).toMatchObject({ rhythm: "alternance", promo: "4A" });
+    const audit = await getTestDb()
+      .select()
+      .from(auditLog)
+      .where(eq(auditLog.action, "class_level.updated"));
+    expect(audit[0]?.payload).toMatchObject({ alternanceOnly: true });
+  });
+
+  it("refuses an unknown programme in the year's list", async () => {
+    const res = await call("POST", "/v1/admin/levels", admin.id, {
+      name: "5A",
+      trackIds: ["00000000-0000-4000-8000-000000000000"],
     });
     expect(res.status).toBe(404);
   });

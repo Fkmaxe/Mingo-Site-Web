@@ -53,6 +53,7 @@ export function findTeamMembers(db: DbOrTx, teamIds: string[]) {
       status: registration.status,
       name: user.name,
       promo: user.promo,
+      image: user.image,
     })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))

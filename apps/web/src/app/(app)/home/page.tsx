@@ -13,6 +13,8 @@ import Link from "next/link";
 import { BrandPanel, DisplayTitle, Logo } from "@/components/brand";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
+import { MyLeagueLink } from "@/features/league/my-league";
+import { getMyLeague } from "@/features/league/queries";
 import { formatPoints } from "@/features/open-points/labels";
 import { getMyOpenPoints } from "@/features/open-points/queries";
 import { requireMe } from "@/lib/session";
@@ -47,10 +49,11 @@ function Shortcuts({ items }: { items: Shortcut[] }) {
 }
 
 export default async function HomePage() {
-  const [me, upcoming, points] = await Promise.all([
+  const [me, upcoming, points, league] = await Promise.all([
     requireMe(),
     listEvents({ limit: 3 }),
     getMyOpenPoints(),
+    getMyLeague(),
   ]);
   const firstName = me.name.split(" ")[0];
   const shortcuts: Shortcut[] = points.isMember
@@ -74,8 +77,8 @@ export default async function HomePage() {
           className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
           <span>
-            <strong className="font-semibold">Complète ta classe</strong> : ton année et ta filière,
-            pour les listes et le classement de la ligue.
+            <strong className="font-semibold">Complète ta classe</strong> : année, filière, initial
+            ou alternance, pour les listes et le classement de la ligue.
           </span>
           <span aria-hidden className="font-semibold text-primary">
             →
@@ -117,6 +120,8 @@ export default async function HomePage() {
       </BrandPanel>
 
       <Shortcuts items={shortcuts} />
+
+      <MyLeagueLink league={league} />
 
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">

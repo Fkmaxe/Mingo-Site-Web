@@ -1,7 +1,50 @@
+import { RHYTHM_LABELS, type StudyRhythm } from "@bde/shared";
 import { BarChart } from "./bar-chart";
 import { formatRate, shortMonth } from "./format";
 import { StatGrid, StatTile } from "./stat-tile";
 import type { YearOverview } from "./types";
+
+type ClassStat = YearOverview["byClass"]["levels"][number];
+
+const classBars = (rows: ClassStat[], label: (name: string) => string = (n) => n) =>
+  rows.map((r) => ({
+    key: r.name ?? "none",
+    label: r.name ? label(r.name) : "Non rens.",
+    value: r.participants,
+  }));
+
+/** Participants of the year by their current class (filled in by the students themselves). */
+function ByClass({ byClass }: { byClass: YearOverview["byClass"] }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="font-bold font-display text-lg">Par classe</h2>
+      <div className="flex flex-col gap-6 rounded-2xl border bg-card p-4 shadow-primary/5 shadow-sm">
+        <BarChart
+          title="Participants par année"
+          unit="participants"
+          empty="Personne n'est encore venu cette année."
+          bars={classBars(byClass.levels)}
+        />
+        <BarChart
+          title="Participants par filière"
+          unit="participants"
+          empty="Personne n'est encore venu cette année."
+          bars={classBars(byClass.tracks)}
+        />
+        <BarChart
+          title="Participants : initial ou alternance"
+          unit="participants"
+          empty="Personne n'est encore venu cette année."
+          bars={classBars(byClass.rhythms, (n) => RHYTHM_LABELS[n as StudyRhythm] ?? n)}
+        />
+        <p className="text-muted-foreground text-xs">
+          Personnes différentes pointées à l'entrée au moins une fois, selon la classe indiquée dans
+          leur profil.
+        </p>
+      </div>
+    </section>
+  );
+}
 
 export function OverviewView({ overview }: { overview: YearOverview }) {
   return (
@@ -87,6 +130,8 @@ export function OverviewView({ overview }: { overview: YearOverview }) {
           </div>
         )}
       </section>
+
+      <ByClass byClass={overview.byClass} />
     </div>
   );
 }

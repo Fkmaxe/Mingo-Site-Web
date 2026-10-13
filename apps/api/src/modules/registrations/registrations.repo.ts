@@ -16,7 +16,7 @@ import {
 } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { compact, type Patch } from "../../db/patch";
-import { event, registration, team, user } from "../../db/schema";
+import { classLevel, event, registration, team, track, user } from "../../db/schema";
 
 export async function countConfirmedByEvent(db: DbOrTx, eventIds: string[]) {
   if (eventIds.length === 0) return new Map<string, number>();
@@ -151,15 +151,28 @@ export function findRegistrants(
       // JS dates stop at milliseconds: the cursor keeps Postgres' full precision.
       createdAtKey: sql<string>`${registration.createdAt}::text`,
       team: team.name,
-      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+      user: registrantUser,
     })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
     .leftJoin(team, eq(team.id, registration.teamId))
+    .leftJoin(classLevel, eq(classLevel.id, user.levelId))
+    .leftJoin(track, eq(track.id, user.trackId))
     .where(and(...conditions))
     .orderBy(asc(registration.createdAt), asc(registration.id))
     .limit(params.limit + 1);
 }
+
+/** Who registered, with their class (filters of the organisers' list). */
+const registrantUser = {
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  promo: user.promo,
+  level: classLevel.name,
+  track: track.name,
+  rhythm: user.rhythm,
+};
 
 const participantSelection = {
   id: registration.id,
@@ -212,11 +225,13 @@ export function findAllRegistrants(db: DbOrTx, eventId: string) {
       createdAt: registration.createdAt,
       answers: registration.answers,
       team: team.name,
-      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+      user: registrantUser,
     })
     .from(registration)
     .innerJoin(user, eq(user.id, registration.userId))
     .leftJoin(team, eq(team.id, registration.teamId))
+    .leftJoin(classLevel, eq(classLevel.id, user.levelId))
+    .leftJoin(track, eq(track.id, user.trackId))
     .where(eq(registration.eventId, eventId))
     .orderBy(asc(user.name));
 }

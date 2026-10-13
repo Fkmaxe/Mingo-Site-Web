@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { PersonNameFields } from "../auth";
-import { APP_ROLES, BOARD_POSITIONS, MEMBERSHIP_ROLES } from "../enums";
+import { APP_ROLES, BOARD_POSITIONS, MEMBERSHIP_ROLES, STUDY_RHYTHMS } from "../enums";
 import { PERMISSIONS } from "../permissions";
 
 export const MembershipDto = z
@@ -22,8 +22,9 @@ export const MeDto = z
     lastName: z.string(),
     /** Class label ("3A · Dev"), computed from level and track. */
     promo: z.string().nullable(),
-    level: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    level: z.object({ id: z.uuid(), name: z.string(), alternanceOnly: z.boolean() }).nullable(),
     track: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    rhythm: z.enum(STUDY_RHYTHMS).nullable(),
     /** Path of the profile photo on the web origin, or null. */
     avatarUrl: z.string().nullable(),
     isAdmin: z.boolean(),

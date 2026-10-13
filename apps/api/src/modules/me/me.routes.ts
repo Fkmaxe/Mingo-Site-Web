@@ -51,6 +51,7 @@ const updateClassRoute = createRoute({
     400: errorResponse("Données invalides"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Niveau ou filière introuvable"),
+    422: errorResponse("TRACK_NOT_OFFERED"),
   },
 });
 

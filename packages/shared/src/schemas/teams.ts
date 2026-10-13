@@ -45,6 +45,7 @@ export const TeamDto = z
         userId: z.uuid(),
         name: z.string(),
         promo: z.string().nullable(),
+        avatarUrl: z.string().nullable(),
       }),
     ),
     /** At least the minimum number of members. */

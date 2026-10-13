@@ -64,6 +64,30 @@ export const LeagueDto = z
   .meta({ id: "League" });
 export type LeagueDto = z.infer<typeof LeagueDto>;
 
+/** The signed-in student's league season: rank, points and events. */
+export const MyLeagueDto = z
+  .object({
+    /** Null between two school years. */
+    seasonName: z.string().nullable(),
+    /** Null without points yet. Ties share their rank. */
+    rank: z.int().nullable(),
+    points: z.int(),
+    /** People with points this season. */
+    ranked: z.int(),
+    events: z.array(
+      z.object({
+        id: z.uuid(),
+        slug: z.string(),
+        title: z.string(),
+        startsAt: z.iso.datetime(),
+        points: z.int(),
+        place: z.int().nullable(),
+      }),
+    ),
+  })
+  .meta({ id: "MyLeague" });
+export type MyLeagueDto = z.infer<typeof MyLeagueDto>;
+
 export const LeagueQuery = z.object({
   levelId: z.uuid().optional(),
   trackId: z.uuid().optional(),

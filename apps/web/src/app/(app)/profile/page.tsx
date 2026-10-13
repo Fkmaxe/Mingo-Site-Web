@@ -10,6 +10,8 @@ import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
+import { MyLeagueCard } from "@/features/league/my-league";
+import { getMyLeague } from "@/features/league/queries";
 import { AvatarEditor } from "@/features/profile/avatar-editor";
 import { ClassForm } from "@/features/profile/class-form";
 import { PasskeysCard } from "@/features/profile/passkeys-card";
@@ -25,11 +27,12 @@ export const metadata: Metadata = { title: "Profil" };
 type Row = { href: string; label: string; icon: LucideIcon };
 
 export default async function ProfilePage() {
-  const [me, push, classes, passkeys] = await Promise.all([
+  const [me, push, classes, passkeys, league] = await Promise.all([
     requireMe(),
     getPushSetup(),
     listClasses(),
     listPasskeys(),
+    getMyLeague(),
   ]);
   const rows: Row[] = me.roles.includes("member")
     ? [
@@ -62,8 +65,8 @@ export default async function ProfilePage() {
         <div className="flex flex-col gap-1">
           <CardTitle>Ma classe</CardTitle>
           <CardDescription>
-            Ton année et ta filière apparaissent dans les listes d'inscrits et le classement de la
-            ligue.
+            Ton année, ta filière et ton rythme apparaissent dans les listes d'inscrits et le
+            classement de la ligue.
           </CardDescription>
         </div>
         <ClassForm
@@ -71,6 +74,7 @@ export default async function ProfilePage() {
           tracks={classes.tracks}
           levelId={me.level?.id ?? null}
           trackId={me.track?.id ?? null}
+          rhythm={me.rhythm}
         />
       </Card>
 
@@ -98,6 +102,8 @@ export default async function ProfilePage() {
           </ul>
         ) : null}
       </Card>
+
+      <MyLeagueCard league={league} />
 
       <PasskeysCard passkeys={passkeys} />
 

@@ -190,6 +190,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiError"];
                     };
                 };
+                /** @description TRACK_NOT_OFFERED */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
             };
         };
         post?: never;
@@ -6348,6 +6357,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/league/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rang, points et événements de la personne connectée */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MyLeague"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/league/sports": {
         parameters: {
             query?: never;
@@ -9290,12 +9343,15 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                alternanceOnly: boolean;
             } | null;
             track: {
                 /** Format: uuid */
                 id: string;
                 name: string;
             } | null;
+            /** @enum {string|null} */
+            rhythm: "initial" | "alternance" | null;
             avatarUrl: string | null;
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
@@ -9319,7 +9375,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -9333,6 +9389,11 @@ export interface components {
             levelId: string | null;
             /** Format: uuid */
             trackId: string | null;
+            /**
+             * @default null
+             * @enum {string|null}
+             */
+            rhythm: "initial" | "alternance" | null;
         };
         Classes: {
             levels: {
@@ -9341,6 +9402,8 @@ export interface components {
                 name: string;
                 userCount: number;
                 position: number;
+                alternanceOnly: boolean;
+                trackIds: string[];
             }[];
             tracks: {
                 /** Format: uuid */
@@ -9352,6 +9415,8 @@ export interface components {
         ClassLevelInput: {
             name: string;
             position?: number;
+            alternanceOnly?: boolean;
+            trackIds?: string[];
         };
         TrackInput: {
             name: string;
@@ -9547,6 +9612,10 @@ export interface components {
                 name: string;
                 email: string;
                 promo: string | null;
+                level: string | null;
+                track: string | null;
+                /** @enum {string|null} */
+                rhythm: "initial" | "alternance" | null;
             };
         };
         Team: {
@@ -9564,6 +9633,7 @@ export interface components {
                 userId: string;
                 name: string;
                 promo: string | null;
+                avatarUrl: string | null;
             }[];
             complete: boolean;
         };
@@ -10211,6 +10281,23 @@ export interface components {
                 checkIns: number;
                 attendanceRate: number | null;
             }[];
+            byClass: {
+                levels: {
+                    name: string | null;
+                    participants: number;
+                    checkIns: number;
+                }[];
+                tracks: {
+                    name: string | null;
+                    participants: number;
+                    checkIns: number;
+                }[];
+                rhythms: {
+                    name: string | null;
+                    participants: number;
+                    checkIns: number;
+                }[];
+            };
         };
         MemberInvolvement: {
             schoolYear: {
@@ -10282,6 +10369,22 @@ export interface components {
                 }[];
             }[];
             canManage: boolean;
+        };
+        MyLeague: {
+            seasonName: string | null;
+            rank: number | null;
+            points: number;
+            ranked: number;
+            events: {
+                /** Format: uuid */
+                id: string;
+                slug: string;
+                title: string;
+                /** Format: date-time */
+                startsAt: string;
+                points: number;
+                place: number | null;
+            }[];
         };
         LeagueSeasonInput: {
             name: string;

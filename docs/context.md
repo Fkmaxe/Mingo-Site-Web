@@ -46,7 +46,13 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 ## Classes et profil
 
-- Chaque étudiant indique sa **classe** dans son profil : une **année** (1A…5A, B1…M2) et une **filière** (Dev, Cyber, Data…), deux listes gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner). Elle s'affiche « 3A · Dev » dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière met à jour tous les étudiants concernés.
+- Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière** et son **rythme** (initial ou alternance). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, et pour chaque année : filières proposées, alternance obligatoire).
+- Organisation de l'ESGI (mise en place par la migration, modifiable) :
+  - **1A et 2A** : **tronc commun** ou **MCSI**, en **initial ou en alternance** au choix ;
+  - **à partir de la 3A** : une filière de spécialité (architecture logicielle, réseaux, sécurité, MCSI…), **forcément en alternance**.
+- Le profil ne propose que les filières de l'année choisie (une année sans filière cochée les propose toutes) ; l'API refuse une filière non proposée. Dans une année en alternance obligatoire, le rythme n'est pas demandé : l'étudiant est en alternance (et passe en alternance si l'année le devient).
+- La classe s'affiche « 1A · MCSI · Alternance » ou « 3A · Sécurité » (le rythme n'est pas répété quand il est obligatoire) dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière met à jour tous les étudiants concernés.
+- Filtres par classe : liste des inscrits d'un événement (année, filière, rythme, « non renseigné »), classement de la ligue (année, filière), statistiques de l'année (participants par année, filière, rythme, selon la classe actuelle de chacun).
 - **Photo de profil** : prise ou choisie depuis le profil, recadrée en carré et réduite dans le navigateur ; visible par les personnes connectées (en-tête, annuaire, équipes, ligue). Sans photo : les initiales.
 
 ## Inventaire
@@ -131,7 +137,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Notifications push
 
 - Chacun active les notifications sur ses appareils, depuis son profil (sur iPhone : une fois l'appli ajoutée à l'écran d'accueil). Elles complètent les mails, ne les remplacent pas.
-- Notifications personnelles : **place libérée** (liste d'attente, y compris l'équipe entière d'un tournoi), **rappel la veille**, **événement annulé**.
+- Notifications personnelles : **place libérée** (liste d'attente, y compris l'équipe entière d'un tournoi), **rappel la veille**, **événement annulé**, **résultats de la ligue** (points et place, à chaque personne qui a marqué, aussi après une correction). Pas de mail pour les résultats : un envoi à tous les participants à chaque événement ferait classer les mails du BDE en indésirables.
 - **Nouvel événement publié** : envoyé aux appareils qui l'acceptent (case « Me prévenir des nouveaux événements », cochée par défaut), seulement à ceux qui peuvent voir l'événement (événements « membres » : membres de l'année), jamais à la personne qui publie.
 - Se déconnecter désabonne l'appareil : un téléphone prêté ne reçoit pas les notifications d'un autre compte.
 
@@ -149,11 +155,12 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - L'organisateur saisit chaque match en un tap sur le vainqueur, score facultatif. Une correction est possible tant que le match suivant n'est pas joué. Les résultats des poules sont figés une fois l'arbre tiré.
 - **Classement de l'événement** proposé d'après le tournoi : vainqueur, finaliste, petite finale, puis éliminés au même tour départagés par leur bilan de poule (puis tête de série). L'organisateur le corrige si besoin et clique « Valider le classement » : les points sont écrits dans un **journal** (ajout seul). Une nouvelle validation annule les points de l'événement par des mouvements inverses puis écrit les nouveaux. Tout est tracé dans l'audit.
 - Le classement général (ex aequo = même rang) est visible par tous les étudiants connectés, filtrable par année et filière ; le tournoi (poules, arbre) est visible en direct sur la page de l'événement.
+- Chacun voit sa place et ses points sur l'accueil, et le détail par événement (points, place) sur son profil.
 
 ## Statistiques
 
 - **Par événement** (ses organisateurs : responsable du pôle, bureau) : inscrits, liste d'attente, désinscriptions, présents et taux de présence, absents (inscrits non venus, une fois l'événement commencé), staff validé et pointé, points open générés, inscriptions jour par jour. Équipes inscrites pour un tournoi.
-- **L'année** (bureau, droit `stats:read`) : événements publiés ou terminés, inscriptions, entrées pointées, participants uniques, taux de présence sur les événements commencés ; détail par mois et par pôle.
+- **L'année** (bureau, droit `stats:read`) : événements publiés ou terminés, inscriptions, entrées pointées, participants uniques, taux de présence sur les événements commencés ; détail par mois, par pôle et par classe (année, filière, initial / alternance).
 - **Implication des membres** (bureau) : créneaux staff pointés et présences en réunion par membre, rapportées aux réunions passées de ses pôles et aux réunions générales ; totaux par pôle.
 
 ## Exports

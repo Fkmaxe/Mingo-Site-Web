@@ -66,11 +66,15 @@
               },
               "name": {
                 "type": "string"
+              },
+              "alternanceOnly": {
+                "type": "boolean"
               }
             },
             "required": [
               "id",
-              "name"
+              "name",
+              "alternanceOnly"
             ]
           },
           "track": {
@@ -90,6 +94,17 @@
             "required": [
               "id",
               "name"
+            ]
+          },
+          "rhythm": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "initial",
+              "alternance",
+              null
             ]
           },
           "avatarUrl": {
@@ -167,6 +182,7 @@
           "promo",
           "level",
           "track",
+          "rhythm",
           "avatarUrl",
           "isAdmin",
           "memberships",
@@ -282,6 +298,7 @@
                   "NOT_A_LEAGUE_EVENT",
                   "PLACE_OUT_OF_SCALE",
                   "NOT_A_PARTICIPANT",
+                  "TRACK_NOT_OFFERED",
                   "INTERNAL_ERROR"
                 ]
               },
@@ -335,6 +352,18 @@
               "null"
             ],
             "format": "uuid"
+          },
+          "rhythm": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "initial",
+              "alternance",
+              null
+            ],
+            "default": null
           }
         },
         "required": [
@@ -362,13 +391,25 @@
                 },
                 "position": {
                   "type": "integer"
+                },
+                "alternanceOnly": {
+                  "type": "boolean"
+                },
+                "trackIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
                 }
               },
               "required": [
                 "id",
                 "name",
                 "userCount",
-                "position"
+                "position",
+                "alternanceOnly",
+                "trackIds"
               ]
             }
           },
@@ -413,6 +454,17 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10000
+          },
+          "alternanceOnly": {
+            "type": "boolean"
+          },
+          "trackIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "maxItems": 50
           }
         },
         "required": [
@@ -1164,13 +1216,39 @@
                   "string",
                   "null"
                 ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "track": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rhythm": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "initial",
+                  "alternance",
+                  null
+                ]
               }
             },
             "required": [
               "id",
               "name",
               "email",
-              "promo"
+              "promo",
+              "level",
+              "track",
+              "rhythm"
             ]
           }
         },
@@ -1230,12 +1308,19 @@
                     "string",
                     "null"
                   ]
+                },
+                "avatarUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "required": [
                 "userId",
                 "name",
-                "promo"
+                "promo",
+                "avatarUrl"
               ]
             }
           },
@@ -3591,6 +3676,91 @@
                 "attendanceRate"
               ]
             }
+          },
+          "byClass": {
+            "type": "object",
+            "properties": {
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "participants": {
+                      "type": "integer"
+                    },
+                    "checkIns": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "participants",
+                    "checkIns"
+                  ]
+                }
+              },
+              "tracks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "participants": {
+                      "type": "integer"
+                    },
+                    "checkIns": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "participants",
+                    "checkIns"
+                  ]
+                }
+              },
+              "rhythms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "participants": {
+                      "type": "integer"
+                    },
+                    "checkIns": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "participants",
+                    "checkIns"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "levels",
+              "tracks",
+              "rhythms"
+            ]
           }
         },
         "required": [
@@ -3601,7 +3771,8 @@
           "uniqueParticipants",
           "attendanceRate",
           "byMonth",
-          "byPole"
+          "byPole",
+          "byClass"
         ]
       },
       "MemberInvolvement": {
@@ -3898,6 +4069,75 @@
           "standings",
           "events",
           "canManage"
+        ]
+      },
+      "MyLeague": {
+        "type": "object",
+        "properties": {
+          "seasonName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rank": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "points": {
+            "type": "integer"
+          },
+          "ranked": {
+            "type": "integer"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "startsAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "points": {
+                  "type": "integer"
+                },
+                "place": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "title",
+                "startsAt",
+                "points",
+                "place"
+              ]
+            }
+          }
+        },
+        "required": [
+          "seasonName",
+          "rank",
+          "points",
+          "ranked",
+          "events"
         ]
       },
       "LeagueSeasonInput": {
@@ -5867,6 +6107,16 @@
           },
           "404": {
             "description": "Niveau ou filière introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "TRACK_NOT_OFFERED",
             "content": {
               "application/json": {
                 "schema": {
@@ -12201,6 +12451,35 @@
           },
           "422": {
             "description": "NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/league/me": {
+      "get": {
+        "tags": [
+          "league"
+        ],
+        "responses": {
+          "200": {
+            "description": "Rang, points et événements de la personne connectée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyLeague"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
             "content": {
               "application/json": {
                 "schema": {

@@ -1,6 +1,8 @@
 import { EventDto, RegistrantDto, TicketDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { classLevel, track } from "../../db/schema";
+import { getTestDb } from "../../test/db";
 import { testMailer } from "../../test/env";
 import {
   createEvent,
@@ -277,6 +279,25 @@ describe("GET /v1/events/:id/registrations", () => {
     expect(second.nextCursor).toBeNull();
     const ids = [...first.items, ...second.items].map((r) => r.user.id).sort();
     expect(ids).toEqual(students.map((s) => s.id).sort());
+  });
+
+  it("gives each registrant's year, programme and rhythm, for the class filters", async () => {
+    const event = await createEvent({ poleId: sport.id });
+    const lead = await createPersona("pole_lead", { poleId: sport.id });
+    const [level] = await getTestDb().insert(classLevel).values({ name: "1A" }).returning();
+    const [mcsi] = await getTestDb().insert(track).values({ name: "MCSI" }).returning();
+    const student = await createUser({
+      levelId: level?.id,
+      trackId: mcsi?.id,
+      rhythm: "alternance",
+      promo: "1A · MCSI · Alternance",
+    });
+    await registerAs(student.id, event.id);
+    const page = await readJson(
+      await call("GET", `/v1/events/${event.id}/registrations`, lead.id),
+      Page,
+    );
+    expect(page.items[0]?.user).toMatchObject({ level: "1A", track: "MCSI", rhythm: "alternance" });
   });
 
   it("refuses students (403) and leads of another pole (403)", async () => {

@@ -117,6 +117,30 @@ export function findStandings(
     .orderBy(desc(points), asc(user.name));
 }
 
+/**
+ * Points of a person per event this year, latest event first, with their validated place
+ * (their own, or their team's).
+ */
+export function findMyEvents(db: DbOrTx, schoolYearId: string, userId: string) {
+  return db
+    .select({
+      id: event.id,
+      slug: event.slug,
+      title: event.title,
+      startsAt: event.startsAt,
+      points: sql<number>`sum(${leaguePoints.points})::int`,
+      place: sql<number | null>`(select min(r."place") from "league_result" r
+        where r."event_id" = "event"."id" and (r."user_id" = ${userId} or r."team_id" in
+          (select g."team_id" from "registration" g where g."event_id" = "event"."id" and g."user_id" = ${userId})))`,
+    })
+    .from(leaguePoints)
+    .innerJoin(event, eq(event.id, leaguePoints.eventId))
+    .where(and(eq(leaguePoints.schoolYearId, schoolYearId), eq(leaguePoints.userId, userId)))
+    .groupBy(event.id)
+    .having(sql`sum(${leaguePoints.points}) <> 0`)
+    .orderBy(desc(event.startsAt));
+}
+
 /** League events with validated results, latest first. */
 export function findValidatedEvents(db: DbOrTx) {
   return db

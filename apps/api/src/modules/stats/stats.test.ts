@@ -1,11 +1,13 @@
 import { EventStatsDto, MemberInvolvementDto, YearOverviewDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  classLevel,
   meeting,
   meetingAttendance,
   registration,
   staffAssignment,
   staffSlot,
+  track,
 } from "../../db/schema";
 import { getTestDb } from "../../test/db";
 import {
@@ -164,6 +166,46 @@ describe("GET /v1/stats/overview", () => {
     expect(overview.byPole.map((p) => [p.pole.name, p.events, p.checkIns])).toEqual([
       ["Communication", 1, 2],
       ["Sport", 1, 2],
+    ]);
+  });
+
+  it("counts check-ins by year of study, programme and rhythm", async () => {
+    const [first] = await getTestDb()
+      .insert(classLevel)
+      .values({ name: "1A", position: 10 })
+      .returning();
+    const [third] = await getTestDb()
+      .insert(classLevel)
+      .values({ name: "3A", position: 30, alternanceOnly: true })
+      .returning();
+    const [secu] = await getTestDb().insert(track).values({ name: "Sécurité" }).returning();
+    const event = await createEvent({ poleId: sport.id, startsAt: hours(-3), endsAt: hours(-1) });
+    const other = await createEvent({ poleId: com.id, startsAt: hours(-3), endsAt: hours(-1) });
+    const alice = await createUser({ levelId: first?.id, rhythm: "initial" });
+    const chloe = await createUser({ levelId: third?.id, trackId: secu?.id, rhythm: "alternance" });
+    const driss = await createUser();
+    for (const u of [alice, chloe, driss])
+      await createAttendance({ eventId: event.id, userId: u.id });
+    await createAttendance({ eventId: other.id, userId: chloe.id });
+
+    const board = await createPersona("board");
+    const { byClass } = await readJson(
+      await call("GET", "/v1/stats/overview", board.id),
+      YearOverviewDto,
+    );
+    expect(byClass.levels).toEqual([
+      { name: "1A", participants: 1, checkIns: 1 },
+      { name: "3A", participants: 1, checkIns: 2 },
+      { name: null, participants: 1, checkIns: 1 },
+    ]);
+    expect(byClass.tracks).toEqual([
+      { name: "Sécurité", participants: 1, checkIns: 2 },
+      { name: null, participants: 2, checkIns: 2 },
+    ]);
+    expect(byClass.rhythms).toEqual([
+      { name: "initial", participants: 1, checkIns: 1 },
+      { name: "alternance", participants: 1, checkIns: 2 },
+      { name: null, participants: 1, checkIns: 1 },
     ]);
   });
 

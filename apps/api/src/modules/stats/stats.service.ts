@@ -12,6 +12,7 @@ import {
   eventStaffCounts,
   eventTeamCounts,
   type YearRange,
+  yearByClass,
   yearByMonth,
   yearByPole,
   yearMeetingsAttended,
@@ -68,11 +69,17 @@ export async function getYearOverview(
   now: Date = new Date(),
 ): Promise<YearOverviewDto> {
   const { schoolYear, range } = await yearOf(ctx, query.schoolYearId, now);
-  const [totals, months, poles] = await Promise.all([
+  const [totals, months, poles, classes] = await Promise.all([
     yearTotals(ctx.db, range),
     yearByMonth(ctx.db, range),
     yearByPole(ctx.db, range),
+    yearByClass(ctx.db, range),
   ]);
+  const byClass = (r: { name: string | null; participants: number; check_ins: number }) => ({
+    name: r.name,
+    participants: r.participants,
+    checkIns: r.check_ins,
+  });
   return {
     schoolYear,
     events: totals.events,
@@ -88,6 +95,11 @@ export async function getYearOverview(
       checkIns: p.check_ins,
       attendanceRate: rate(p.started_check_ins, p.started_confirmed),
     })),
+    byClass: {
+      levels: classes.levels.map(byClass),
+      tracks: classes.tracks.map(byClass),
+      rhythms: classes.rhythms.map(byClass),
+    },
   };
 }
 

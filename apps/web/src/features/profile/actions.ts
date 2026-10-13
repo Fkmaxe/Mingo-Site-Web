@@ -16,6 +16,7 @@ export async function updateProfileAction(input: UpdateProfileInput): Promise<Ac
 export async function updateClassAction(input: {
   levelId: string | null;
   trackId: string | null;
+  rhythm: "initial" | "alternance" | null;
 }): Promise<ActionResult> {
   const { error } = await (await api()).PUT("/v1/me/class", { body: input });
   if (error) return fromApiError(error);

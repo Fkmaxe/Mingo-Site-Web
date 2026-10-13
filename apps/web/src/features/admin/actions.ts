@@ -76,7 +76,7 @@ export async function createLevelAction(name: string): Promise<ActionResult> {
 
 export async function editLevelAction(
   id: string,
-  input: { name: string; position?: number },
+  input: { name: string; position?: number; alternanceOnly?: boolean; trackIds?: string[] },
 ): Promise<ActionResult> {
   const { error } = await (await api()).PUT("/v1/admin/levels/{id}", {
     params: { path: { id } },

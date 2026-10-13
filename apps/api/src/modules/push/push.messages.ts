@@ -32,6 +32,21 @@ export function cancelledPush(event: EventInfo): PushMessage {
   };
 }
 
+/** League results of an event, to each person who scored (corrections included). */
+export function leagueResultPush(
+  event: Pick<EventInfo, "title" | "slug">,
+  points: number,
+  place: number | null,
+): PushMessage {
+  const rank = place === null ? "" : ` (${place === 1 ? "1re" : `${place}e`} place)`;
+  return {
+    title: `Ligue : résultats de ${event.title}`,
+    body: `+${points} point${points > 1 ? "s" : ""}${rank}. Regarde ta place au classement.`,
+    url: "/ligue",
+    tag: `league-${event.slug}`,
+  };
+}
+
 export function newEventPush(event: EventInfo): PushMessage {
   return {
     title: `Nouvel événement : ${event.title}`,

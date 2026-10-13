@@ -9,6 +9,7 @@ import { createLevelAction, createTrackAction, editLevelAction, editTrackAction 
 import { useAction } from "./use-action";
 
 type Entry = { id: string; name: string; userCount: number; position?: number };
+type LevelEntry = Entry & { position: number; alternanceOnly: boolean; trackIds: string[] };
 
 function EntryRow({
   entry,
@@ -22,7 +23,7 @@ function EntryRow({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(entry.name);
   return (
-    <li className="flex min-h-14 items-center gap-2 px-4 py-2">
+    <div className="flex min-h-14 items-center gap-2 px-4 py-2">
       {editing ? (
         <>
           <Input value={name} maxLength={40} autoFocus onChange={(e) => setName(e.target.value)} />
@@ -86,7 +87,74 @@ function EntryRow({
           </Button>
         </>
       )}
-    </li>
+    </div>
+  );
+}
+
+/** Work-study only or not, and the programmes offered in this year (none checked = all). */
+function LevelRules({ level, tracks }: { level: LevelEntry; tracks: Entry[] }) {
+  const { run, pending, error } = useAction();
+  const [alternanceOnly, setAlternanceOnly] = useState(level.alternanceOnly);
+  const [trackIds, setTrackIds] = useState(level.trackIds);
+  const changed =
+    alternanceOnly !== level.alternanceOnly ||
+    [...trackIds].sort().join() !== [...level.trackIds].sort().join();
+  const summary = [
+    level.alternanceOnly ? "Alternance obligatoire" : "Initial ou alternance",
+    level.trackIds.length === 0
+      ? "toutes les filières"
+      : tracks
+          .filter((t) => level.trackIds.includes(t.id))
+          .map((t) => t.name)
+          .join(", "),
+  ].join(" · ");
+  return (
+    <details className="px-4 pb-3">
+      <summary className="min-h-9 cursor-pointer content-center text-muted-foreground text-xs">
+        {summary}
+      </summary>
+      <div className="flex flex-col gap-3 pt-2">
+        {error ? <FormAlert tone="error">{error}</FormAlert> : null}
+        <label className="flex min-h-11 items-center gap-3 text-sm">
+          <input
+            type="checkbox"
+            checked={alternanceOnly}
+            onChange={(e) => setAlternanceOnly(e.target.checked)}
+            className="size-5 accent-primary"
+          />
+          Alternance obligatoire
+        </label>
+        <fieldset className="flex flex-col gap-1">
+          <legend className="mb-1 font-medium text-sm">Filières proposées</legend>
+          {tracks.map((t) => (
+            <label key={t.id} className="flex min-h-10 items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={trackIds.includes(t.id)}
+                onChange={(e) =>
+                  setTrackIds((ids) =>
+                    e.target.checked ? [...ids, t.id] : ids.filter((id) => id !== t.id),
+                  )
+                }
+                className="size-5 accent-primary"
+              />
+              {t.name}
+            </label>
+          ))}
+          <p className="text-muted-foreground text-xs">Aucune cochée : toutes les filières.</p>
+        </fieldset>
+        <Button
+          size="sm"
+          className="self-start"
+          disabled={pending || !changed}
+          onClick={() =>
+            run(() => editLevelAction(level.id, { name: level.name, alternanceOnly, trackIds }))
+          }
+        >
+          Enregistrer
+        </Button>
+      </div>
+    </details>
   );
 }
 
@@ -116,7 +184,7 @@ function AddForm({ placeholder, onAdd }: { placeholder: string; onAdd: (name: st
 }
 
 /** Years of study (ordered) and programmes; students pick theirs in their profile. */
-export function ClassesAdmin({ levels, tracks }: { levels: Entry[]; tracks: Entry[] }) {
+export function ClassesAdmin({ levels, tracks }: { levels: LevelEntry[]; tracks: Entry[] }) {
   const { run, error } = useAction();
   const swap = (a: Entry, b: Entry) =>
     run(async () => {
@@ -135,15 +203,21 @@ export function ClassesAdmin({ levels, tracks }: { levels: Entry[]; tracks: Entr
               const prev = levels[i - 1];
               const next = levels[i + 1];
               return (
-                <EntryRow
-                  key={l.id}
-                  entry={l}
-                  onRename={(name) => run(() => editLevelAction(l.id, { name }))}
-                  move={{
-                    up: prev ? () => swap(l, prev) : null,
-                    down: next ? () => swap(l, next) : null,
-                  }}
-                />
+                <li key={l.id}>
+                  <EntryRow
+                    entry={l}
+                    onRename={(name) => run(() => editLevelAction(l.id, { name }))}
+                    move={{
+                      up: prev ? () => swap(l, prev) : null,
+                      down: next ? () => swap(l, next) : null,
+                    }}
+                  />
+                  <LevelRules
+                    key={`${l.alternanceOnly}-${l.trackIds.join()}`}
+                    level={l}
+                    tracks={tracks}
+                  />
+                </li>
               );
             })}
           </ul>
@@ -158,22 +232,20 @@ export function ClassesAdmin({ levels, tracks }: { levels: Entry[]; tracks: Entr
         {tracks.length > 0 ? (
           <ul className="flex flex-col divide-y rounded-2xl border bg-card shadow-primary/5 shadow-sm">
             {tracks.map((t) => (
-              <EntryRow
-                key={t.id}
-                entry={t}
-                onRename={(name) => run(() => editTrackAction(t.id, name))}
-              />
+              <li key={t.id}>
+                <EntryRow entry={t} onRename={(name) => run(() => editTrackAction(t.id, name))} />
+              </li>
             ))}
           </ul>
         ) : null}
         <AddForm
-          placeholder="Dev, Cyber, Data…"
+          placeholder="Réseaux, Sécurité, MCSI…"
           onAdd={(name) => run(() => createTrackAction(name))}
         />
       </section>
       <p className="text-muted-foreground text-xs">
         Renommer une année ou une filière met à jour la classe affichée de tous les étudiants
-        concernés.
+        concernés. Une année en alternance obligatoire passe tous ses étudiants en alternance.
       </p>
     </div>
   );

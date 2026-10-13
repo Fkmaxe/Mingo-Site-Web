@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { REGISTRATION_STATUSES } from "../enums";
+import { REGISTRATION_STATUSES, STUDY_RHYTHMS } from "../enums";
 
 const EventSummary = z.object({
   id: z.uuid(),
@@ -56,6 +56,9 @@ export const RegistrantDto = z
       name: z.string(),
       email: z.string(),
       promo: z.string().nullable(),
+      level: z.string().nullable(),
+      track: z.string().nullable(),
+      rhythm: z.enum(STUDY_RHYTHMS).nullable(),
     }),
   })
   .meta({ id: "Registrant" });

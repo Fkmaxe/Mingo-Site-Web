@@ -42,6 +42,7 @@ export const ERROR_CODES = [
   "NOT_A_LEAGUE_EVENT",
   "PLACE_OUT_OF_SCALE",
   "NOT_A_PARTICIPANT",
+  "TRACK_NOT_OFFERED",
   "INTERNAL_ERROR",
 ] as const;
 

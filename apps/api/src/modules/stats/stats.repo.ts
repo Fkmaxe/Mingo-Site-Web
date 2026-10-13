@@ -173,6 +173,45 @@ export function yearByPole(db: DbOrTx, range: YearRange) {
   );
 }
 
+const ClassRow = z.object({ name: z.string().nullable(), participants: Count, check_ins: Count });
+
+/**
+ * Check-ins of the year by the participants' current class: year of study, programme, rhythm.
+ * `name` is null for those who did not fill it in.
+ */
+export async function yearByClass(db: DbOrTx, range: YearRange) {
+  const ins = sql`with ev as (${yearEvents(range)}),
+      ins as (select a.user_id from attendance a join ev on ev.id = a.event_id
+        where a.kind = 'participant')`;
+  const [levels, tracks, rhythms] = await Promise.all([
+    rows(
+      db,
+      ClassRow,
+      sql`${ins} select l.name, count(distinct ins.user_id) as participants, count(*) as check_ins
+        from ins join "user" u on u.id = ins.user_id
+        left join class_level l on l.id = u.level_id
+        group by l.id, l.name, l.position order by l.position nulls last, l.name`,
+    ),
+    rows(
+      db,
+      ClassRow,
+      sql`${ins} select t.name, count(distinct ins.user_id) as participants, count(*) as check_ins
+        from ins join "user" u on u.id = ins.user_id
+        left join track t on t.id = u.track_id
+        group by t.id, t.name order by t.name nulls last`,
+    ),
+    rows(
+      db,
+      ClassRow,
+      sql`${ins} select u.rhythm::text as name, count(distinct ins.user_id) as participants,
+          count(*) as check_ins
+        from ins join "user" u on u.id = ins.user_id
+        group by u.rhythm order by u.rhythm nulls last`,
+    ),
+  ]);
+  return { levels, tracks, rhythms };
+}
+
 /** Active memberships of the year, one row per membership. */
 export function yearMemberships(db: DbOrTx, schoolYearId: string) {
   return rows(

@@ -12,5 +12,5 @@ on("event.published", async ({ defer, services, event, publishedBy }) => {
 });
 
 export { createNotifier } from "./notifier";
-export { cancelledPush, promotedPush, reminderPush } from "./push.messages";
+export { cancelledPush, leagueResultPush, promotedPush, reminderPush } from "./push.messages";
 export { createPushRouter } from "./push.routes";

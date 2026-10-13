@@ -204,6 +204,13 @@
       "when": 1791902018172,
       "tag": "0028_league",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791913140599,
+      "tag": "0029_class_rhythm",
+      "breakpoints": true
     }
   ]
 }

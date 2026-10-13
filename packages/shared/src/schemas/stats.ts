@@ -35,6 +35,13 @@ export type EventStatsDto = z.infer<typeof EventStatsDto>;
 
 const SchoolYear = z.object({ id: z.uuid(), label: z.string() });
 
+const ClassStat = z.object({
+  name: z.string().nullable(),
+  /** Different people checked in at least once. */
+  participants: z.int(),
+  checkIns: z.int(),
+});
+
 export const StatsYearQuery = z.object({
   /** Default: the current school year. */
   schoolYearId: z.uuid().optional(),
@@ -62,6 +69,15 @@ export const YearOverviewDto = z
         attendanceRate: Rate,
       }),
     ),
+    /**
+     * Check-ins by the participants' current class. `name` null: not filled in. For rhythms,
+     * `name` is "initial" or "alternance".
+     */
+    byClass: z.object({
+      levels: z.array(ClassStat),
+      tracks: z.array(ClassStat),
+      rhythms: z.array(ClassStat),
+    }),
   })
   .meta({ id: "YearOverview" });
 export type YearOverviewDto = z.infer<typeof YearOverviewDto>;
