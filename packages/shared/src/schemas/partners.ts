@@ -62,6 +62,7 @@ export const MemberDirectoryEntryDto = z
       name: z.string(),
       email: z.string(),
       promo: z.string().nullable(),
+      avatarUrl: z.string().nullable(),
     }),
   })
   .meta({ id: "MemberDirectoryEntry" });

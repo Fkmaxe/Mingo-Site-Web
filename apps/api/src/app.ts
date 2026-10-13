@@ -13,6 +13,7 @@ import type { PhotoStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
+import { createClassesRouter } from "./modules/classes";
 import { createEventsRouter } from "./modules/events";
 import { createExportsRouter } from "./modules/exports";
 import { createGradesRouter } from "./modules/grades";
@@ -55,7 +56,7 @@ export function createApp(deps: AppDeps) {
     onError: (c) => tooLargeError(c),
   });
   app.use("*", (c, next) =>
-    /^\/v1\/inventory\/items\/[^/]+\/photo$/.test(c.req.path)
+    /^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)
       ? photoLimit(c, next)
       : tooLarge(c, next),
   );
@@ -74,7 +75,8 @@ export function createApp(deps: AppDeps) {
       webOrigin: env.WEB_ORIGIN,
     }),
   );
-  app.route("/v1", createMeRouter());
+  app.route("/v1", createMeRouter(deps.photos));
+  app.route("/v1", createClassesRouter());
   app.route("/v1", createPolesRouter());
   app.route("/v1", createEventsRouter());
   app.route("/v1", createRegistrationsRouter());

@@ -68,6 +68,20 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {me.promo ? null : (
+        <Link
+          href="/profile#classe"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
+        >
+          <span>
+            <strong className="font-semibold">Complète ta classe</strong> : ton année et ta filière,
+            pour les listes et le classement de la ligue.
+          </span>
+          <span aria-hidden className="font-semibold text-primary">
+            →
+          </span>
+        </Link>
+      )}
       <BrandPanel className="flex flex-col gap-4">
         <Logo
           size={88}

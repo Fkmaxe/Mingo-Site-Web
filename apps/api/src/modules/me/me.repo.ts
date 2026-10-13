@@ -1,6 +1,6 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
-import { membership, pole, schoolYear, user } from "../../db/schema";
+import { classLevel, membership, pole, schoolYear, track, user } from "../../db/schema";
 
 export async function findUserById(db: DbOrTx, userId: string) {
   const [row] = await db
@@ -13,8 +13,12 @@ export async function findUserById(db: DbOrTx, userId: string) {
       promo: user.promo,
       image: user.image,
       isAdmin: user.isAdmin,
+      level: { id: classLevel.id, name: classLevel.name },
+      track: { id: track.id, name: track.name },
     })
     .from(user)
+    .leftJoin(classLevel, eq(classLevel.id, user.levelId))
+    .leftJoin(track, eq(track.id, user.trackId))
     .where(eq(user.id, userId));
   return row;
 }
@@ -49,4 +53,8 @@ export async function findCurrentMemberships(db: DbOrTx, userId: string) {
         isNull(membership.deletedAt),
       ),
     );
+}
+
+export async function setUserImage(db: DbOrTx, userId: string, image: string | null) {
+  await db.update(user).set({ image }).where(eq(user.id, userId));
 }

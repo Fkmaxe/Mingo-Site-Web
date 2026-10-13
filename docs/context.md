@@ -40,6 +40,11 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 | Bureau | Tout, sur tous les pôles + valider notes et points open, exporter. Le trésorier gère le budget |
 | Admin technique | Configuration, rôles, intégrations, logs |
 
+## Classes et profil
+
+- Chaque étudiant indique sa **classe** dans son profil : une **année** (1A…5A, B1…M2) et une **filière** (Dev, Cyber, Data…), deux listes gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner). Elle s'affiche « 3A · Dev » dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière met à jour tous les étudiants concernés.
+- **Photo de profil** : prise ou choisie depuis le profil, recadrée en carré et réduite dans le navigateur ; visible par les personnes connectées (en-tête, annuaire, équipes, ligue). Sans photo : les initiales.
+
 ## Inventaire
 
 - Le matériel du BDE (son, déco, barnums, gobelets…) : **tous les membres** ajoutent, modifient, déplacent, sortent et rendent ; responsables et bureau peuvent **archiver** (perdu, jeté, vendu), l'historique est gardé et l'objet restaurable.

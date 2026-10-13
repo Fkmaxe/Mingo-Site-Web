@@ -10,10 +10,12 @@ import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
+import { AvatarEditor } from "@/features/profile/avatar-editor";
+import { ClassForm } from "@/features/profile/class-form";
 import { ProfileNameForm } from "@/features/profile/profile-name-form";
+import { listClasses } from "@/features/profile/queries";
 import { NotificationsCard } from "@/features/push/notifications-card";
 import { getPushSetup } from "@/features/push/queries";
-import { initials } from "@/lib/initials";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { requireMe } from "@/lib/session";
 
@@ -22,7 +24,7 @@ export const metadata: Metadata = { title: "Profil" };
 type Row = { href: string; label: string; icon: LucideIcon };
 
 export default async function ProfilePage() {
-  const [me, push] = await Promise.all([requireMe(), getPushSetup()]);
+  const [me, push, classes] = await Promise.all([requireMe(), getPushSetup(), listClasses()]);
   const rows: Row[] = me.roles.includes("member")
     ? [
         { href: "/grades", label: "Ma note et mes présences", icon: GraduationCap },
@@ -32,16 +34,11 @@ export default async function ProfilePage() {
   return (
     <div className="flex flex-col gap-6">
       <BrandPanel className="flex items-center gap-4">
-        <span
-          aria-hidden
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white/20 font-display font-extrabold text-2xl italic ring-2 ring-white/60"
-        >
-          {initials(me.firstName, me.lastName)}
-        </span>
+        <AvatarEditor name={me.name} url={me.avatarUrl} />
         <div className="flex min-w-0 flex-col gap-0.5">
           <DisplayTitle className="text-2xl normal-case">{me.name}</DisplayTitle>
           <p className="truncate text-sm text-white/90">{me.email}</p>
-          {me.promo ? <p className="text-sm text-white/85">Promo {me.promo}</p> : null}
+          {me.promo ? <p className="text-sm text-white/85">{me.promo}</p> : null}
         </div>
       </BrandPanel>
 
@@ -53,6 +50,22 @@ export default async function ProfilePage() {
           </CardDescription>
         </div>
         <ProfileNameForm firstName={me.firstName} lastName={me.lastName} />
+      </Card>
+
+      <Card id="classe">
+        <div className="flex flex-col gap-1">
+          <CardTitle>Ma classe</CardTitle>
+          <CardDescription>
+            Ton année et ta filière apparaissent dans les listes d'inscrits et le classement de la
+            ligue.
+          </CardDescription>
+        </div>
+        <ClassForm
+          levels={classes.levels}
+          tracks={classes.tracks}
+          levelId={me.level?.id ?? null}
+          trackId={me.track?.id ?? null}
+        />
       </Card>
 
       <Card>

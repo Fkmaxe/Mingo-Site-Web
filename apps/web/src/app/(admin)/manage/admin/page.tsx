@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuditList } from "@/features/admin/audit-list";
+import { ClassesAdmin } from "@/features/admin/classes-admin";
 import { MembersAdmin } from "@/features/admin/members-admin";
 import { PolesAdmin } from "@/features/admin/poles-admin";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/features/admin/queries";
 import { YearsAdmin } from "@/features/admin/years-admin";
 import { listPoles } from "@/features/events/queries";
+import { listClasses } from "@/features/profile/queries";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +27,7 @@ const TABS = [
   ["members", "Membres", "roles:manage"],
   ["poles", "Pôles", "settings:manage"],
   ["years", "Années", "settings:manage"],
+  ["classes", "Classes", "settings:manage"],
   ["audit", "Journal", "audit:read"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
@@ -49,11 +52,12 @@ export default async function AdminPage({
   const scope: UserScope =
     params.scope === "roles" || params.scope === "unverified" ? params.scope : "all";
 
-  const [users, poles, years, audit] = await Promise.all([
+  const [users, poles, years, audit, classes] = await Promise.all([
     tab === "members" ? listAdminUsers(q, scope) : null,
     tab === "members" || tab === "poles" ? listPoles() : null,
     tab === "years" ? listSchoolYears() : null,
     tab === "audit" ? listAudit(params.cursor) : null,
+    tab === "classes" ? listClasses() : null,
   ]);
 
   return (
@@ -129,6 +133,7 @@ export default async function AdminPage({
       ) : null}
       {tab === "poles" && poles ? <PolesAdmin poles={poles} /> : null}
       {years ? <YearsAdmin years={years} /> : null}
+      {classes ? <ClassesAdmin levels={classes.levels} tracks={classes.tracks} /> : null}
       {audit ? (
         <>
           <AuditList entries={audit.items} />

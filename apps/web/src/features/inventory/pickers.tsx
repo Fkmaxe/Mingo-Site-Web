@@ -6,10 +6,10 @@ import { FieldShell } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { resizePhoto } from "@/lib/resize-photo";
 import { cn } from "@/lib/utils";
 import { createCategoryAction, createLocationAction } from "./actions";
 import { CONDITION_LABELS } from "./labels";
-import { resizePhoto } from "./resize-photo";
 import type { ItemCondition } from "./types";
 
 const CONDITIONS = Object.keys(CONDITION_LABELS) as ItemCondition[];

@@ -54,7 +54,45 @@
               "null"
             ]
           },
-          "image": {
+          "level": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "track": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "avatarUrl": {
             "type": [
               "string",
               "null"
@@ -126,7 +164,9 @@
           "firstName",
           "lastName",
           "promo",
-          "image",
+          "level",
+          "track",
+          "avatarUrl",
           "isAdmin",
           "memberships",
           "roles",
@@ -266,6 +306,119 @@
         "required": [
           "firstName",
           "lastName"
+        ]
+      },
+      "UpdateClassInput": {
+        "type": "object",
+        "properties": {
+          "levelId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "trackId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "levelId",
+          "trackId"
+        ]
+      },
+      "Classes": {
+        "type": "object",
+        "properties": {
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "userCount": {
+                  "type": "integer"
+                },
+                "position": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "userCount",
+                "position"
+              ]
+            }
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "userCount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "userCount"
+              ]
+            }
+          }
+        },
+        "required": [
+          "levels",
+          "tracks"
+        ]
+      },
+      "ClassLevelInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TrackInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "Pole": {
@@ -2683,13 +2836,20 @@
                   "string",
                   "null"
                 ]
+              },
+              "avatarUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
               "id",
               "name",
               "email",
-              "promo"
+              "promo",
+              "avatarUrl"
             ]
           }
         },
@@ -4638,6 +4798,585 @@
           },
           "401": {
             "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/class": {
+      "put": {
+        "tags": [
+          "me"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClassInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Classe enregistrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Niveau ou filière introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/avatar": {
+      "put": {
+        "tags": [
+          "me"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "L'image (3 Mo au plus), recadrée et réduite par le navigateur",
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Photo de profil enregistrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pas une image, ou trop lourde",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo retirée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/avatars/{name}": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "required": true,
+            "name": "name",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo de profil",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Photo introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/classes": {
+      "get": {
+        "tags": [
+          "classes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Niveaux et filières",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classes"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/levels": {
+      "post": {
+        "tags": [
+          "classes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassLevelInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Niveaux et filières",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé aux administrateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/levels/{id}": {
+      "put": {
+        "tags": [
+          "classes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassLevelInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Niveaux et filières",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé aux administrateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/tracks": {
+      "post": {
+        "tags": [
+          "classes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Niveaux et filières",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé aux administrateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/tracks/{id}": {
+      "put": {
+        "tags": [
+          "classes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Niveaux et filières",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nom invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Réservé aux administrateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_EXISTS",
             "content": {
               "application/json": {
                 "schema": {

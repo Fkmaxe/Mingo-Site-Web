@@ -1,6 +1,7 @@
 import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Avatar } from "@/components/avatar";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listDirectory } from "@/features/members/queries";
 import type { DirectoryEntry } from "@/features/members/types";
@@ -48,7 +49,8 @@ export default async function TeamPage() {
                 key={e.membershipId}
                 className="flex items-center justify-between gap-3 px-4 py-3"
               >
-                <span className="flex min-w-0 flex-col">
+                <Avatar name={e.user.name} url={e.user.avatarUrl} size={40} />
+                <span className="flex min-w-0 flex-1 flex-col">
                   <span className="font-medium">{e.user.name}</span>
                   <span className="text-muted-foreground text-xs">
                     {e.boardPosition

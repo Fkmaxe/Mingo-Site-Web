@@ -68,3 +68,32 @@ export async function setCurrentSchoolYearAction(id: string): Promise<ActionResu
   });
   return error ? fromApiError(error) : done();
 }
+
+export async function createLevelAction(name: string): Promise<ActionResult> {
+  const { error } = await (await api()).POST("/v1/admin/levels", { body: { name } });
+  return error ? fromApiError(error) : done();
+}
+
+export async function editLevelAction(
+  id: string,
+  input: { name: string; position?: number },
+): Promise<ActionResult> {
+  const { error } = await (await api()).PUT("/v1/admin/levels/{id}", {
+    params: { path: { id } },
+    body: input,
+  });
+  return error ? fromApiError(error) : done();
+}
+
+export async function createTrackAction(name: string): Promise<ActionResult> {
+  const { error } = await (await api()).POST("/v1/admin/tracks", { body: { name } });
+  return error ? fromApiError(error) : done();
+}
+
+export async function editTrackAction(id: string, name: string): Promise<ActionResult> {
+  const { error } = await (await api()).PUT("/v1/admin/tracks/{id}", {
+    params: { path: { id } },
+    body: { name },
+  });
+  return error ? fromApiError(error) : done();
+}

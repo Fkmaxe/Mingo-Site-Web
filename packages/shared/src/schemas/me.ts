@@ -20,8 +20,12 @@ export const MeDto = z
     name: z.string(),
     firstName: z.string(),
     lastName: z.string(),
+    /** Class label ("3A · Dev"), computed from level and track. */
     promo: z.string().nullable(),
-    image: z.string().nullable(),
+    level: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    track: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    /** Path of the profile photo on the web origin, or null. */
+    avatarUrl: z.string().nullable(),
     isAdmin: z.boolean(),
     /** Active memberships of the current school year. Empty for a student. */
     memberships: z.array(MembershipDto),

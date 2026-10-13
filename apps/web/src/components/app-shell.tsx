@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
-import { initials } from "@/lib/initials";
 import type { Me } from "@/lib/session";
+import { Avatar } from "./avatar";
 import { Logo } from "./brand";
 import { BottomNav, SideNav } from "./nav";
 
@@ -42,6 +42,13 @@ export function AppShell({ me, children }: { me: Me; children: React.ReactNode }
           <Logo size={96} priority />
         </Link>
         <SideNav canManage={canManage} />
+        <Link
+          href="/profile"
+          className="mt-auto flex items-center gap-3 rounded-2xl p-2 font-semibold text-sm hover:bg-accent"
+        >
+          <Avatar name={me.name} url={me.avatarUrl} size={36} />
+          <span className="min-w-0 truncate">{me.name}</span>
+        </Link>
       </aside>
       <div className="flex min-w-0 flex-col">
         <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur-md md:hidden">
@@ -51,12 +58,7 @@ export function AppShell({ me, children }: { me: Me; children: React.ReactNode }
             aria-label={`Mon profil (${me.name})`}
             className="flex size-11 items-center justify-center rounded-full"
           >
-            <span
-              aria-hidden
-              className="flex size-9 items-center justify-center rounded-full bg-primary font-display font-extrabold text-primary-foreground text-sm italic"
-            >
-              {initials(me.firstName, me.lastName)}
-            </span>
+            <Avatar name={me.name} url={me.avatarUrl} size={36} />
           </Link>
         </header>
         {/* Bottom padding keeps content above the mobile nav bar. */}

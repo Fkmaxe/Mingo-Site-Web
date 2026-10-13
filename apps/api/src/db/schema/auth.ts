@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { classLevel, track } from "./classes";
 import { createdAt, id } from "./columns";
 
 // Tables managed by Better Auth: property names must match its field names.
@@ -21,8 +22,12 @@ export const user = pgTable(
     lastName: text().notNull(),
     email: text().notNull().unique(),
     emailVerified: boolean().notNull().default(false),
+    /** Profile photo: file name in the uploads directory (served under /avatars/). */
     image: text(),
+    /** Display label of the class ("3A · Dev"), kept in sync with levelId / trackId. */
     promo: text(),
+    levelId: uuid().references(() => classLevel.id, { onDelete: "set null" }),
+    trackId: uuid().references(() => track.id, { onDelete: "set null" }),
     isAdmin: boolean().notNull().default(false),
     createdAt: createdAt(),
     updatedAt: authUpdatedAt(),

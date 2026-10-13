@@ -23,6 +23,15 @@ Conventions SQL :
 
 Un utilisateur sans `membership` actif sur l'année courante est un **étudiant**.
 
+### Classes
+
+| Table | Colonnes clés | Contraintes |
+| --- | --- | --- |
+| `class_level` | name, position | nom unique (insensible à la casse) |
+| `track` | name | nom unique (insensible à la casse) |
+
+`user.level_id` / `user.track_id` (nullables) ; `user.promo` est le **libellé calculé** (« 3A · Dev »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
+
 ### Événements
 
 | Table | Colonnes clés | Contraintes |

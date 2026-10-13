@@ -11,7 +11,13 @@ export function findDirectory(db: DbOrTx) {
       boardPosition: membership.boardPosition,
       poleId: pole.id,
       poleName: pole.name,
-      user: { id: user.id, name: user.name, email: user.email, promo: user.promo },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        promo: user.promo,
+        image: user.image,
+      },
     })
     .from(membership)
     .innerJoin(user, eq(user.id, membership.userId))
