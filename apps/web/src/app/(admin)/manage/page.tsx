@@ -57,7 +57,7 @@ export default async function ManagePage() {
     {
       href: "/manage/treasury",
       title: "Trésorerie",
-      description: "Budgets, dépenses et recettes",
+      description: "Écritures, justificatifs, recettes et dépenses",
       icon: PiggyBank,
       show: me.permissions.includes("budget:read"),
     },

@@ -3,28 +3,38 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export type PhotoType = "image/jpeg" | "image/png" | "image/webp";
+export type ReceiptType = PhotoType | "application/pdf";
 
-/** Stored photos (inventory). Implementations: a directory on disk, in-memory in tests. */
-export interface PhotoStore {
+/**
+ * Stored files of the given types. Implementations: a directory on disk, in-memory in tests.
+ * Photos (inventory, avatars) and payment receipts (treasury) each have their own store.
+ */
+export interface FileStore<T extends string> {
   /** Saves the bytes under a new name and returns it. */
-  save(bytes: Uint8Array, type: PhotoType): Promise<string>;
-  read(name: string): Promise<{ bytes: Uint8Array; type: PhotoType } | null>;
+  save(bytes: Uint8Array, type: T): Promise<string>;
+  read(name: string): Promise<{ bytes: Uint8Array; type: T } | null>;
   remove(name: string): Promise<void>;
 }
 
-const EXTENSIONS: Record<PhotoType, string> = {
+export type PhotoStore = FileStore<PhotoType>;
+export type ReceiptStore = FileStore<ReceiptType>;
+
+const PHOTO_EXTENSIONS: Record<PhotoType, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
 };
+const RECEIPT_EXTENSIONS: Record<ReceiptType, string> = {
+  ...PHOTO_EXTENSIONS,
+  "application/pdf": "pdf",
+};
 
 /** Names are generated here: anything else is refused (no path traversal). */
-const NAME = /^[0-9a-f-]{36}\.(jpg|png|webp)$/;
-
-export function typeOfName(name: string): PhotoType | null {
-  if (!NAME.test(name)) return null;
-  const ext = name.split(".").pop();
-  return (Object.entries(EXTENSIONS).find(([, e]) => e === ext)?.[0] as PhotoType) ?? null;
+function typeOfName<T extends string>(extensions: Record<T, string>, name: string): T | null {
+  const match = /^[0-9a-f-]{36}\.([a-z]+)$/.exec(name);
+  if (!match) return null;
+  const entry = (Object.entries(extensions) as [T, string][]).find(([, e]) => e === match[1]);
+  return entry?.[0] ?? null;
 }
 
 /** The real type, read from the first bytes: the browser's claim is not trusted. */
@@ -36,17 +46,26 @@ export function sniffPhotoType(bytes: Uint8Array): PhotoType | null {
   return null;
 }
 
-export function createDiskPhotoStore(directory: string): PhotoStore {
+/** A photo, or a PDF (it starts with « %PDF- »). */
+export function sniffReceiptType(bytes: Uint8Array): ReceiptType | null {
+  if (String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-") return "application/pdf";
+  return sniffPhotoType(bytes);
+}
+
+function createDiskFileStore<T extends string>(
+  directory: string,
+  extensions: Record<T, string>,
+): FileStore<T> {
   const ready = mkdir(directory, { recursive: true });
   return {
     async save(bytes, type) {
       await ready;
-      const name = `${randomUUID()}.${EXTENSIONS[type]}`;
+      const name = `${randomUUID()}.${extensions[type]}`;
       await writeFile(join(directory, name), bytes, { flag: "wx" });
       return name;
     },
     async read(name) {
-      const type = typeOfName(name);
+      const type = typeOfName(extensions, name);
       if (!type) return null;
       try {
         return { bytes: new Uint8Array(await readFile(join(directory, name))), type };
@@ -55,24 +74,28 @@ export function createDiskPhotoStore(directory: string): PhotoStore {
       }
     },
     async remove(name) {
-      if (typeOfName(name)) await rm(join(directory, name), { force: true });
+      if (typeOfName(extensions, name)) await rm(join(directory, name), { force: true });
     },
   };
 }
 
-export type MemoryPhotoStore = PhotoStore & { files: Map<string, Uint8Array> };
+export type MemoryFileStore<T extends string> = FileStore<T> & { files: Map<string, Uint8Array> };
+export type MemoryPhotoStore = MemoryFileStore<PhotoType>;
+export type MemoryReceiptStore = MemoryFileStore<ReceiptType>;
 
-export function createMemoryPhotoStore(): MemoryPhotoStore {
+function createMemoryFileStore<T extends string>(
+  extensions: Record<T, string>,
+): MemoryFileStore<T> {
   const files = new Map<string, Uint8Array>();
   return {
     files,
     async save(bytes, type) {
-      const name = `${randomUUID()}.${EXTENSIONS[type]}`;
+      const name = `${randomUUID()}.${extensions[type]}`;
       files.set(name, bytes);
       return name;
     },
     async read(name) {
-      const type = typeOfName(name);
+      const type = typeOfName(extensions, name);
       const bytes = files.get(name);
       return type && bytes ? { bytes, type } : null;
     },
@@ -81,3 +104,12 @@ export function createMemoryPhotoStore(): MemoryPhotoStore {
     },
   };
 }
+
+export const createDiskPhotoStore = (directory: string): PhotoStore =>
+  createDiskFileStore(directory, PHOTO_EXTENSIONS);
+export const createMemoryPhotoStore = (): MemoryPhotoStore =>
+  createMemoryFileStore(PHOTO_EXTENSIONS);
+export const createDiskReceiptStore = (directory: string): ReceiptStore =>
+  createDiskFileStore(directory, RECEIPT_EXTENSIONS);
+export const createMemoryReceiptStore = (): MemoryReceiptStore =>
+  createMemoryFileStore(RECEIPT_EXTENSIONS);

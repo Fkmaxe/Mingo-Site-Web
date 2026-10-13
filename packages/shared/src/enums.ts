@@ -102,3 +102,11 @@ export type LeaguePointsReason = (typeof LEAGUE_POINTS_REASONS)[number];
 /** Initial training or work-study (alternance). From some years on, work-study only. */
 export const STUDY_RHYTHMS = ["initial", "alternance"] as const;
 export type StudyRhythm = (typeof STUDY_RHYTHMS)[number];
+
+/** Treasury entry: money out (debit), money in (credit), or another kind named by the treasurer. */
+export const TREASURY_KINDS = ["debit", "credit", "other"] as const;
+export type TreasuryKind = (typeof TREASURY_KINDS)[number];
+
+/** Direction of an « other » treasury entry: money in or out. */
+export const TREASURY_DIRECTIONS = ["in", "out"] as const;
+export type TreasuryDirection = (typeof TREASURY_DIRECTIONS)[number];

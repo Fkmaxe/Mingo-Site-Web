@@ -331,6 +331,8 @@
                   "PLACE_OUT_OF_SCALE",
                   "NOT_A_PARTICIPANT",
                   "TRACK_NOT_OFFERED",
+                  "INITIATOR_NOT_MEMBER",
+                  "TOO_MANY_ATTACHMENTS",
                   "INTERNAL_ERROR"
                 ]
               },
@@ -3319,69 +3321,13 @@
           },
           "balanceCents": {
             "type": "integer"
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "event": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "startsAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title",
-                    "slug",
-                    "startsAt"
-                  ]
-                },
-                "budgetCents": {
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
-                },
-                "incomeCents": {
-                  "type": "integer"
-                },
-                "expenseCents": {
-                  "type": "integer"
-                },
-                "balanceCents": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "event",
-                "budgetCents",
-                "incomeCents",
-                "expenseCents",
-                "balanceCents"
-              ]
-            }
           }
         },
         "required": [
           "schoolYear",
           "incomeCents",
           "expenseCents",
-          "balanceCents",
-          "events"
+          "balanceCents"
         ]
       },
       "Transaction": {
@@ -3391,8 +3337,34 @@
             "type": "string",
             "format": "uuid"
           },
-          "label": {
+          "counterparty": {
             "type": "string"
+          },
+          "initiator": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "avatarUrl"
+            ]
           },
           "amountCents": {
             "type": "integer"
@@ -3400,11 +3372,22 @@
           "occurredOn": {
             "type": "string"
           },
-          "receiptUrl": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "debit",
+              "credit",
+              "other"
+            ]
+          },
+          "otherLabel": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "comment": {
+            "type": "string"
           },
           "event": {
             "type": [
@@ -3428,6 +3411,15 @@
               "title",
               "slug"
             ]
+          },
+          "receiptUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attachmentCount": {
+            "type": "integer"
           },
           "createdBy": {
             "type": [
@@ -3456,20 +3448,251 @@
         },
         "required": [
           "id",
-          "label",
+          "counterparty",
+          "initiator",
           "amountCents",
           "occurredOn",
-          "receiptUrl",
+          "kind",
+          "otherLabel",
+          "comment",
           "event",
+          "receiptUrl",
+          "attachmentCount",
           "createdBy",
           "reversalOfId",
           "reversedById",
           "createdAt"
         ]
       },
+      "TransactionDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "counterparty": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "avatarUrl"
+            ]
+          },
+          "amountCents": {
+            "type": "integer"
+          },
+          "occurredOn": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "debit",
+              "credit",
+              "other"
+            ]
+          },
+          "otherLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "event": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "slug"
+            ]
+          },
+          "receiptUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attachmentCount": {
+            "type": "integer"
+          },
+          "createdBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reversalOfId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "reversedById": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TreasuryAttachment"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "counterparty",
+          "initiator",
+          "amountCents",
+          "occurredOn",
+          "kind",
+          "otherLabel",
+          "comment",
+          "event",
+          "receiptUrl",
+          "attachmentCount",
+          "createdBy",
+          "reversalOfId",
+          "reversedById",
+          "createdAt",
+          "attachments"
+        ]
+      },
+      "TreasuryAttachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "application/pdf"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "contentType",
+          "sizeBytes",
+          "url",
+          "createdAt"
+        ]
+      },
       "CreateTransactionInput": {
         "type": "object",
         "properties": {
+          "counterparty": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "initiatorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "occurredOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "debit",
+              "credit",
+              "other"
+            ]
+          },
+          "otherLabel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 60,
+            "default": null
+          },
+          "direction": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "in",
+              "out",
+              null
+            ],
+            "default": null
+          },
           "eventId": {
             "type": [
               "string",
@@ -3478,53 +3701,79 @@
             "format": "uuid",
             "default": null
           },
-          "label": {
+          "comment": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          },
-          "amountCents": {
-            "type": "integer"
-          },
-          "occurredOn": {
-            "type": "string",
-            "format": "date"
-          },
-          "receiptUrl": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uri",
-            "default": null
+            "maxLength": 2000,
+            "default": ""
           }
         },
         "required": [
-          "label",
+          "counterparty",
+          "initiatorUserId",
           "amountCents",
-          "occurredOn"
+          "occurredOn",
+          "kind"
         ]
       },
       "UpdateTransactionInput": {
         "type": "object",
         "properties": {
-          "label": {
+          "counterparty": {
             "type": "string",
             "minLength": 1,
             "maxLength": 200
+          },
+          "initiatorUserId": {
+            "type": "string",
+            "format": "uuid"
           },
           "occurredOn": {
             "type": "string",
             "format": "date"
           },
-          "receiptUrl": {
+          "otherLabel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "eventId": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uri"
+            "format": "uuid"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000
           }
         }
+      },
+      "EventBudget": {
+        "type": "object",
+        "properties": {
+          "budgetCents": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "incomeCents": {
+            "type": "integer"
+          },
+          "expenseCents": {
+            "type": "integer"
+          },
+          "balanceCents": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "budgetCents",
+          "incomeCents",
+          "expenseCents",
+          "balanceCents"
+        ]
       },
       "SetEventBudgetInput": {
         "type": "object",
@@ -12013,7 +12262,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Totaux de l'année et par événement",
+            "description": "Recettes, dépenses et solde de l'année",
             "content": {
               "application/json": {
                 "schema": {
@@ -12071,6 +12320,16 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       }
@@ -12081,6 +12340,28 @@
           "treasury"
         ],
         "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "required": false,
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "debit",
+                "credit",
+                "other"
+              ]
+            },
+            "required": false,
+            "name": "kind",
+            "in": "query"
+          },
           {
             "schema": {
               "type": "string",
@@ -12154,6 +12435,16 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -12176,7 +12467,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetail"
                 }
               }
             }
@@ -12230,11 +12521,109 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/treasury/transactions/{transactionId}": {
+      "get": {
+        "tags": [
+          "treasury"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Écriture et ses justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "tags": [
           "treasury"
@@ -12261,11 +12650,11 @@
         },
         "responses": {
           "200": {
-            "description": "Libellé, date ou justificatif modifié",
+            "description": "Écriture corrigée (hors montant)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetail"
                 }
               }
             }
@@ -12312,6 +12701,16 @@
           },
           "409": {
             "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
             "content": {
               "application/json": {
                 "schema": {
@@ -12345,7 +12744,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetail"
                 }
               }
             }
@@ -12399,11 +12798,438 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/treasury/transactions/{transactionId}/attachments": {
+      "post": {
+        "tags": [
+          "treasury"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "required": true,
+            "name": "name",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Le fichier lui-même : photo ou PDF, 8 Mo au plus",
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "application/pdf": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Justificatif ajouté",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/treasury/attachments/{attachmentId}": {
+      "delete": {
+        "tags": [
+          "treasury"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "attachmentId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Justificatif retiré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/treasury/attachments/{name}": {
+      "get": {
+        "tags": [
+          "treasury"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "required": true,
+            "name": "name",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Justificatif",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/events/{eventId}/budget": {
+      "get": {
+        "tags": [
+          "treasury"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget prévu et réalisé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventBudget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas le droit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "tags": [
           "treasury"
@@ -12481,6 +13307,16 @@
           },
           "409": {
             "description": "Écriture déjà annulée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Initiateur hors du BDE, trop de justificatifs",
             "content": {
               "application/json": {
                 "schema": {

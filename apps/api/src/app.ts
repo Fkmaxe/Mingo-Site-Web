@@ -1,4 +1,4 @@
-import { PHOTO_MAX_BYTES } from "@bde/shared";
+import { PHOTO_MAX_BYTES, RECEIPT_MAX_BYTES } from "@bde/shared";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import type { Context } from "hono";
@@ -9,7 +9,7 @@ import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import type { Pusher } from "./lib/push";
-import type { PhotoStore } from "./lib/storage";
+import type { PhotoStore, ReceiptStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
@@ -33,7 +33,7 @@ import { createStatsRouter } from "./modules/stats";
 import { createTasksRouter } from "./modules/tasks";
 import { createTreasuryRouter } from "./modules/treasury";
 
-export type AppDeps = AuthDeps & { pusher: Pusher; photos: PhotoStore };
+export type AppDeps = AuthDeps & { pusher: Pusher; photos: PhotoStore; receipts: ReceiptStore };
 
 export const OPENAPI_CONFIG = {
   openapi: "3.1.0",
@@ -50,17 +50,25 @@ export function createApp(deps: AppDeps) {
 
   app.use("*", secureHeaders());
   app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }));
-  // JSON requests stay small; only inventory photos (images, resized by the browser) are bigger.
+  // JSON requests stay small; only photos (resized by the browser) and receipts are bigger.
   const tooLarge = bodyLimit({ maxSize: 1024 * 1024, onError: (c) => tooLargeError(c) });
   const photoLimit = bodyLimit({
     maxSize: PHOTO_MAX_BYTES + 64 * 1024,
     onError: (c) => tooLargeError(c),
   });
-  app.use("*", (c, next) =>
-    /^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)
-      ? photoLimit(c, next)
-      : tooLarge(c, next),
-  );
+  const receiptLimit = bodyLimit({
+    maxSize: RECEIPT_MAX_BYTES + 64 * 1024,
+    onError: (c) => tooLargeError(c),
+  });
+  app.use("*", (c, next) => {
+    if (/^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)) {
+      return photoLimit(c, next);
+    }
+    if (/^\/v1\/treasury\/transactions\/[^/]+\/attachments$/.test(c.req.path)) {
+      return receiptLimit(c, next);
+    }
+    return tooLarge(c, next);
+  });
   app.onError(onError);
   app.notFound(onNotFound);
 
@@ -92,7 +100,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createApplicationsRouter());
   app.route("/v1", createMembersRouter());
   app.route("/v1", createPartnersRouter());
-  app.route("/v1", createTreasuryRouter());
+  app.route("/v1", createTreasuryRouter(deps.receipts));
   app.route("/v1", createStatsRouter());
   app.route("/v1", createLeagueRouter());
   app.route("/v1", createPushRouter());

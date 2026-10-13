@@ -15,19 +15,25 @@ const config: NextConfig = {
   // Biome lints the whole monorepo.
   eslint: { ignoreDuringBuilds: true },
   poweredByHeader: false,
-  // Inventory photos go through a server action (already resized by the browser).
-  experimental: { serverActions: { bodySizeLimit: "4mb" } },
+  // Inventory photos (resized by the browser) and payment receipts (PDF up to 8 MB) go
+  // through a server action.
+  experimental: { serverActions: { bodySizeLimit: "10mb" } },
   async headers() {
+    const common = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      // The check-in scanner needs the camera; nothing else does.
+      { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+    ];
     return [
       {
-        source: "/:path*",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // The check-in scanner needs the camera; nothing else does.
-          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
-        ],
+        source: "/((?!manage/treasury/attachments/).*)",
+        headers: [...common, { key: "X-Frame-Options", value: "DENY" }],
+      },
+      // Payment receipts (PDF) are shown inside the page of their entry.
+      {
+        source: "/manage/treasury/attachments/:name",
+        headers: [...common, { key: "X-Frame-Options", value: "SAMEORIGIN" }],
       },
     ];
   },

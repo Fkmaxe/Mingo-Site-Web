@@ -1,52 +1,59 @@
+import { TREASURY_KINDS, type TreasuryKind } from "@bde/shared";
+import { Plus, Search } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/brand";
 import { DownloadLink } from "@/components/download-link";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { listEvents } from "@/features/events/queries";
-import { BudgetCell } from "@/features/treasury/budget-cell";
+import { Input } from "@/components/ui/input";
 import { getSummary, listTransactions } from "@/features/treasury/queries";
-import { TransactionForm } from "@/features/treasury/transaction-form";
-import { TransactionList } from "@/features/treasury/transaction-list";
+import { kindLabel, TransactionList } from "@/features/treasury/transaction-list";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { formatCents } from "@/lib/money";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Trésorerie" };
 
-export default async function TreasuryPage() {
-  const me = await requireMe();
+const FILTERS: [TreasuryKind | "all", string][] = [
+  ["all", "Tout"],
+  ...TREASURY_KINDS.map((k): [TreasuryKind, string] => [
+    k,
+    k === "other" ? "Autre" : kindLabel({ kind: k, otherLabel: null }),
+  ]),
+];
+
+export default async function TreasuryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; type?: string }>;
+}) {
+  const [me, params] = await Promise.all([requireMe(), searchParams]);
   if (!me.permissions.includes("budget:read")) notFound();
   const canManage = me.permissions.includes("budget:manage");
-  const [summary, transactions, upcoming, past] = await Promise.all([
-    getSummary(),
-    listTransactions(),
-    listEvents({ scope: "upcoming", manageable: true, limit: 50 }),
-    listEvents({ scope: "past", manageable: true, limit: 50 }),
-  ]);
-  const allEvents = [...past.items, ...upcoming.items].sort((a, b) =>
-    a.startsAt.localeCompare(b.startsAt),
-  );
-  const events = allEvents.map((e) => ({ id: e.id, title: e.title }));
-  const figures = new Map(summary.events.map((e) => [e.event.id, e]));
-  // Every event of the year, with its figures when it has a budget or entries.
-  const rows = allEvents.map((e) => ({
-    event: e,
-    budgetCents: figures.get(e.id)?.budgetCents ?? null,
-    incomeCents: figures.get(e.id)?.incomeCents ?? 0,
-    expenseCents: figures.get(e.id)?.expenseCents ?? 0,
-    balanceCents: figures.get(e.id)?.balanceCents ?? 0,
-  }));
-  const today = new Date().toISOString().slice(0, 10);
+  const q = params.q?.trim() || undefined;
+  const kind = TREASURY_KINDS.find((k) => k === params.type);
+  const [summary, transactions] = await Promise.all([getSummary(), listTransactions({ q, kind })]);
+  const link = (type: string) => {
+    const next = new URLSearchParams();
+    if (q) next.set("q", q);
+    if (type !== "all") next.set("type", type);
+    const s = next.toString();
+    return s ? `/manage/treasury?${s}` : "/manage/treasury";
+  };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
-          Trésorerie {summary.schoolYear}
-        </h1>
-        <DownloadLink href="/manage/treasury/export">CSV</DownloadLink>
-      </div>
+    // Bottom padding: the floating "Ajouter" button never hides the last entry.
+    <div className={cn("flex flex-col gap-5", canManage && "pb-16")}>
+      <PageHeader
+        title="Trésorerie"
+        description={`Année ${summary.schoolYear}`}
+        breadcrumb={manageTrail()}
+        action={<DownloadLink href="/manage/treasury/export">CSV</DownloadLink>}
+      />
+
       <div className="grid grid-cols-3 gap-2">
         {(
           [
@@ -69,60 +76,65 @@ export default async function TreasuryPage() {
         ))}
       </div>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="font-bold font-display text-lg">Par événement</h2>
-        {rows.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Aucun événement cette année.</p>
-        ) : (
-          <ul className="flex flex-col divide-y rounded-xl border">
-            {rows.map((e) => {
-              const over = e.budgetCents !== null && -e.expenseCents > e.budgetCents;
-              return (
-                <li key={e.event.id} className="flex flex-col gap-1 px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <Link
-                      href={`/manage/events/${e.event.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {e.event.title}
-                    </Link>
-                    <span
-                      className={cn(
-                        "font-semibold tabular-nums",
-                        e.balanceCents < 0 && "text-destructive",
-                      )}
-                    >
-                      {formatCents(e.balanceCents)}
-                    </span>
-                  </div>
-                  <span className="text-muted-foreground text-xs">
-                    Dépenses {formatCents(-e.expenseCents)} · Recettes {formatCents(e.incomeCents)}
-                    {over ? " · budget dépassé" : ""}
-                  </span>
-                  <BudgetCell
-                    eventId={e.event.id}
-                    budgetCents={e.budgetCents}
-                    canManage={canManage}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        {canManage ? (
-          <p className="text-muted-foreground text-xs">
-            Pour fixer le budget d'un événement sans écriture, saisis-le depuis une première
-            écriture ou l'événement apparaîtra ici dès qu'il en aura une.
-          </p>
-        ) : null}
-      </section>
+      <form action="/manage/treasury" className="flex gap-2">
+        {kind ? <input type="hidden" name="type" value={kind} /> : null}
+        <label htmlFor="treasury-search" className="sr-only">
+          Rechercher une écriture
+        </label>
+        <Input
+          id="treasury-search"
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="Contrepartie, initiateur ou commentaire"
+          autoComplete="off"
+        />
+        <Button type="submit" size="icon" aria-label="Rechercher">
+          <Search aria-hidden />
+        </Button>
+      </form>
 
-      {canManage ? <TransactionForm events={events} today={today} /> : null}
+      <nav aria-label="Type" className="flex flex-wrap gap-2">
+        {FILTERS.map(([value, label]) => {
+          const active = (kind ?? "all") === value;
+          return (
+            <Link
+              key={value}
+              href={link(value)}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex min-h-9 items-center rounded-full border px-3 font-semibold text-sm",
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground",
+              )}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="font-bold font-display text-lg">Écritures</h2>
-        <TransactionList transactions={transactions} canManage={canManage} />
-      </section>
+      <TransactionList
+        transactions={transactions}
+        empty={
+          q || kind
+            ? "Aucune écriture ne correspond."
+            : "Aucune écriture cette année : ajoute la première."
+        }
+      />
+
+      {canManage ? (
+        <Button
+          asChild
+          size="lg"
+          className="fixed right-4 bottom-24 z-30 shadow-lg md:right-8 md:bottom-8"
+        >
+          <Link href="/manage/treasury/new">
+            <Plus aria-hidden />
+            Ajouter
+          </Link>
+        </Button>
+      ) : null}
     </div>
   );
 }

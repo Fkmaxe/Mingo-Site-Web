@@ -225,6 +225,20 @@
       "when": 1791932452848,
       "tag": "0031_task_scopes",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791932957114,
+      "tag": "0032_treasury_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791932982227,
+      "tag": "0033_treasury_counterparty",
+      "breakpoints": true
     }
   ]
 }
