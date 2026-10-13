@@ -47,12 +47,13 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 ## Classes et profil
 
-- Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière** et son **rythme** (initial ou alternance). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, et pour chaque année : filières proposées, alternance obligatoire).
+- Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière**, son **rythme** (initial ou alternance), son **numéro de classe** (1 à 9, obligatoire dès qu'une année est choisie) et s'il a fait la **rentrée de janvier** (non par défaut). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, donner un **code**, et pour chaque année : filières proposées, alternance obligatoire).
+- **Code de classe ESGI** : code de l'année + code de la filière, ou, pour une filière sans code (tronc commun), la lettre du rythme (A = alternance, I = initial) + numéro. Exemples : `4AL1` (4A, architecture logicielle, classe 1), `1A3` (1A tronc commun en alternance, classe 3), `2I8` (2A tronc commun en initial, classe 8). Codes posés par la migration, modifiables : années `1` à `5`, MCSI `MCSI`, architecture logicielle `AL`, réseaux `SRC`, sécurité `SI` (à vérifier par le bureau).
 - Organisation de l'ESGI (mise en place par la migration, modifiable) :
   - **1A et 2A** : **tronc commun** ou **MCSI**, en **initial ou en alternance** au choix ;
   - **à partir de la 3A** : une filière de spécialité (architecture logicielle, réseaux, sécurité, MCSI…), **forcément en alternance**.
 - Le profil ne propose que les filières de l'année choisie (une année sans filière cochée les propose toutes) ; l'API refuse une filière non proposée. Dans une année en alternance obligatoire, le rythme n'est pas demandé : l'étudiant est en alternance (et passe en alternance si l'année le devient).
-- La classe s'affiche « 1A · MCSI · Alternance » ou « 3A · Sécurité » (le rythme n'est pas répété quand il est obligatoire) dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière met à jour tous les étudiants concernés.
+- La classe s'affiche « 4AL1 · 4A · Architecture logicielle », « 1A3 · 1A · Tronc commun · Alternance · Rentrée de janvier » ou « 3A · Sécurité » sans numéro (le rythme n'est pas répété quand il est obligatoire) dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière, ou changer son code, met à jour tous les étudiants concernés.
 - Filtres par classe : liste des inscrits d'un événement (année, filière, rythme, « non renseigné »), classement de la ligue (année, filière), statistiques de l'année (participants par année, filière, rythme, selon la classe actuelle de chacun).
 - **Photo de profil** : prise ou choisie depuis le profil, recadrée en carré et réduite dans le navigateur ; visible par les personnes connectées (en-tête, annuaire, équipes, ligue). Sans photo : les initiales.
 

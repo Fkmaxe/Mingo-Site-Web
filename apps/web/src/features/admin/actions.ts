@@ -76,7 +76,13 @@ export async function createLevelAction(name: string): Promise<ActionResult> {
 
 export async function editLevelAction(
   id: string,
-  input: { name: string; position?: number; alternanceOnly?: boolean; trackIds?: string[] },
+  input: {
+    name: string;
+    code?: string | null;
+    position?: number;
+    alternanceOnly?: boolean;
+    trackIds?: string[];
+  },
 ): Promise<ActionResult> {
   const { error } = await (await api()).PUT("/v1/admin/levels/{id}", {
     params: { path: { id } },
@@ -90,10 +96,13 @@ export async function createTrackAction(name: string): Promise<ActionResult> {
   return error ? fromApiError(error) : done();
 }
 
-export async function editTrackAction(id: string, name: string): Promise<ActionResult> {
+export async function editTrackAction(
+  id: string,
+  input: { name: string; code: string | null },
+): Promise<ActionResult> {
   const { error } = await (await api()).PUT("/v1/admin/tracks/{id}", {
     params: { path: { id } },
-    body: { name },
+    body: input,
   });
   return error ? fromApiError(error) : done();
 }

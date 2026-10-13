@@ -27,11 +27,11 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `class_level` | name, position, alternance_only | nom unique (insensible à la casse) |
+| `class_level` | name, code (`4`), position, alternance_only | nom unique (insensible à la casse) ; code `[A-Z0-9]{1,6}` |
 | `class_level_track` | level_id, track_id | filières proposées dans l'année ; aucune ligne = toutes |
-| `track` | name | nom unique (insensible à la casse) |
+| `track` | name, code (`AL`, null = lettre du rythme) | nom unique (insensible à la casse) ; code `[A-Z0-9]{1,6}` |
 
-`user.level_id` / `user.track_id` / `user.rhythm` (`initial`, `alternance`, nullables ; toujours `alternance` dans une année `alternance_only`) ; `user.promo` est le **libellé calculé** (« 1A · MCSI · Alternance », « 3A · Sécurité »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
+`user.level_id` / `user.track_id` / `user.rhythm` (`initial`, `alternance`, nullables ; toujours `alternance` dans une année `alternance_only`) / `user.class_number` (1 à 9, null sans année) / `user.january_intake` (false par défaut) ; `user.promo` est le **libellé calculé** (« 4AL1 · 4A · Architecture logicielle », « 3A · Sécurité »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
 
 ### Événements
 

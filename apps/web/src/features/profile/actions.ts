@@ -1,6 +1,6 @@
 "use server";
 
-import type { UpdateProfileInput } from "@bde/shared";
+import type { UpdateClassData, UpdateProfileInput } from "@bde/shared";
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
@@ -13,11 +13,7 @@ export async function updateProfileAction(input: UpdateProfileInput): Promise<Ac
   return { ok: true };
 }
 
-export async function updateClassAction(input: {
-  levelId: string | null;
-  trackId: string | null;
-  rhythm: "initial" | "alternance" | null;
-}): Promise<ActionResult> {
+export async function updateClassAction(input: UpdateClassData): Promise<ActionResult> {
   const { error } = await (await api()).PUT("/v1/me/class", { body: input });
   if (error) return fromApiError(error);
   revalidatePath("/", "layout");

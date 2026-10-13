@@ -70,17 +70,14 @@ export function createClassesRouter() {
       ),
     )
     .openapi(createTrackRoute, async (c) =>
-      c.json(
-        await createTrack(authedCtx(c.get("ctx")), TrackInput.parse(await c.req.json()).name),
-        200,
-      ),
+      c.json(await createTrack(authedCtx(c.get("ctx")), TrackInput.parse(await c.req.json())), 200),
     )
     .openapi(editTrackRoute, async (c) =>
       c.json(
         await editTrack(
           authedCtx(c.get("ctx")),
           Id.parse(c.req.param()).id,
-          TrackInput.parse(await c.req.json()).name,
+          TrackInput.parse(await c.req.json()),
         ),
         200,
       ),

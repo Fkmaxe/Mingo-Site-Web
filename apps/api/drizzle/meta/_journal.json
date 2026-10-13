@@ -211,6 +211,13 @@
       "when": 1791913140599,
       "tag": "0029_class_rhythm",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1791932016211,
+      "tag": "0030_class_code_number",
+      "breakpoints": true
     }
   ]
 }

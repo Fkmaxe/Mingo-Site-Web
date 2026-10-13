@@ -9343,15 +9343,20 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 alternanceOnly: boolean;
             } | null;
             track: {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
             } | null;
             /** @enum {string|null} */
             rhythm: "initial" | "alternance" | null;
+            classNumber: number | null;
+            januaryIntake: boolean;
+            classCode: string | null;
             avatarUrl: string | null;
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
@@ -9394,12 +9399,17 @@ export interface components {
              * @enum {string|null}
              */
             rhythm: "initial" | "alternance" | null;
+            /** @default null */
+            classNumber: number | null;
+            /** @default false */
+            januaryIntake: boolean;
         };
         Classes: {
             levels: {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 userCount: number;
                 position: number;
                 alternanceOnly: boolean;
@@ -9409,17 +9419,20 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 userCount: number;
             }[];
         };
         ClassLevelInput: {
             name: string;
+            code?: string | null;
             position?: number;
             alternanceOnly?: boolean;
             trackIds?: string[];
         };
         TrackInput: {
             name: string;
+            code?: string | null;
         };
         Pole: {
             /** Format: uuid */

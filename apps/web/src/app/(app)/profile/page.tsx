@@ -75,6 +75,8 @@ export default async function ProfilePage() {
           levelId={me.level?.id ?? null}
           trackId={me.track?.id ?? null}
           rhythm={me.rhythm}
+          classNumber={me.classNumber}
+          januaryIntake={me.januaryIntake}
         />
       </Card>
 

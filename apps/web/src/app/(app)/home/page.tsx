@@ -71,14 +71,14 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {me.promo ? null : (
+      {me.promo && (me.level === null || me.classNumber !== null) ? null : (
         <Link
           href="/profile#classe"
           className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
           <span>
-            <strong className="font-semibold">Complète ta classe</strong> : année, filière, initial
-            ou alternance, pour les listes et le classement de la ligue.
+            <strong className="font-semibold">Complète ta classe</strong> : année, filière, numéro,
+            initial ou alternance, pour les listes et le classement de la ligue.
           </span>
           <span aria-hidden className="font-semibold text-primary">
             →

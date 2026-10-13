@@ -20,11 +20,23 @@ export const MeDto = z
     name: z.string(),
     firstName: z.string(),
     lastName: z.string(),
-    /** Class label ("3A · Dev"), computed from level and track. */
+    /** Class label ("4AL1 · 4A · Architecture logicielle"), computed from the class. */
     promo: z.string().nullable(),
-    level: z.object({ id: z.uuid(), name: z.string(), alternanceOnly: z.boolean() }).nullable(),
-    track: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    level: z
+      .object({
+        id: z.uuid(),
+        name: z.string(),
+        code: z.string().nullable(),
+        alternanceOnly: z.boolean(),
+      })
+      .nullable(),
+    track: z.object({ id: z.uuid(), name: z.string(), code: z.string().nullable() }).nullable(),
     rhythm: z.enum(STUDY_RHYTHMS).nullable(),
+    /** Number of the class in its year, 1 to 9. */
+    classNumber: z.int().nullable(),
+    januaryIntake: z.boolean(),
+    /** ESGI class code ("4AL1"), or null while the class is incomplete. */
+    classCode: z.string().nullable(),
     /** Path of the profile photo on the web origin, or null. */
     avatarUrl: z.string().nullable(),
     isAdmin: z.boolean(),

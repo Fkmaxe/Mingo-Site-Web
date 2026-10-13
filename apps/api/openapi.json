@@ -67,6 +67,12 @@
               "name": {
                 "type": "string"
               },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "alternanceOnly": {
                 "type": "boolean"
               }
@@ -74,6 +80,7 @@
             "required": [
               "id",
               "name",
+              "code",
               "alternanceOnly"
             ]
           },
@@ -89,11 +96,18 @@
               },
               "name": {
                 "type": "string"
+              },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
               "id",
-              "name"
+              "name",
+              "code"
             ]
           },
           "rhythm": {
@@ -105,6 +119,21 @@
               "initial",
               "alternance",
               null
+            ]
+          },
+          "classNumber": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "januaryIntake": {
+            "type": "boolean"
+          },
+          "classCode": {
+            "type": [
+              "string",
+              "null"
             ]
           },
           "avatarUrl": {
@@ -183,6 +212,9 @@
           "level",
           "track",
           "rhythm",
+          "classNumber",
+          "januaryIntake",
+          "classCode",
           "avatarUrl",
           "isAdmin",
           "memberships",
@@ -364,6 +396,19 @@
               null
             ],
             "default": null
+          },
+          "classNumber": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 9,
+            "default": null
+          },
+          "januaryIntake": {
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -386,6 +431,12 @@
                 "name": {
                   "type": "string"
                 },
+                "code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "userCount": {
                   "type": "integer"
                 },
@@ -406,6 +457,7 @@
               "required": [
                 "id",
                 "name",
+                "code",
                 "userCount",
                 "position",
                 "alternanceOnly",
@@ -425,6 +477,12 @@
                 "name": {
                   "type": "string"
                 },
+                "code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "userCount": {
                   "type": "integer"
                 }
@@ -432,6 +490,7 @@
               "required": [
                 "id",
                 "name",
+                "code",
                 "userCount"
               ]
             }
@@ -449,6 +508,13 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 40
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Z0-9]{0,6}$"
           },
           "position": {
             "type": "integer",
@@ -478,6 +544,13 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 40
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Z0-9]{0,6}$"
           }
         },
         "required": [
