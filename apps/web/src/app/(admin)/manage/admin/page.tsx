@@ -32,9 +32,10 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number][0];
 
+/** The first one is the default: the people with a role are the ones administered most. */
 const SCOPES = [
-  ["all", "Tous les comptes"],
   ["roles", "Avec un rôle"],
+  ["all", "Tous les comptes"],
   ["unverified", "Non confirmés"],
 ] as const;
 
@@ -50,7 +51,7 @@ export default async function AdminPage({
   const tab: Tab = allowed.find(([value]) => value === params.tab)?.[0] ?? first[0];
   const q = params.q?.trim() || undefined;
   const scope: UserScope =
-    params.scope === "roles" || params.scope === "unverified" ? params.scope : "all";
+    params.scope === "all" || params.scope === "unverified" ? params.scope : "roles";
 
   const [users, poles, years, audit, classes] = await Promise.all([
     tab === "members" ? listAdminUsers(q, scope) : null,
