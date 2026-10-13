@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { MEMBERSHIP_ROLES, TASK_STATUSES } from "../enums";
+import { MEMBERSHIP_ROLES, TASK_SCOPES, TASK_STATUSES } from "../enums";
 
 const TaskFields = z.object({
   title: z.string().trim().min(1, "Le titre est obligatoire").max(120, "Titre trop long"),
   description: z.string().trim().max(2000, "Description trop longue"),
   status: z.enum(TASK_STATUSES, "Statut invalide"),
-  /** Membership of the pole (current school year), or null. */
+  /** Membership of the pole (or of the bureau for a bureau task), current school year, or null. */
   assigneeMembershipId: z.uuid("Membre invalide").nullable(),
   dueOn: z.iso.date("Date invalide").nullable(),
 });
@@ -18,6 +18,13 @@ export const CreateTaskInput = TaskFields.extend({
 }).meta({ id: "CreateTaskInput" });
 export type CreateTaskInput = z.input<typeof CreateTaskInput>;
 export type CreateTaskData = z.output<typeof CreateTaskInput>;
+
+/** A personal task: nobody else is assigned, only its author sees it. */
+export const CreatePersonalTaskInput = CreateTaskInput.omit({ assigneeMembershipId: true }).meta({
+  id: "CreatePersonalTaskInput",
+});
+export type CreatePersonalTaskInput = z.input<typeof CreatePersonalTaskInput>;
+export type CreatePersonalTaskData = z.output<typeof CreatePersonalTaskInput>;
 
 export const UpdateTaskInput = TaskFields.partial().meta({ id: "UpdateTaskInput" });
 export type UpdateTaskData = z.output<typeof UpdateTaskInput>;
@@ -38,10 +45,13 @@ export const TaskDto = z
     description: z.string(),
     status: z.enum(TASK_STATUSES),
     dueOn: z.string().nullable(),
-    pole: z.object({ id: z.uuid(), name: z.string() }),
+    /** Pole board, bureau board, or personal task. */
+    scope: z.enum(TASK_SCOPES),
+    /** The pole of a pole task; null for the bureau and personal tasks. */
+    pole: z.object({ id: z.uuid(), name: z.string() }).nullable(),
     // Inline (not a $ref): a nullable reference is generated as an unusable allOf type.
     assignee: PoleMemberShape.nullable(),
-    /** Organisers edit everything; the assignee only moves the status. */
+    /** Organisers (or the author of a personal task) edit everything; the assignee only moves the status. */
     canEdit: z.boolean(),
     canMove: z.boolean(),
     createdAt: z.iso.datetime(),

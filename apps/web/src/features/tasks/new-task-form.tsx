@@ -8,11 +8,19 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { createTaskAction } from "./actions";
-import type { PoleMember } from "./types";
+import type { PoleMember, TaskTarget } from "./types";
 
 const empty = { title: "", description: "", dueOn: "", assignee: "" };
 
-export function NewTaskForm({ poleId, members }: { poleId: string; members: PoleMember[] }) {
+/** New task of a pole board, of the bureau board, or a personal one (nobody to assign). */
+export function NewTaskForm({
+  target,
+  members = [],
+}: {
+  target: TaskTarget;
+  members?: PoleMember[];
+}) {
+  const personal = target.kind === "personal";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(empty);
@@ -23,7 +31,7 @@ export function NewTaskForm({ poleId, members }: { poleId: string; members: Pole
   if (!open) {
     return (
       <Button size="lg" onClick={() => setOpen(true)}>
-        Nouvelle tâche
+        {personal ? "Nouvelle tâche perso" : "Nouvelle tâche"}
       </Button>
     );
   }
@@ -42,7 +50,7 @@ export function NewTaskForm({ poleId, members }: { poleId: string; members: Pole
     }
     setErrors({});
     startTransition(async () => {
-      const result = await createTaskAction(poleId, parsed.data);
+      const result = await createTaskAction(target, parsed.data);
       if (!result.ok) {
         setMessage(result.message);
         setErrors(result.fieldErrors);
@@ -62,6 +70,9 @@ export function NewTaskForm({ poleId, members }: { poleId: string; members: Pole
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-3 rounded-xl border p-3">
       {message ? <FormAlert tone="error">{message}</FormAlert> : null}
+      {personal ? (
+        <p className="text-muted-foreground text-sm">Une tâche perso n'est visible que par toi.</p>
+      ) : null}
       <FormField
         id="task-title"
         label="Titre"
@@ -83,18 +94,20 @@ export function NewTaskForm({ poleId, members }: { poleId: string; members: Pole
           onChange={set("dueOn")}
           error={errors.dueOn}
         />
-        <FieldShell id="task-assignee" label="Assignée à" error={errors.assigneeMembershipId}>
-          {(aria) => (
-            <NativeSelect {...aria} value={values.assignee} onChange={set("assignee")}>
-              <option value="">Personne</option>
-              {members.map((m) => (
-                <option key={m.membershipId} value={m.membershipId}>
-                  {m.user.name}
-                </option>
-              ))}
-            </NativeSelect>
-          )}
-        </FieldShell>
+        {personal ? null : (
+          <FieldShell id="task-assignee" label="Assignée à" error={errors.assigneeMembershipId}>
+            {(aria) => (
+              <NativeSelect {...aria} value={values.assignee} onChange={set("assignee")}>
+                <option value="">Personne</option>
+                {members.map((m) => (
+                  <option key={m.membershipId} value={m.membershipId}>
+                    {m.user.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            )}
+          </FieldShell>
+        )}
       </div>
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>

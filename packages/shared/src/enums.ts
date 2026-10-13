@@ -45,6 +45,10 @@ export type GradeStatus = (typeof GRADE_STATUSES)[number];
 export const TASK_STATUSES = ["todo", "doing", "done"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
+/** Board of a pole, of the bureau, or personal (seen only by its author). */
+export const TASK_SCOPES = ["pole", "board", "personal"] as const;
+export type TaskScope = (typeof TASK_SCOPES)[number];
+
 export const APPLICATION_STATUSES = ["new", "interview", "accepted", "rejected"] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 

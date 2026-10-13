@@ -2,6 +2,7 @@ import {
   BarChart3,
   CalendarDays,
   ChevronRight,
+  ClipboardList,
   GraduationCap,
   PiggyBank,
   ShieldCheck,
@@ -45,6 +46,13 @@ export default async function ManagePage() {
       description: "Recrutement des nouveaux membres",
       icon: UserPlus,
       show: me.permissions.includes("members:manage"),
+    },
+    {
+      href: "/tasks?scope=board",
+      title: "Tâches du bureau",
+      description: "Le tableau du bureau, à côté de tes tâches perso",
+      icon: ClipboardList,
+      show: me.permissions.includes("poles:all"),
     },
     {
       href: "/manage/treasury",

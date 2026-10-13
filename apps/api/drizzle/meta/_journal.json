@@ -218,6 +218,13 @@
       "when": 1791932016211,
       "tag": "0030_class_code_number",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791932452848,
+      "tag": "0031_task_scopes",
+      "breakpoints": true
     }
   ]
 }

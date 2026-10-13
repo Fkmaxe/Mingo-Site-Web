@@ -137,3 +137,114 @@ describe("tasks", () => {
     expect(await tasks(com.id, board.id)).toHaveLength(1);
   });
 });
+
+describe("bureau tasks", () => {
+  const boardTasks = async (userId: string) =>
+    readJson(await call("GET", "/v1/board/tasks", userId), z.array(TaskDto));
+
+  it("are created and assigned within the bureau, seen by the bureau only", async () => {
+    const president = await createPersona("board");
+    const treasurer = await createPersona("board");
+    const seats = await readJson(
+      await call("GET", "/v1/board/members", president.id),
+      z.array(PoleMemberDto),
+    );
+    const seat = seats.find((m) => m.user.id === treasurer.id);
+    expect(seats.map((m) => m.user.id).sort()).toEqual([president.id, treasurer.id].sort());
+
+    const res = await call("POST", "/v1/board/tasks", president.id, {
+      title: "Bilan financier",
+      assigneeMembershipId: seat?.membershipId,
+    });
+    expect(res.status).toBe(201);
+    expect(await readJson(res, TaskDto)).toMatchObject({
+      scope: "board",
+      pole: null,
+      assignee: { user: { id: treasurer.id } },
+      canEdit: true,
+    });
+    expect((await boardTasks(treasurer.id)).map((t) => t.title)).toEqual(["Bilan financier"]);
+    const mine = await readJson(await call("GET", "/v1/me/tasks", treasurer.id), z.array(TaskDto));
+    expect(mine.map((t) => t.scope)).toEqual(["board"]);
+
+    for (const outsider of [lead, member]) {
+      expect((await call("GET", "/v1/board/tasks", outsider.id)).status).toBe(403);
+      expect((await call("POST", "/v1/board/tasks", outsider.id, { title: "X" })).status).toBe(403);
+      expect((await call("GET", "/v1/board/members", outsider.id)).status).toBe(403);
+    }
+    expect((await call("GET", "/v1/board/tasks", null)).status).toBe(401);
+  });
+
+  it("refuses an assignee outside the bureau", async () => {
+    const board = await createPersona("board");
+    const res = await call("POST", "/v1/board/tasks", board.id, {
+      title: "X",
+      assigneeMembershipId: await memberMembershipId(),
+    });
+    expect(res.status).toBe(400);
+    expect((await readError(res)).message).toBe("Cette personne n'est pas au bureau.");
+  });
+});
+
+describe("personal tasks", () => {
+  const createPersonal = (userId: string, body: Record<string, unknown>) =>
+    call("POST", "/v1/me/tasks", userId, body);
+
+  it("are created by a member and listed with their assigned tasks", async () => {
+    const res = await createPersonal(member.id, {
+      title: "Réviser le partiel",
+      dueOn: "2026-12-01",
+    });
+    expect(res.status).toBe(201);
+    const created = await readJson(res, TaskDto);
+    expect(created).toMatchObject({
+      scope: "personal",
+      pole: null,
+      assignee: null,
+      canEdit: true,
+      canMove: true,
+    });
+
+    const moved = await call("PATCH", `/v1/tasks/${created.id}`, member.id, {
+      status: "doing",
+      title: "Réviser le partiel de maths",
+    });
+    expect(await readJson(moved, TaskDto)).toMatchObject({
+      status: "doing",
+      title: "Réviser le partiel de maths",
+    });
+    const mine = await readJson(await call("GET", "/v1/me/tasks", member.id), z.array(TaskDto));
+    expect(mine.map((t) => t.id)).toEqual([created.id]);
+    expect((await call("DELETE", `/v1/tasks/${created.id}`, member.id)).status).toBe(204);
+  });
+
+  it("stay private, the bureau included", async () => {
+    const created = await readJson(await createPersonal(member.id, { title: "Perso" }), TaskDto);
+    const board = await createPersona("board");
+    for (const other of [lead, board]) {
+      expect(
+        (await call("PATCH", `/v1/tasks/${created.id}`, other.id, { status: "done" })).status,
+      ).toBe(404);
+      expect((await call("DELETE", `/v1/tasks/${created.id}`, other.id)).status).toBe(404);
+      const theirs = await readJson(await call("GET", "/v1/me/tasks", other.id), z.array(TaskDto));
+      expect(theirs).toHaveLength(0);
+    }
+    expect(await tasks(sport.id, lead.id)).toHaveLength(0);
+    expect(
+      await readJson(await call("GET", "/v1/board/tasks", board.id), z.array(TaskDto)),
+    ).toHaveLength(0);
+  });
+
+  it("are not assigned to anyone, and are for BDE members only", async () => {
+    const created = await readJson(await createPersonal(member.id, { title: "Perso" }), TaskDto);
+    const assigned = await call("PATCH", `/v1/tasks/${created.id}`, member.id, {
+      assigneeMembershipId: await memberMembershipId(),
+    });
+    expect(assigned.status).toBe(400);
+
+    const student = await createPersona("student");
+    expect((await createPersonal(student.id, { title: "X" })).status).toBe(403);
+    expect((await createPersonal(member.id, { title: "" })).status).toBe(400);
+    expect((await call("POST", "/v1/me/tasks", null, { title: "X" })).status).toBe(401);
+  });
+});

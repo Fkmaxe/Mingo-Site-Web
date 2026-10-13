@@ -23,3 +23,16 @@ export async function listPoleMembers(poleId: string): Promise<PoleMember[]> {
   if (!data) throw new Error(`GET members a échoué (${response.status})`);
   return data;
 }
+
+export async function listBoardTasks(): Promise<Task[]> {
+  const { data, response } = await (await api()).GET("/v1/board/tasks");
+  if (!data) throw new Error(`GET /v1/board/tasks a échoué (${response.status})`);
+  return data;
+}
+
+/** The bureau of the year: who a bureau task can be assigned to. */
+export async function listBoardMembers(): Promise<PoleMember[]> {
+  const { data, response } = await (await api()).GET("/v1/board/members");
+  if (!data) throw new Error(`GET /v1/board/members a échoué (${response.status})`);
+  return data;
+}

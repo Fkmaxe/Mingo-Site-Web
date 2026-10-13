@@ -9,17 +9,19 @@ import { Button } from "@/components/ui/button";
 import { formatShortDay } from "@/lib/paris-time";
 import { cn } from "@/lib/utils";
 import { deleteTaskAction, moveTaskAction } from "./actions";
-import { NEXT_STATUS, PREVIOUS_STATUS, TASK_STATUS_LABELS } from "./labels";
+import { NEXT_STATUS, PREVIOUS_STATUS, TASK_STATUS_LABELS, taskOrigin } from "./labels";
 import type { Task } from "./types";
 
 function TaskCard({
   task,
   pending,
+  showOrigin,
   onMove,
   onDelete,
 }: {
   task: Task;
   pending: boolean;
+  showOrigin: boolean;
   onMove: (status: TaskStatus) => void;
   onDelete: () => void;
 }) {
@@ -46,8 +48,17 @@ function TaskCard({
       {task.description ? (
         <p className="whitespace-pre-line text-muted-foreground text-sm">{task.description}</p>
       ) : null}
-      <p className="text-muted-foreground text-xs">
-        {task.assignee ? task.assignee.user.name : "Non assignée"}
+      <p className="flex flex-wrap items-center gap-x-1 text-muted-foreground text-xs">
+        {showOrigin ? (
+          <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground">
+            {taskOrigin(task)}
+          </span>
+        ) : null}
+        {task.scope === "personal"
+          ? null
+          : task.assignee
+            ? task.assignee.user.name
+            : "Non assignée"}
         {task.dueOn ? (
           <span className={cn(late && "font-medium text-destructive")}>
             {" "}
@@ -75,8 +86,11 @@ function TaskCard({
   );
 }
 
-/** Kanban: one column at a time on phones (tabs), three columns from md up. */
-export function TaskBoard({ tasks }: { tasks: Task[] }) {
+/**
+ * Kanban: one column at a time on phones (tabs), three columns from md up. `showOrigin` labels
+ * each card with its board (Perso, Bureau, Pôle …) where they are mixed (Mes tâches).
+ */
+export function TaskBoard({ tasks, showOrigin = false }: { tasks: Task[]; showOrigin?: boolean }) {
   const router = useRouter();
   const [tab, setTab] = useState<TaskStatus>("todo");
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +149,7 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
                       key={task.id}
                       task={task}
                       pending={pending}
+                      showOrigin={showOrigin}
                       onMove={(to) => run(() => moveTaskAction(task.id, to))}
                       onDelete={() => run(() => deleteTaskAction(task.id))}
                     />

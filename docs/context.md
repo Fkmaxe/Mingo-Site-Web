@@ -130,7 +130,10 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Gestion interne
 
 - Annuaire des membres (pôle, rôle, promo, contact).
-- Tâches par pôle (à faire / en cours / fait, responsable, échéance).
+- Tâches (à faire / en cours / fait, responsable, échéance), sur `/tasks` en onglets :
+  - **Mes tâches** : celles qui me sont assignées et mes **tâches perso**. Une tâche perso est créée par n'importe quel membre de l'année, n'est assignée à personne et n'est visible que par son auteur (ni le bureau ni les admins ne la voient) ;
+  - **Bureau** : le tableau du bureau, visible et géré par le bureau seulement (et les admins) ; on l'assigne à un membre du bureau. Accessible aussi depuis Gestion ;
+  - **Pôle X** : le tableau de chaque pôle (le responsable gère, les membres du pôle voient, l'assigné déplace sa tâche).
 - Réunions : ordre du jour, compte rendu, présences.
 - Recrutement : candidatures, affectation à un pôle.
 - Partenariats : fiches partenaires, contacts, statut, contreparties. Gérées par le bureau ; le membre référent d'un partenaire peut modifier sa fiche. Les partenaires actifs (nom, site, avantages) sont affichés publiquement.

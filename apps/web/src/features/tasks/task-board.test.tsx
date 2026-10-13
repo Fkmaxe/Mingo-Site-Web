@@ -11,13 +11,14 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 const task = (
   id: string,
   status: Task["status"],
-  rights: Partial<Pick<Task, "canEdit" | "canMove">> = {},
+  rights: Partial<Pick<Task, "canEdit" | "canMove" | "scope" | "pole">> = {},
 ): Task => ({
   id,
   title: `Tâche ${id}`,
   description: "",
   status,
   dueOn: null,
+  scope: "pole",
   pole: { id: "p", name: "Sport" },
   assignee: null,
   canEdit: false,
@@ -53,5 +54,29 @@ describe("TaskBoard", () => {
   it("offers deletion only to organisers", () => {
     render(<TaskBoard tasks={[task("a", "todo", { canEdit: true }), task("b", "todo")]} />);
     expect(screen.getAllByRole("button", { name: /Supprimer/ })).toHaveLength(1);
+  });
+
+  it("labels each card with its board in « Mes tâches », without an assignee for a personal one", () => {
+    render(
+      <TaskBoard
+        showOrigin
+        tasks={[
+          task("a", "todo"),
+          task("b", "todo", { scope: "board", pole: null }),
+          task("c", "todo", { scope: "personal", pole: null, canEdit: true }),
+        ]}
+      />,
+    );
+    const card = (id: string) => screen.getByText(`Tâche ${id}`).closest("li") as HTMLElement;
+    expect(within(card("a")).getByText("Pôle Sport")).toBeInTheDocument();
+    expect(within(card("b")).getByText("Bureau")).toBeInTheDocument();
+    expect(within(card("b")).getByText("Non assignée")).toBeInTheDocument();
+    expect(within(card("c")).getByText("Perso")).toBeInTheDocument();
+    expect(within(card("c")).queryByText("Non assignée")).toBeNull();
+  });
+
+  it("does not label the cards of a single board", () => {
+    render(<TaskBoard tasks={[task("a", "todo")]} />);
+    expect(screen.queryByText("Pôle Sport")).toBeNull();
   });
 });
