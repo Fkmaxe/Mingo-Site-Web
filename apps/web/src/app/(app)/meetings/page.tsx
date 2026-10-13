@@ -1,9 +1,11 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listMeetings } from "@/features/meetings/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { formatDateTime } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -27,16 +29,17 @@ export default async function MeetingsPage({
   const meetings = await listMeetings(scope);
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Réunions
-        </h1>
-        {me.permissions.includes("meetings:manage") ? (
-          <Button asChild>
-            <Link href="/meetings/new">Créer</Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        title="Réunions"
+        breadcrumb={[HOME]}
+        action={
+          me.permissions.includes("meetings:manage") ? (
+            <Button asChild>
+              <Link href="/meetings/new">Créer</Link>
+            </Button>
+          ) : null
+        }
+      />
       <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
         {(
           [

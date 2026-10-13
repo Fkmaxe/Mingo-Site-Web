@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gestion" };
@@ -72,9 +73,7 @@ export default async function ManagePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Gestion
-      </h1>
+      <PageHeader title="Gestion" />
       <ul className="flex flex-col gap-3">
         {links.map(({ href, title, description, icon: Icon }) => (
           <li key={href}>

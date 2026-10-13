@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { listDirectory } from "@/features/members/queries";
 import { PARTNER_STATUS_LABELS } from "@/features/partners/labels";
 import { PartnerForm } from "@/features/partners/partner-form";
 import { getPartnerOr404 } from "@/features/partners/queries";
+import { HOME, PARTNERS, TEAM } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Partenaire" };
@@ -19,6 +21,7 @@ export default async function PartnerPage({ params }: { params: Promise<{ partne
       : undefined;
     return (
       <div className="flex flex-col gap-5">
+        <Breadcrumbs items={[HOME, TEAM, PARTNERS]} current={partner.name} />
         <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
           {partner.name}
         </h1>
@@ -28,6 +31,7 @@ export default async function PartnerPage({ params }: { params: Promise<{ partne
   }
   return (
     <div className="flex flex-col gap-4">
+      <Breadcrumbs items={[HOME, TEAM, PARTNERS]} current={partner.name} />
       <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
         {partner.name}
       </h1>

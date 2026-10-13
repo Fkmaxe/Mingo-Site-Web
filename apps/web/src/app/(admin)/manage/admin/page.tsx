@@ -18,6 +18,7 @@ import {
 import { YearsAdmin } from "@/features/admin/years-admin";
 import { listPoles } from "@/features/events/queries";
 import { listClasses } from "@/features/profile/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +64,11 @@ export default async function AdminPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Administration" description="Rôles, pôles, années scolaires et journal." />
+      <PageHeader
+        title="Administration"
+        description="Rôles, pôles, années scolaires et journal."
+        breadcrumb={manageTrail()}
+      />
       <nav
         aria-label="Sections"
         className="grid rounded-full bg-muted p-1 text-sm"

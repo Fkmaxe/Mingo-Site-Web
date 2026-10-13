@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listPoles } from "@/features/events/queries";
 import { NewTaskForm } from "@/features/tasks/new-task-form";
 import { listMyTasks, listPoleMembers, listPoleTasks } from "@/features/tasks/queries";
 import { TaskBoard } from "@/features/tasks/task-board";
+import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -43,9 +45,7 @@ export default async function TasksPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Tâches
-      </h1>
+      <PageHeader title="Tâches" breadcrumb={[HOME]} />
       <nav
         aria-label="Tableau"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/brand";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { formatScore } from "@/features/grades/labels";
 import { getMyGrades } from "@/features/grades/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { formatShortDay } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
@@ -12,9 +14,7 @@ export default async function MyGradesPage() {
   if (!me.roles.includes("member")) {
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Ma note
-        </h1>
+        <PageHeader title="Ma note" breadcrumb={[HOME]} />
         <Card>
           <CardDescription>La note concerne les membres du BDE.</CardDescription>
         </Card>
@@ -24,9 +24,7 @@ export default async function MyGradesPage() {
   const { periods } = await getMyGrades();
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Ma note
-      </h1>
+      <PageHeader title="Ma note" breadcrumb={[HOME]} />
       {periods.length === 0 ? (
         <p className="text-muted-foreground text-sm">Le bureau n'a pas encore créé de période.</p>
       ) : null}

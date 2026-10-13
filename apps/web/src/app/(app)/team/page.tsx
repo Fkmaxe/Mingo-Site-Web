@@ -2,9 +2,11 @@ import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
+import { PageHeader } from "@/components/brand";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listDirectory } from "@/features/members/queries";
 import type { DirectoryEntry } from "@/features/members/types";
+import { HOME } from "@/lib/breadcrumbs";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS } from "@/lib/labels";
 import { requireMe } from "@/lib/session";
 
@@ -27,17 +29,18 @@ export default async function TeamPage() {
   }
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          L'équipe
-        </h1>
-        <Link
-          href="/team/partners"
-          className="text-primary text-sm underline-offset-4 hover:underline"
-        >
-          Partenaires
-        </Link>
-      </div>
+      <PageHeader
+        title="L'équipe"
+        breadcrumb={[HOME]}
+        action={
+          <Link
+            href="/team/partners"
+            className="text-primary text-sm underline-offset-4 hover:underline"
+          >
+            Partenaires
+          </Link>
+        }
+      />
       {[...groups.entries()].map(([name, people]) => (
         <section key={name} className="flex flex-col gap-2">
           <h2 className="font-bold font-display text-lg">

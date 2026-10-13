@@ -2,6 +2,7 @@ import { ExternalLink, ScanLine } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { DownloadLink } from "@/components/download-link";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { listStaffSlots } from "@/features/staff/queries";
 import { StaffManager } from "@/features/staff/staff-manager";
 import { EventStatsView } from "@/features/stats/event-stats";
 import { getEventStats } from "@/features/stats/queries";
+import { MANAGE_EVENTS, manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gérer l'événement" };
@@ -51,6 +53,7 @@ export default async function ManageEventPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
+        <Breadcrumbs items={manageTrail(MANAGE_EVENTS)} current={event.title} />
         <StatusBadge status={event.status} />
         <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
           {event.title}

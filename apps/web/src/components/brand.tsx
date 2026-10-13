@@ -1,5 +1,7 @@
 import Image from "next/image";
 import type * as React from "react";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import type { Crumb } from "@/lib/breadcrumbs";
 import { cn } from "@/lib/utils";
 
 /** The BDE Mingo logo (flamingo badge). `size` is its height in pixels. */
@@ -41,23 +43,35 @@ export function DisplayTitle({
   );
 }
 
-/** Page title with an optional line below and an action on the right. */
+/**
+ * Page title with an optional line below and an action on the right, under the breadcrumb
+ * trail of its parent pages when given.
+ */
 export function PageHeader({
   title,
   description,
   action,
+  breadcrumb,
 }: {
   title: string;
   description?: React.ReactNode;
   action?: React.ReactNode;
+  breadcrumb?: readonly Crumb[];
 }) {
-  return (
+  const header = (
     <div className="flex items-end justify-between gap-3">
       <div className="flex min-w-0 flex-col gap-1.5">
         <DisplayTitle className="text-[1.75rem]">{title}</DisplayTitle>
         {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
+    </div>
+  );
+  if (!breadcrumb) return header;
+  return (
+    <div className="flex flex-col gap-1">
+      <Breadcrumbs items={breadcrumb} current={title} />
+      {header}
     </div>
   );
 }

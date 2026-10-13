@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/brand";
 import { listDirectory } from "@/features/members/queries";
 import { PartnerForm } from "@/features/partners/partner-form";
+import { HOME, PARTNERS, TEAM } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Nouveau partenaire" };
@@ -15,9 +17,7 @@ export default async function NewPartnerPage() {
   }));
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Nouveau partenaire
-      </h1>
+      <PageHeader title="Nouveau partenaire" breadcrumb={[HOME, TEAM, PARTNERS]} />
       <PartnerForm owners={owners} />
     </div>
   );

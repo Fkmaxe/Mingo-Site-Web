@@ -2,8 +2,10 @@ import { CalendarDays, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DisplayTitle, Logo } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { QrCode } from "@/features/registrations/qr-code";
 import { getTicketOr404 } from "@/features/registrations/queries";
+import { TICKETS } from "@/lib/breadcrumbs";
 import { formatEventRange } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
@@ -21,6 +23,7 @@ export default async function TicketPage({
   const valid = ticket.status === "confirmed" && ticket.event.status !== "cancelled";
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-5">
+      <Breadcrumbs items={[TICKETS]} current={ticket.event.title} />
       <div className="overflow-hidden rounded-3xl border bg-card shadow-primary/15 shadow-xl">
         <div className="relative flex flex-col gap-2 bg-linear-to-br from-brand-magenta via-brand-violet to-brand-blue p-5 text-white">
           <Logo size={56} className="absolute top-3 right-3 rotate-6" />

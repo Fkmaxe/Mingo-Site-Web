@@ -2,10 +2,12 @@ import { APPLICATION_STATUSES, type ApplicationStatus } from "@bde/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/brand";
 import { ApplicationCard } from "@/features/applications/application-card";
 import { APPLICATION_STATUS_LABELS } from "@/features/applications/labels";
 import { listApplications } from "@/features/applications/queries";
 import { listPoles } from "@/features/events/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -30,9 +32,7 @@ export default async function ApplicationsPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Candidatures
-      </h1>
+      <PageHeader title="Candidatures" breadcrumb={manageTrail()} />
       <nav
         aria-label="Statut"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

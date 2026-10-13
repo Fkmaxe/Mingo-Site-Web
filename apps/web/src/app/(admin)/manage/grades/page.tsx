@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/brand";
 import { GradeRow } from "@/features/grades/grade-row";
 import { GenerateQuartersButton, GradesActionsBar } from "@/features/grades/grades-actions-bar";
 import { PeriodSettings } from "@/features/grades/period-settings";
 import { listGrades, listPeriods } from "@/features/grades/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +25,7 @@ export default async function ManageGradesPage({
   if (periods.length === 0) {
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Notes des membres
-        </h1>
+        <PageHeader title="Notes des membres" breadcrumb={manageTrail()} />
         <p className="text-muted-foreground text-sm">Aucune période de notation cette année.</p>
         {isBoard ? <GenerateQuartersButton /> : null}
       </div>
@@ -42,9 +42,7 @@ export default async function ManageGradesPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Notes des membres
-      </h1>
+      <PageHeader title="Notes des membres" breadcrumb={manageTrail()} />
       <nav
         aria-label="Période"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"
