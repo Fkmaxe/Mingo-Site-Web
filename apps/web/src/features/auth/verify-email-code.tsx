@@ -1,9 +1,9 @@
 "use client";
 
-import { ALLOWED_EMAIL_DOMAIN } from "@bde/shared";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { FormAlert, FormField } from "@/components/form-field";
+import { FormAlert } from "@/components/form-field";
+import { SchoolEmailField } from "@/components/school-email-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
@@ -50,16 +50,11 @@ export function VerifyEmailCode({
       >
         {error ? <FormAlert tone="error">{error}</FormAlert> : null}
         {initialEmail ? null : (
-          <FormField
+          <SchoolEmailField
             id="verify-email"
-            label="Adresse email"
-            type="email"
-            inputMode="email"
             autoComplete="email"
-            autoCapitalize="none"
-            placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
           />
         )}
         <CodeField value={otp} onChange={setOtp} />

@@ -22,7 +22,7 @@ describe("VerifyEmailCode", () => {
     verifyEmail.mockResolvedValueOnce({ data: { status: true } });
     const user = userEvent.setup();
     render(<VerifyEmailCode email="jeanne@myskolae.fr" next="/events/gala" />);
-    expect(screen.queryByLabelText("Adresse email")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Adresse email de l'école")).not.toBeInTheDocument();
     await user.type(screen.getByLabelText("Code reçu par mail"), "654321");
     await user.click(screen.getByRole("button", { name: "Confirmer mon adresse" }));
     expect(verifyEmail).toHaveBeenCalledWith({ email: "jeanne@myskolae.fr", otp: "654321" });
@@ -32,7 +32,7 @@ describe("VerifyEmailCode", () => {
   it("asks for the address when the page has none, and sends a new code", async () => {
     const user = userEvent.setup();
     render(<VerifyEmailCode />);
-    await user.type(screen.getByLabelText("Adresse email"), "jeanne@myskolae.fr");
+    await user.type(screen.getByLabelText("Adresse email de l'école"), "jeanne@myskolae.fr");
     await user.click(screen.getByRole("button", { name: "Pas reçu ? Renvoyer un code" }));
     expect(sendOtp).toHaveBeenCalledWith({
       email: "jeanne@myskolae.fr",

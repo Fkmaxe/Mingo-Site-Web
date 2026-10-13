@@ -3,8 +3,9 @@
 import { ForgotPasswordInput } from "@bde/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { FormAlert, FormField } from "@/components/form-field";
+import { Controller, useForm } from "react-hook-form";
+import { FormAlert } from "@/components/form-field";
+import { SchoolEmailField } from "@/components/school-email-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
@@ -13,7 +14,7 @@ export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordInput>({ resolver: zodResolver(ForgotPasswordInput) });
@@ -40,14 +41,21 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
-      <FormField
-        id="email"
-        label="Adresse email"
-        type="email"
-        autoComplete="email"
-        placeholder="prenom.nom@myskolae.fr"
-        error={errors.email?.message}
-        {...register("email")}
+      <Controller
+        control={control}
+        name="email"
+        render={({ field }) => (
+          <SchoolEmailField
+            id="email"
+            autoComplete="email"
+            error={errors.email?.message}
+            ref={field.ref}
+            name={field.name}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+          />
+        )}
       />
       <Button type="submit" size="lg" disabled={isSubmitting}>
         {isSubmitting ? "Envoi…" : "Recevoir le lien"}

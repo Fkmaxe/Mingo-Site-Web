@@ -13,6 +13,7 @@ BDE de l'ESGI Paris. Organisation :
 ## Utilisateurs et connexion
 
 - Tout le monde se connecte avec son adresse école **@myskolae.fr** (élèves et membres) et un **mot de passe** choisi à l'inscription. Aucun autre domaine n'est accepté.
+- Les adresses de l'école sont de la forme `j.dupont@myskolae.fr` (initiale du prénom, un point, nom de famille). Les formulaires ne demandent que cet identifiant : `@myskolae.fr` est affiché, collé au champ, et ne se modifie pas. Une adresse complète collée ou proposée par le navigateur ne garde que l'identifiant.
 - L'adresse est **confirmée par un code à 6 chiffres** envoyé par mail (valable 10 minutes, 3 essais) avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Un code plutôt qu'un lien : les filtres de Microsoft 365 de l'école mettent beaucoup moins ces mails en quarantaine. Une fois l'adresse confirmée, l'étudiant est connecté directement. Mot de passe oublié → lien de réinitialisation par mail.
 - Trois façons de se connecter, au choix sur `/login` :
   - **mot de passe** ;

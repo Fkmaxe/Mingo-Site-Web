@@ -1,11 +1,12 @@
 "use client";
 
-import { ALLOWED_EMAIL_DOMAIN, composeName, PASSWORD_MIN_LENGTH, SignUpInput } from "@bde/shared";
+import { composeName, PASSWORD_MIN_LENGTH, SignUpInput } from "@bde/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { FormAlert, FormField } from "@/components/form-field";
+import { SchoolEmailField } from "@/components/school-email-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
@@ -17,6 +18,7 @@ export function SignUpForm({ next }: { next?: string | undefined }) {
   const [error, setError] = useState<string | null>(null);
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({ resolver: zodResolver(SignUpInput) });
@@ -58,17 +60,21 @@ export function SignUpForm({ next }: { next?: string | undefined }) {
           {...register("lastName")}
         />
       </div>
-      <FormField
-        id="email"
-        label="Adresse email de l'école"
-        type="email"
-        inputMode="email"
-        autoComplete="email"
-        autoCapitalize="none"
-        placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
-        hint={`Seules les adresses @${ALLOWED_EMAIL_DOMAIN} sont acceptées.`}
-        error={errors.email?.message}
-        {...register("email")}
+      <Controller
+        control={control}
+        name="email"
+        render={({ field }) => (
+          <SchoolEmailField
+            id="email"
+            autoComplete="email"
+            error={errors.email?.message}
+            ref={field.ref}
+            name={field.name}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+          />
+        )}
       />
       <PasswordField
         id="password"

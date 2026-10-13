@@ -9,6 +9,20 @@ export function isAllowedEmail(email: string): boolean {
   return email.trim().toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN}`);
 }
 
+/**
+ * The part typed in the email fields, whose domain is fixed: what comes before "@", without
+ * spaces. A pasted or autofilled full address ("j.dupont@myskolae.fr") keeps only "j.dupont".
+ */
+export function emailLocalPart(value: string): string {
+  return (value.split("@")[0] ?? "").replace(/\s/g, "");
+}
+
+/** The school address of a local part ("j.dupont" -> "j.dupont@myskolae.fr"); empty stays empty. */
+export function schoolEmail(localPart: string): string {
+  const local = emailLocalPart(localPart).toLowerCase();
+  return local ? `${local}@${ALLOWED_EMAIL_DOMAIN}` : "";
+}
+
 const SchoolEmail = z
   .email("Adresse email invalide")
   .refine(isAllowedEmail, `Utilise ton adresse @${ALLOWED_EMAIL_DOMAIN}`);
