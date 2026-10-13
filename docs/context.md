@@ -13,7 +13,11 @@ BDE de l'ESGI Paris. Organisation :
 ## Utilisateurs et connexion
 
 - Tout le monde se connecte avec son adresse école **@myskolae.fr** (élèves et membres) et un **mot de passe** choisi à l'inscription. Aucun autre domaine n'est accepté.
-- L'adresse est **confirmée par mail** avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Mot de passe oublié → lien de réinitialisation par mail.
+- L'adresse est **confirmée par un code à 6 chiffres** envoyé par mail (valable 10 minutes, 3 essais) avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Un code plutôt qu'un lien : les filtres de Microsoft 365 de l'école mettent beaucoup moins ces mails en quarantaine. Une fois l'adresse confirmée, l'étudiant est connecté directement. Mot de passe oublié → lien de réinitialisation par mail.
+- Trois façons de se connecter, au choix sur `/login` :
+  - **mot de passe** ;
+  - **code par mail** : on saisit son adresse, on reçoit un code (mêmes règles que ci-dessus). Ne crée jamais de compte : l'inscription reste nécessaire (elle demande le prénom et le nom) ;
+  - **passkey** (Face ID, empreinte, code du téléphone) : ajoutée depuis le profil une fois connecté, une par appareil, supprimable. Le navigateur la propose aussi directement dans le champ email. Ajouts et suppressions sont tracés dans l'audit.
 - Pas de connexion Microsoft (Entra ID) : le BDE n'a pas accès au tenant de l'école.
 - À l'inscription, le compte est créé avec le rôle **Étudiant**. Le bureau promeut ensuite les membres dans leur pôle.
 - L'étudiant saisit son **prénom** et son **nom** séparément ; il peut les corriger depuis son profil (changement tracé dans l'audit). Email, promo et rôles ne se modifient pas soi-même.

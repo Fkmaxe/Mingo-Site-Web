@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { classLevel, track } from "./classes";
 import { createdAt, id } from "./columns";
 
@@ -85,4 +94,26 @@ export const verification = pgTable(
     updatedAt: authUpdatedAt(),
   },
   (t) => [index("verification_identifier_idx").on(t.identifier)],
+);
+
+/** WebAuthn credentials (Face ID, fingerprint, phone screen lock), from @better-auth/passkey. */
+export const passkey = pgTable(
+  "passkey",
+  {
+    id: id(),
+    /** Device label shown in the profile ("iPhone de Camille"). */
+    name: text(),
+    publicKey: text().notNull(),
+    userId: uuid()
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    credentialID: text().notNull().unique("passkey_credential_id_unique"),
+    counter: integer().notNull(),
+    deviceType: text().notNull(),
+    backedUp: boolean().notNull(),
+    transports: text(),
+    aaguid: text(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("passkey_user_id_idx").on(t.userId)],
 );

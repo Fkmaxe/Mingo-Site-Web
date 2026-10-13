@@ -3,7 +3,7 @@
 //   Docker : docker compose exec api node dist/mail-test.js toi@exemple.fr
 import nodemailer from "nodemailer";
 import { z } from "zod";
-import { verificationEmail } from "../core/auth/emails";
+import { otpEmail } from "../core/auth/emails";
 import { loadEnv } from "../env";
 import { messageOf, smtpOptions } from "../lib/mailer/smtp-mailer";
 
@@ -74,12 +74,9 @@ async function main() {
     });
     console.log(`✔ Mail simple accepté par le serveur (${info.response})`);
     // The real confirmation mail (HTML, button, link): filtered more often than plain text.
-    const sample = verificationEmail(
-      { email: to, name: "Test" },
-      `${env.BETTER_AUTH_URL}/api/auth/verify-email?token=exemple-de-test`,
-    );
+    const sample = otpEmail(to, "123456", "email-verification");
     const info2 = await transport.sendMail(messageOf(env.MAIL_FROM, sample));
-    console.log(`✔ Mail de confirmation (modèle réel) accepté (${info2.response})`);
+    console.log(`✔ Mail de code de confirmation (modèle réel) accepté (${info2.response})`);
     console.log("  Deux mails envoyés. Si seul le mail simple arrive : filtrage à l'arrivée");
     console.log(
       "  (indésirables, quarantaine Microsoft 365 de l'école), voir SPF/DKIM du domaine.",

@@ -12,8 +12,9 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { AvatarEditor } from "@/features/profile/avatar-editor";
 import { ClassForm } from "@/features/profile/class-form";
+import { PasskeysCard } from "@/features/profile/passkeys-card";
 import { ProfileNameForm } from "@/features/profile/profile-name-form";
-import { listClasses } from "@/features/profile/queries";
+import { listClasses, listPasskeys } from "@/features/profile/queries";
 import { NotificationsCard } from "@/features/push/notifications-card";
 import { getPushSetup } from "@/features/push/queries";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
@@ -24,7 +25,12 @@ export const metadata: Metadata = { title: "Profil" };
 type Row = { href: string; label: string; icon: LucideIcon };
 
 export default async function ProfilePage() {
-  const [me, push, classes] = await Promise.all([requireMe(), getPushSetup(), listClasses()]);
+  const [me, push, classes, passkeys] = await Promise.all([
+    requireMe(),
+    getPushSetup(),
+    listClasses(),
+    listPasskeys(),
+  ]);
   const rows: Row[] = me.roles.includes("member")
     ? [
         { href: "/grades", label: "Ma note et mes présences", icon: GraduationCap },
@@ -92,6 +98,8 @@ export default async function ProfilePage() {
           </ul>
         ) : null}
       </Card>
+
+      <PasskeysCard passkeys={passkeys} />
 
       <NotificationsCard publicKey={push.publicKey} newEvents={push.newEvents} />
 

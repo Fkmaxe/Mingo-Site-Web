@@ -26,3 +26,18 @@ describe("buildMail", () => {
     expect(text).not.toContain("<");
   });
 });
+
+describe("buildMail with a code", () => {
+  it("shows the code big, without a button, in both versions", () => {
+    const mail = buildMail({
+      to: "a@myskolae.fr",
+      subject: "123456",
+      title: "Ton code",
+      code: "123456",
+      paragraphs: ["Saisis-le sur le site."],
+    });
+    expect(mail.html).toContain(">123456</p>");
+    expect(mail.html).not.toContain("<a href");
+    expect(mail.text.startsWith("Code : 123456")).toBe(true);
+  });
+});

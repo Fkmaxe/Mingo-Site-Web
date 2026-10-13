@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
-import { ResendVerificationButton } from "@/features/auth/resend-verification-button";
-import { ResendVerificationForm } from "@/features/auth/resend-verification-form";
-import { authHref, safeNextPath } from "@/features/auth/safe-next";
+import { authHref } from "@/features/auth/safe-next";
+import { VerifyEmailCode } from "@/features/auth/verify-email-code";
 
 export const metadata: Metadata = { title: "Confirme ton adresse" };
 
@@ -14,14 +13,13 @@ export default async function VerifyEmailPage({
   searchParams: Promise<{ email?: string; next?: string; resent?: string }>;
 }) {
   const { email, next, resent } = await searchParams;
-  const callbackURL = safeNextPath(next);
   return (
     <AuthCard
       title="Regarde tes mails"
       description={
         email
-          ? `On a envoyé un lien de confirmation à ${email}.`
-          : "On t'a envoyé un lien de confirmation."
+          ? `On a envoyé un code à 6 chiffres à ${email}.`
+          : "On t'a envoyé un code à 6 chiffres."
       }
       footer={
         <Link
@@ -34,18 +32,14 @@ export default async function VerifyEmailPage({
     >
       {resent ? (
         <FormAlert tone="success">
-          Ton adresse n'est pas encore confirmée : on vient de te renvoyer le mail.
+          Ton adresse n'est pas encore confirmée : on vient de t'envoyer un nouveau code.
         </FormAlert>
       ) : null}
       <p className="text-sm">
-        Clique sur le lien du mail pour activer ton compte : tu seras connecté directement. Il est
-        valable 1 heure. Pense à regarder dans les spams.
+        Saisis le code du mail pour activer ton compte : tu seras connecté directement. Il est
+        valable 10 minutes. Pense à regarder dans les indésirables.
       </p>
-      {email ? (
-        <ResendVerificationButton email={email} callbackURL={callbackURL} />
-      ) : (
-        <ResendVerificationForm callbackURL={callbackURL} />
-      )}
+      <VerifyEmailCode email={email} next={next} />
     </AuthCard>
   );
 }

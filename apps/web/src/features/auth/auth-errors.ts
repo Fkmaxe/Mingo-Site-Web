@@ -12,6 +12,14 @@ const MESSAGES: Record<string, string> = {
   INVALID_TOKEN: "Ce lien a expiré ou a déjà servi. Refais une demande.",
   INVALID_NAME: "Indique ton prénom et ton nom.",
   PROFILE_UPDATE_NOT_ALLOWED: "Modifie ton profil depuis la page Profil.",
+  INVALID_OTP: "Code incorrect. Vérifie le dernier mail reçu.",
+  OTP_EXPIRED: "Ce code a expiré : demande-en un nouveau.",
+  TOO_MANY_ATTEMPTS: "Trop d'essais : demande un nouveau code.",
+  AUTH_CANCELLED: "Connexion par passkey annulée.",
+  AUTHENTICATION_FAILED: "Cette passkey n'est pas reconnue. Connecte-toi autrement.",
+  PASSKEY_NOT_FOUND: "Aucune passkey pour ce compte sur cet appareil.",
+  REGISTRATION_CANCELLED: "Ajout de la passkey annulé.",
+  PREVIOUSLY_REGISTERED: "Cet appareil a déjà une passkey sur ton compte.",
 };
 
 export type AuthError = { code?: string | undefined; status: number };

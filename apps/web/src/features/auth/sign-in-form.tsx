@@ -50,7 +50,7 @@ export function SignInForm({ next }: { next?: string | undefined }) {
         label="Adresse email"
         type="email"
         inputMode="email"
-        autoComplete="username"
+        autoComplete="username webauthn"
         autoCapitalize="none"
         placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
         error={errors.email?.message}

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FormAlert } from "@/components/form-field";
 import { AuthCard } from "@/features/auth/auth-card";
+import { LoginMethods } from "@/features/auth/login-methods";
 import { authHref, safeNextPath } from "@/features/auth/safe-next";
-import { SignInForm } from "@/features/auth/sign-in-form";
 import { getMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Connexion" };
@@ -35,7 +35,7 @@ export default async function LoginPage({
       {reset ? (
         <FormAlert tone="success">Mot de passe changé. Tu peux te connecter.</FormAlert>
       ) : null}
-      <SignInForm next={next} />
+      <LoginMethods next={next} />
     </AuthCard>
   );
 }

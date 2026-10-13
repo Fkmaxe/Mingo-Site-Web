@@ -117,9 +117,10 @@ registration.cancelled ──► registrations : promotion du premier en liste d
 ## Auth
 
 - Better Auth monté sur `/api/auth/*` dans l'API, **email + mot de passe** (hash scrypt).
-- Adresse vérifiée par mail obligatoire avant toute connexion ; réinitialisation du mot de passe par mail.
+- Plugin `emailOTP` (inclus dans Better Auth) : vérification de l'adresse par code (`overrideDefaultEmailVerification`, notre `emailVerification.sendVerificationEmail` ne doit donc pas être déclaré) et connexion par code (`disableSignUp`). Codes stockés hachés, 10 min, 3 essais. Adresse vérifiée obligatoire avant toute connexion ; réinitialisation du mot de passe par lien.
+- Plugin `@better-auth/passkey` (WebAuthn, table `passkey`) : `rpID` = domaine de `WEB_ORIGIN`, donc une passkey créée en dev ne marche pas en prod et un changement de domaine les rend inutilisables. Le hook `after` écrit `passkey.added` / `passkey.deleted` dans `audit_log`. La liste du profil est lue côté serveur (`list-user-passkeys`), l'ajout et la suppression passent par le client Better Auth (exception auth).
 - Domaine `@myskolae.fr` vérifié trois fois : hook avant l'inscription (`403 DOMAIN_NOT_ALLOWED`), hook de création d'utilisateur, contrainte SQL `check` sur `user.email`.
-- Rate limiting sur la connexion, l'inscription et la demande de réinitialisation.
+- Rate limiting sur la connexion (mot de passe, code, passkey), l'inscription, l'envoi de code et la demande de réinitialisation.
 - `BETTER_AUTH_URL` est l'URL **du web** : le web proxifie `/api/auth/*` vers l'API, donc cookies et liens des mails sont sur l'origine du web.
 - Session en cookie httpOnly, partagé avec le web (même domaine parent en prod, proxy Next en dev).
 - Le middleware `requireAuth` charge l'utilisateur et ses permissions dans le contexte Hono.

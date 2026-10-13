@@ -15,7 +15,7 @@ Conventions SQL :
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
 | `user` | email (unique, `@myskolae.fr`), first_name, last_name, name (toujours « prénom nom », exigé par Better Auth), promo, image, is_admin (admin technique) | check sur le domaine de l'email |
-| `session`, `account`, `verification` | gérées par Better Auth | ne pas modifier à la main |
+| `session`, `account`, `verification`, `passkey` | gérées par Better Auth (`verification` contient aussi les codes envoyés par mail, hachés) | ne pas modifier à la main ; `passkey.credential_id` unique, supprimée avec l'utilisateur |
 | `school_year` | label (`2026-2027`), starts_on, ends_on, is_current | un seul `is_current = true` |
 | `pole` | slug, name, description | slug unique |
 | `membership` | user_id, pole_id (nullable pour le bureau), school_year_id, role (`member`, `pole_lead`, `board`), board_position (`president`, `vice_president`, `secretary`, `treasurer`, null), is_active | unique (user_id, pole_id, school_year_id) |

@@ -1,8 +1,10 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { user } from "../../db/schema";
+import { auditLog, passkey, user } from "../../db/schema";
+import { authHeaders } from "../../test/auth";
 import { getTestDb } from "../../test/db";
 import { createTestApp, testEnv } from "../../test/env";
+import { createUser } from "../../test/factories";
 
 type TestApp = ReturnType<typeof createTestApp>;
 
@@ -28,6 +30,13 @@ function signUp(app: TestApp, email: string) {
 
 function signIn(app: TestApp, email: string) {
   return post(app, "/sign-in/email", { email, password });
+}
+
+/** The 6-digit code of the last mail sent to `to`. */
+function codeFromMail(app: TestApp, to: string): string {
+  const match = app.mailer.lastTo(to)?.text.match(/Code : (\d{6})/);
+  if (!match?.[1]) throw new Error(`Aucun code dans le mail envoyé à ${to}`);
+  return match[1];
 }
 
 /** Extracts the first link of the last mail sent to `to`. */
@@ -59,7 +68,10 @@ describe("sign-up", () => {
       lastName: "Durand",
       name: "Jeanne Durand",
     });
-    expect(app.mailer.lastTo("jeanne@myskolae.fr")?.subject).toContain("Confirme ton adresse");
+    const mail = app.mailer.lastTo("jeanne@myskolae.fr");
+    expect(mail?.subject).toMatch(/^\d{6} est ton code de confirmation BDE Mingo$/);
+    // A code, no link to click: mail filters flag those far less.
+    expect(mail?.html).not.toContain("verify-email");
   });
 
   it("stores trimmed names and derives `name` from them, whatever the client sent", async () => {
@@ -117,9 +129,17 @@ describe("sign-in", () => {
     expect(before.status).toBe(403);
     expect(await before.json()).toMatchObject({ code: "EMAIL_NOT_VERIFIED" });
 
-    const verifyUrl = linkFromMail(app, "jeanne@myskolae.fr");
-    const verify = await app.request(`${verifyUrl.pathname}${verifyUrl.search}`);
-    expect(verify.status).toBeLessThan(400);
+    // The refused sign-in sent a new code.
+    const wrong = await post(app, "/email-otp/verify-email", {
+      email: "jeanne@myskolae.fr",
+      otp: "000000",
+    });
+    expect(wrong.status).toBe(400);
+    const verify = await post(app, "/email-otp/verify-email", {
+      email: "jeanne@myskolae.fr",
+      otp: codeFromMail(app, "jeanne@myskolae.fr"),
+    });
+    expect(verify.status).toBe(200);
     const [verified] = await getTestDb()
       .select()
       .from(user)
@@ -181,13 +201,12 @@ describe("confirmation mail sent again", () => {
     await signUp(app, "jeanne@myskolae.fr");
     expect(app.mailer.lastTo("jeanne@myskolae.fr")).toBeUndefined();
 
-    const res = await post(app, "/send-verification-email", {
+    const res = await post(app, "/email-otp/send-verification-otp", {
       email: "jeanne@myskolae.fr",
-      callbackURL: "/home",
+      type: "email-verification",
     });
     expect(res.status).toBe(200);
-    const link = linkFromMail(app, "jeanne@myskolae.fr");
-    expect(link.pathname).toContain("verify-email");
+    expect(codeFromMail(app, "jeanne@myskolae.fr")).toMatch(/^\d{6}$/);
   });
 });
 
@@ -207,5 +226,141 @@ describe("update-user", () => {
     expect(await res.json()).toMatchObject({ code: "PROFILE_UPDATE_NOT_ALLOWED" });
     const [unchanged] = await getTestDb().select().from(user);
     expect(unchanged?.firstName).toBe("Jeanne");
+  });
+});
+
+describe("sign-in with a code by mail", () => {
+  async function verifiedAccount(app: TestApp, email: string) {
+    await signUp(app, email);
+    await post(app, "/email-otp/verify-email", { email, otp: codeFromMail(app, email) });
+    app.mailer.sent.length = 0;
+  }
+
+  it("sends a 6-digit code, then signs in with it, once", async () => {
+    const app = createTestApp();
+    await verifiedAccount(app, "jeanne@myskolae.fr");
+    const sent = await post(app, "/email-otp/send-verification-otp", {
+      email: "jeanne@myskolae.fr",
+      type: "sign-in",
+    });
+    expect(sent.status).toBe(200);
+    const mail = app.mailer.lastTo("jeanne@myskolae.fr");
+    expect(mail?.subject).toMatch(/^\d{6} est ton code de connexion BDE Mingo$/);
+    const otp = codeFromMail(app, "jeanne@myskolae.fr");
+
+    const ok = await post(app, "/sign-in/email-otp", { email: "jeanne@myskolae.fr", otp });
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get("set-cookie")).toContain("session_token");
+
+    const reused = await post(app, "/sign-in/email-otp", { email: "jeanne@myskolae.fr", otp });
+    expect(reused.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("locks the code after 3 wrong attempts", async () => {
+    const app = createTestApp();
+    await verifiedAccount(app, "jeanne@myskolae.fr");
+    await post(app, "/email-otp/send-verification-otp", {
+      email: "jeanne@myskolae.fr",
+      type: "sign-in",
+    });
+    const otp = codeFromMail(app, "jeanne@myskolae.fr");
+    const wrong = otp === "111111" ? "222222" : "111111";
+    for (let i = 0; i < 3; i++) {
+      await post(app, "/sign-in/email-otp", { email: "jeanne@myskolae.fr", otp: wrong });
+    }
+    const late = await post(app, "/sign-in/email-otp", { email: "jeanne@myskolae.fr", otp });
+    expect(late.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("never creates an account (sign-up asks for the names)", async () => {
+    const app = createTestApp();
+    await post(app, "/email-otp/send-verification-otp", {
+      email: "nouveau@myskolae.fr",
+      type: "sign-in",
+    });
+    const otp =
+      app.mailer.lastTo("nouveau@myskolae.fr")?.text.match(/Code : (\d{6})/)?.[1] ?? "123456";
+    const res = await post(app, "/sign-in/email-otp", { email: "nouveau@myskolae.fr", otp });
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(await getTestDb().select().from(user)).toHaveLength(0);
+  });
+});
+
+describe("passkeys", () => {
+  it("offer registration to a signed-in user only, for the web's domain", async () => {
+    const app = createTestApp();
+    const anonymous = await app.request("/api/auth/passkey/generate-register-options", {
+      headers: { origin: testEnv.WEB_ORIGIN },
+    });
+    expect(anonymous.status).toBe(401);
+
+    const account = await createUser();
+    const headers = await authHeaders(account.id);
+    headers.set("origin", testEnv.WEB_ORIGIN);
+    const res = await app.request("/api/auth/passkey/generate-register-options", { headers });
+    expect(res.status).toBe(200);
+    const options = (await res.json()) as {
+      rp: { id: string; name: string };
+      user: { name: string };
+    };
+    expect(options.rp).toEqual({ id: "localhost", name: "BDE Mingo" });
+    expect(options.user.name).toBe(account.email);
+  });
+
+  it("let anyone start a passkey sign-in (the browser picks the credential)", async () => {
+    const app = createTestApp();
+    const res = await app.request("/api/auth/passkey/generate-authenticate-options", {
+      headers: { origin: testEnv.WEB_ORIGIN },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ rpId: "localhost" });
+  });
+});
+
+const OWNER_PASSKEY = "8f8b5f0e-3c1a-4d2e-9b7a-1a2b3c4d5e6f";
+const OTHER_PASSKEY = "1d2c3b4a-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
+
+describe("passkey deletion", () => {
+  it("removes only the user's own passkey and writes the audit log", async () => {
+    const app = createTestApp();
+    const owner = await createUser();
+    const other = await createUser();
+    const row = (userId: string, id: string) => ({
+      id,
+      name: "iPhone",
+      publicKey: "pk",
+      userId,
+      credentialID: `cred-${id}`,
+      counter: 0,
+      deviceType: "multiDevice",
+      backedUp: true,
+      transports: "internal",
+    });
+    await getTestDb()
+      .insert(passkey)
+      .values([row(owner.id, OWNER_PASSKEY), row(other.id, OTHER_PASSKEY)]);
+    const headers = await authHeaders(owner.id);
+    headers.set("origin", testEnv.WEB_ORIGIN);
+    headers.set("content-type", "application/json");
+    const [mine, theirs] = [OWNER_PASSKEY, OTHER_PASSKEY];
+    const del = (id: string) =>
+      app.request("/api/auth/passkey/delete-passkey", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ id }),
+      });
+
+    expect((await del(theirs)).status).toBeGreaterThanOrEqual(400);
+    expect((await del(mine)).status).toBe(200);
+    const left = await getTestDb().select({ id: passkey.id }).from(passkey);
+    expect(left).toEqual([{ id: theirs }]);
+    const audit = await getTestDb().select().from(auditLog);
+    expect(audit).toEqual([
+      expect.objectContaining({
+        actorUserId: owner.id,
+        action: "passkey.deleted",
+        entityId: mine,
+      }),
+    ]);
   });
 });
