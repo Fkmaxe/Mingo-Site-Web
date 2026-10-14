@@ -1,6 +1,8 @@
 import "server-only";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { authHref } from "@/features/auth/safe-next";
 import { api } from "@/lib/api";
+import { getMe } from "@/lib/session";
 import type { Event, Pole } from "./types";
 
 type ListParams = {
@@ -23,6 +25,21 @@ export async function listEvents(params: ListParams = {}) {
   });
   if (!data) throw new Error(`GET /v1/events a échoué (${response.status})`);
   return data;
+}
+
+/**
+ * Event page from a shared link: a visitor who cannot see the event (reserved to students) is
+ * sent to the login page first, then back to the event.
+ */
+export async function getEventOrLogin(slug: string): Promise<Event> {
+  const { data, response } = await (await api()).GET("/v1/events/{eventRef}", {
+    params: { path: { eventRef: slug } },
+  });
+  if (data) return data;
+  if (response.status === 404 && !(await getMe())) {
+    redirect(authHref("/login", `/events/${encodeURIComponent(slug)}`));
+  }
+  notFound();
 }
 
 /** Event by slug or id, or the not-found page. */

@@ -13,6 +13,7 @@ import { eventToForm } from "@/features/events/event-form-values";
 import { EventManageActions } from "@/features/events/event-manage-actions";
 import { manageablePoles } from "@/features/events/manageable-poles";
 import { getEventOr404, listPoles } from "@/features/events/queries";
+import { ShareButton } from "@/features/events/share-button";
 import { LeagueManager } from "@/features/league/league-manager";
 import { getEventLeague } from "@/features/league/queries";
 import { listAllRegistrants, listTeams } from "@/features/registrations/queries";
@@ -68,6 +69,9 @@ export default async function ManageEventPage({
             Voir la page publique
             <ExternalLink aria-hidden className="size-4" />
           </Link>
+        ) : null}
+        {event.status === "published" ? (
+          <ShareButton slug={event.slug} title={event.title} className="self-start" />
         ) : null}
       </div>
       {created ? (

@@ -5,7 +5,8 @@ import { BrandPanel, DisplayTitle, Pill } from "@/components/brand";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/events/event-badges";
-import { getEventOr404 } from "@/features/events/queries";
+import { getEventOrLogin } from "@/features/events/queries";
+import { ShareButton } from "@/features/events/share-button";
 import { EventLeagueSection } from "@/features/league/event-league-section";
 import { getEventLeague } from "@/features/league/queries";
 import { getMyTeam } from "@/features/registrations/queries";
@@ -19,12 +20,20 @@ import { getMe } from "@/lib/session";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const event = await getEventOr404((await params).slug);
-  return { title: event.title, description: event.description.slice(0, 160) || undefined };
+  const event = await getEventOrLogin((await params).slug);
+  const description =
+    event.description.slice(0, 160) ||
+    `${formatShortDay(event.startsAt)} · ${event.location}`.replace(/^./, (c) => c.toUpperCase());
+  // Link previews (Discord, Instagram, WhatsApp) when the page is shared.
+  return {
+    title: event.title,
+    description,
+    openGraph: { title: event.title, description, type: "website" },
+  };
 }
 
 export default async function EventPage({ params }: Props) {
-  const [event, me] = await Promise.all([getEventOr404((await params).slug), getMe()]);
+  const [event, me] = await Promise.all([getEventOrLogin((await params).slug), getMe()]);
   const isMember = me?.roles.includes("member") ?? false;
   const isTeamEvent = event.teamMinSize !== null && event.teamMaxSize !== null;
   const [staffSlots, team, league] = await Promise.all([
@@ -110,6 +119,8 @@ export default async function EventPage({ params }: Props) {
           </li>
         ) : null}
       </ul>
+
+      {event.status === "published" ? <ShareButton slug={event.slug} title={event.title} /> : null}
 
       {event.description ? (
         <p className="whitespace-pre-line leading-relaxed">{event.description}</p>
