@@ -2,7 +2,7 @@
 
 import { Fingerprint } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -23,18 +23,21 @@ export function PasskeySignIn({ next }: { next?: string | undefined }) {
     router.refresh();
   };
 
-  // Browser capability only (no data from the API): WebAuthn exists on this device.
+  // Latest done() for the autofill ceremony started once on mount.
+  const doneRef = useRef(done);
+  doneRef.current = done;
+
+  // Browser capability only (no data from the API): WebAuthn exists on this device. Runs once:
+  // a second autofill ceremony would abort the button's one and replace its challenge cookie.
   useEffect(() => {
     if (typeof window === "undefined" || !window.PublicKeyCredential) return;
     setSupported(true);
     void PublicKeyCredential.isConditionalMediationAvailable?.().then(async (available) => {
       if (!available) return;
       const response = await authClient.signIn.passkey({ autoFill: true });
-      if (response && !response.error) done();
+      if (response && !response.error) doneRef.current();
     });
-    // done() only changes the route: running this once per page is intended.
-    // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount.
-  }, [done]);
+  }, []);
 
   if (!supported) return null;
   return (
@@ -50,6 +53,7 @@ export function PasskeySignIn({ next }: { next?: string | undefined }) {
             setError(null);
             const response = await authClient.signIn.passkey();
             if (response?.error) {
+              console.warn("passkey sign-in failed", response.error);
               setError(authErrorMessage(response.error));
               return;
             }

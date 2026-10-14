@@ -22,7 +22,8 @@ const EnvSchema = z
     PORT: z.coerce.number().int().positive().default(3001),
     DATABASE_URL: z.url(),
     DATABASE_URL_TEST: z.url().optional(),
-    WEB_ORIGIN: z.url(),
+    // An origin is compared exactly (CORS, passkeys): "https://x.fr/" becomes "https://x.fr".
+    WEB_ORIGIN: z.url().transform((url) => new URL(url).origin),
     BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET doit faire au moins 32 caractères"),
     BETTER_AUTH_URL: z.url(),
     SMTP_HOST: z.string().min(1),

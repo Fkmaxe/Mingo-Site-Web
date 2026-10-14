@@ -20,6 +20,12 @@ describe("loadEnv", () => {
     expect(env.NODE_ENV).toBe("development");
   });
 
+  it("keeps the web origin without a trailing slash", () => {
+    expect(loadEnv({ ...validEnv, WEB_ORIGIN: "https://bde-mingo.fr/" }).WEB_ORIGIN).toBe(
+      "https://bde-mingo.fr",
+    );
+  });
+
   it("parses SMTP_SECURE as a boolean", () => {
     expect(loadEnv({ ...validEnv, SMTP_SECURE: "true" }).SMTP_SECURE).toBe(true);
   });

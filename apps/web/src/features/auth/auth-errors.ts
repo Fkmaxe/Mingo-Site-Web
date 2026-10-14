@@ -18,6 +18,10 @@ const MESSAGES: Record<string, string> = {
   AUTH_CANCELLED: "Connexion par passkey annulée.",
   AUTHENTICATION_FAILED: "Cette passkey n'est pas reconnue. Connecte-toi autrement.",
   PASSKEY_NOT_FOUND: "Aucune passkey pour ce compte sur cet appareil.",
+  ERROR_CEREMONY_ABORTED: "Connexion par passkey annulée.",
+  ERROR_INVALID_DOMAIN: "Les passkeys ne fonctionnent pas sur cette adresse du site.",
+  ERROR_INVALID_RP_ID: "Les passkeys ne fonctionnent pas sur cette adresse du site.",
+  CHALLENGE_NOT_FOUND: "La demande a expiré. Réessaie.",
   REGISTRATION_CANCELLED: "Ajout de la passkey annulé.",
   PREVIOUSLY_REGISTERED: "Cet appareil a déjà une passkey sur ton compte.",
 };
