@@ -252,7 +252,7 @@ export function ClassesAdmin({ levels, tracks }: { levels: LevelEntry[]; tracks:
           </ul>
         ) : null}
         <AddForm
-          placeholder="1A, 2A… ou B1, M2…"
+          placeholder="1, 2, 3… ou B1, M2…"
           onAdd={(name) => run(() => createLevelAction(name))}
         />
       </section>

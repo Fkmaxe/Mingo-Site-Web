@@ -239,6 +239,13 @@
       "when": 1791932982227,
       "tag": "0033_treasury_counterparty",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1791964896776,
+      "tag": "0034_year_names",
+      "breakpoints": true
     }
   ]
 }

@@ -163,11 +163,7 @@ export function ClassForm({
           )}
         </FieldShell>
       ) : null}
-      {alternanceOnly ? (
-        <p className="text-muted-foreground text-sm">
-          En {selected?.name}, tout le monde est en alternance.
-        </p>
-      ) : (
+      {alternanceOnly ? null : (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 font-medium text-sm">Rythme</legend>
           <div className="grid grid-cols-2 gap-2">

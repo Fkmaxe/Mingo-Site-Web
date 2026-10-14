@@ -16,7 +16,7 @@ import { createdAt, id } from "./columns";
 
 export const studyRhythm = pgEnum("study_rhythm", STUDY_RHYTHMS);
 
-/** Year of study (1A, 2A… or B1, M2…), ordered by `position`. Managed by administrators. */
+/** Year of study (1, 2… or B1, M2…), ordered by `position`. Managed by administrators. */
 export const classLevel = pgTable(
   "class_level",
   {
@@ -51,7 +51,7 @@ export const track = pgTable(
   ],
 );
 
-/** Programmes offered in a year (1A, 2A: tronc commun or MCSI). No row for a year = all. */
+/** Programmes offered in a year (1st, 2nd: tronc commun or MCSI). No row for a year = all. */
 export const classLevelTrack = pgTable(
   "class_level_track",
   {
