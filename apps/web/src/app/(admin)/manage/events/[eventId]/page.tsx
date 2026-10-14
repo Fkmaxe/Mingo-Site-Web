@@ -2,6 +2,7 @@ import { ExternalLink, ScanLine } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DisplayTitle } from "@/components/brand";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { DownloadLink } from "@/components/download-link";
 import { FormAlert } from "@/components/form-field";
@@ -58,9 +59,7 @@ export default async function ManageEventPage({
       <div className="flex flex-col gap-2">
         <Breadcrumbs items={manageTrail(MANAGE_EVENTS)} current={event.title} />
         <StatusBadge status={event.status} />
-        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
-          {event.title}
-        </h1>
+        <DisplayTitle className="text-2xl normal-case leading-tight">{event.title}</DisplayTitle>
         {event.status !== "draft" ? (
           <Link
             href={`/events/${event.slug}`}

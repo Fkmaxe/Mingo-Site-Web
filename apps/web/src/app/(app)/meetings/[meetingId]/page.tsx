@@ -1,5 +1,6 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import type { Metadata } from "next";
+import { DisplayTitle } from "@/components/brand";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AttendanceList } from "@/features/meetings/attendance-list";
 import { DeleteMeetingButton } from "@/features/meetings/delete-meeting-button";
@@ -19,9 +20,7 @@ export default async function MeetingPage({ params }: { params: Promise<{ meetin
         <p className="text-primary text-sm">
           {meeting.pole ? `Pôle ${meeting.pole.name}` : "Réunion générale"}
         </p>
-        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
-          {meeting.title}
-        </h1>
+        <DisplayTitle className="text-2xl normal-case leading-tight">{meeting.title}</DisplayTitle>
         <p className="flex items-center gap-2 text-muted-foreground text-sm">
           <CalendarDays aria-hidden className="size-4" />
           <span className="first-letter:uppercase">{formatDateTime(meeting.startsAt)}</span>

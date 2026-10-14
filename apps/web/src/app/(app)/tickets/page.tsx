@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/brand";
 import { listMyTickets } from "@/features/registrations/queries";
 import { TicketList } from "@/features/registrations/ticket-card";
+import { HOME } from "@/lib/breadcrumbs";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Mes billets" };
@@ -16,7 +17,7 @@ export default async function TicketsPage({
   const tickets = await listMyTickets(scope);
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Mes billets" />
+      <PageHeader title="Mes billets" breadcrumb={[HOME]} />
       <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
         {(
           [

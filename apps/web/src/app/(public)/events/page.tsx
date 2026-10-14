@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
+import { HOME, SITE_HOME } from "@/lib/breadcrumbs";
+import { getMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Événements" };
@@ -14,13 +17,11 @@ export default async function EventsPage({
 }) {
   const params = await searchParams;
   const scope = params.scope === "past" ? "past" : "upcoming";
-  const page = await listEvents({ scope, cursor: params.cursor });
+  const [page, me] = await Promise.all([listEvents({ scope, cursor: params.cursor }), getMe()]);
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Événements
-      </h1>
+      <PageHeader title="Événements" breadcrumb={[me ? HOME : SITE_HOME]} />
       <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
         {(
           [

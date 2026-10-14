@@ -8,6 +8,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { MyLeagueCard } from "@/features/league/my-league";
@@ -19,6 +20,7 @@ import { ProfileNameForm } from "@/features/profile/profile-name-form";
 import { listClasses, listPasskeys } from "@/features/profile/queries";
 import { NotificationsCard } from "@/features/push/notifications-card";
 import { getPushSetup } from "@/features/push/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { BOARD_POSITION_LABELS, MEMBERSHIP_ROLE_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { requireMe } from "@/lib/session";
 
@@ -42,6 +44,7 @@ export default async function ProfilePage() {
     : [{ href: "/points", label: "Mes points open", icon: Sparkles }];
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumbs items={[HOME]} current="Profil" />
       <BrandPanel className="flex items-center gap-4">
         <AvatarEditor name={me.name} url={me.avatarUrl} />
         <div className="flex min-w-0 flex-col gap-0.5">

@@ -36,7 +36,7 @@ pnpm api:types      # exporte l'OpenAPI de l'API (sans la lancer) puis régénè
 
 - **Mobile d'abord** : concevoir en 375 px. Navigation principale en barre en bas sur mobile, latérale sur desktop.
 - Zones tactiles d'au moins 44 px. Action principale en bas de l'écran, à portée de pouce.
-- **Fil d'Ariane** sur toute page qui n'est pas une entrée de la navigation : `PageHeader breadcrumb={…}` (ou `<Breadcrumbs>` au-dessus d'un titre dynamique), avec les parents de `lib/breadcrumbs.ts`. Il suit la hiérarchie des pages, pas l'historique ; sur mobile, seul le lien vers le parent s'affiche.
+- **Fil d'Ariane** sur toute page sauf l'accueil (`/home`) : `PageHeader breadcrumb={…}` (ou `<Breadcrumbs>` au-dessus d'un titre dynamique), avec les parents de `lib/breadcrumbs.ts` (`SITE_HOME` pour un visiteur sur une page publique). Il suit la hiérarchie des pages, pas l'historique ; sur mobile, seul le lien vers le parent s'affiche.
 - Tailwind uniquement, pas de CSS custom sauf variables de thème dans `globals.css`. Classes ordonnées par Biome.
 - Couleurs via les tokens du thème (`bg-primary`, `text-muted-foreground`), jamais de hex en dur dans les composants.
 - Mode sombre supporté dès le départ.

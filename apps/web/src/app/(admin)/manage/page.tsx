@@ -12,6 +12,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/brand";
+import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gestion" };
@@ -81,7 +82,7 @@ export default async function ManagePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Gestion" />
+      <PageHeader title="Gestion" breadcrumb={[HOME]} />
       <ul className="flex flex-col gap-3">
         {links.map(({ href, title, description, icon: Icon }) => (
           <li key={href}>

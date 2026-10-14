@@ -2,6 +2,8 @@
 export type Crumb = { label: string; href: string };
 
 export const HOME: Crumb = { label: "Accueil", href: "/home" };
+/** Home of a visitor: the showcase site. */
+export const SITE_HOME: Crumb = { label: "Accueil", href: "/" };
 export const MANAGE: Crumb = { label: "Gestion", href: "/manage" };
 export const MANAGE_EVENTS: Crumb = { label: "Événements", href: "/manage/events" };
 export const OPEN_POINTS: Crumb = { label: "Points open", href: "/manage/open-points" };
