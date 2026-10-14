@@ -52,7 +52,7 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 | `league_season` | school_year_id, name, prizes, placement_points (int[], défaut {10,7,5,3,2}), participation_points (défaut 1) | une par année ; 1 à 10 places ; valeurs par défaut tant que le bureau n'a rien enregistré |
 | `tournament` | event_id, format (`pools_bracket`, `pools`, `bracket`), pool_count, qualifiers_per_pool, third_place, status (`pools`, `bracket`, `done`) | un par événement |
 | `tournament_entrant` | tournament_id, user_id **ou** team_id, seed, pool | exactement l'un des deux ; unique (tournament_id, seed / user_id / team_id) |
-| `tournament_match` | tournament_id, phase (`pool`, `bracket`, `third_place`), pool, round, position, entrant_a_id, entrant_b_id, winner_id, draw, score_a, score_b | un emplacement unique par (tournoi, phase, poule, tour, position) ; nul seulement en poule ; deux scores ou aucun |
+| `tournament_match` | tournament_id, phase (`pool`, `bracket`, `third_place`), pool, round, position, entrant_a_id, entrant_b_id, winner_id, draw, score_a, score_b, started_at (match « en cours », vidé par le résultat) | un emplacement unique par (tournoi, phase, poule, tour, position) ; nul seulement en poule ; deux scores ou aucun |
 | `league_result` | event_id, place, user_id **ou** team_id | classement validé courant (remplacé à la correction) ; unique (event_id, place) |
 | `league_points` | school_year_id, event_id, user_id, points, reason (`participation`, `placement`, `reversal`), place | **journal** : jamais modifié ni supprimé ; points ≠ 0 ; un solde = une somme |
 

@@ -1,6 +1,7 @@
 import { Trophy } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { LiveLink } from "./live-link";
 import { TournamentBoard } from "./tournament-board";
 import type { EventLeague } from "./types";
 
@@ -11,7 +12,7 @@ const MEDALS = [
 ];
 
 /** Event page: what the event counts for, its validated placements and its tournament. */
-export function EventLeagueSection({ league }: { league: EventLeague }) {
+export function EventLeagueSection({ league, slug }: { league: EventLeague; slug: string }) {
   if (!league.sport && !league.tournament) return null;
   return (
     <section className="flex flex-col gap-4" aria-labelledby="event-league-title">
@@ -51,7 +52,12 @@ export function EventLeagueSection({ league }: { league: EventLeague }) {
           5.
         </p>
       ) : null}
-      {league.tournament ? <TournamentBoard tournament={league.tournament} /> : null}
+      {league.tournament ? (
+        <>
+          <TournamentBoard tournament={league.tournament} />
+          <LiveLink slug={slug} />
+        </>
+      ) : null}
     </section>
   );
 }

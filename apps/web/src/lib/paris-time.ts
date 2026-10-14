@@ -115,3 +115,8 @@ export function formatEventTimes(startsAt: string, endsAt: string): string {
   }
   return `${timeFormatter.format(start)} → ${shortDayFormatter.format(end)} ${timeFormatter.format(end)}`;
 }
+
+/** Paris time of an instant: "16:42". */
+export function formatTime(iso: string): string {
+  return timeFormatter.format(new Date(iso));
+}

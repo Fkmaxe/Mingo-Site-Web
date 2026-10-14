@@ -110,7 +110,7 @@ export default async function ManageEventPage({
       {league ? (
         <section className="flex flex-col gap-3">
           <h2 className="font-bold font-display text-lg">Ligue & tournoi</h2>
-          <LeagueManager eventId={event.id} league={league} />
+          <LeagueManager eventId={event.id} slug={event.slug} league={league} />
         </section>
       ) : null}
 

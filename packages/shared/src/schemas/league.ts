@@ -135,6 +135,9 @@ export const RecordMatchInput = z
 export type RecordMatchInput = z.input<typeof RecordMatchInput>;
 export type RecordMatchData = z.output<typeof RecordMatchInput>;
 
+export const MatchLiveInput = z.object({ live: z.boolean() }).meta({ id: "MatchLiveInput" });
+export type MatchLiveInput = z.infer<typeof MatchLiveInput>;
+
 const Placement = z
   .object({
     place: z.int().min(1).max(10),
@@ -173,6 +176,8 @@ export const TournamentMatchDto = z.object({
   draw: z.boolean(),
   scoreA: z.int().nullable(),
   scoreB: z.int().nullable(),
+  /** Started by the organiser and not played yet: "en cours". */
+  live: z.boolean(),
   /** Both sides known, and changing it would not void a later result. */
   editable: z.boolean(),
 });

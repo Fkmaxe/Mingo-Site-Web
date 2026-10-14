@@ -55,7 +55,7 @@ describe("LeagueManager results", () => {
   beforeEach(() => validate.mockReset().mockResolvedValue({ ok: true }));
 
   it("prefills the rewarded places from the tournament ranking and validates them", async () => {
-    render(<LeagueManager eventId={uid(7)} league={league} />);
+    render(<LeagueManager eventId={uid(7)} slug="tournoi" league={league} />);
     expect(screen.getByLabelText("1re place")).toHaveDisplayValue("Joueur 3");
     expect(screen.getByLabelText("2e place")).toHaveDisplayValue("Joueur 1");
     expect(screen.queryByLabelText("3e place")).toBeNull();
@@ -67,7 +67,7 @@ describe("LeagueManager results", () => {
   });
 
   it("blocks the same person on two places", async () => {
-    render(<LeagueManager eventId={uid(7)} league={league} />);
+    render(<LeagueManager eventId={uid(7)} slug="tournoi" league={league} />);
     await userEvent.selectOptions(screen.getByLabelText("2e place"), "Joueur 3");
     expect(screen.getByRole("alert")).toHaveTextContent("une place");
     expect(screen.getByRole("button", { name: "Valider le classement" })).toBeDisabled();
@@ -76,6 +76,7 @@ describe("LeagueManager results", () => {
   it("offers a correction once validated", () => {
     render(
       <LeagueManager
+        slug="tournoi"
         eventId={uid(7)}
         league={{
           ...league,

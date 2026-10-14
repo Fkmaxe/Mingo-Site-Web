@@ -102,3 +102,12 @@ export async function validateResultsAction(
   });
   return ok(error);
 }
+
+export async function setMatchLiveAction(matchId: string, live: boolean): Promise<ActionResult> {
+  const { error } = await (await api()).PUT("/v1/tournament-matches/{id}/live", {
+    params: { path: { id: matchId } },
+    body: { live },
+  });
+  if (!error) revalidatePath("/events/[slug]/live", "page");
+  return ok(error);
+}

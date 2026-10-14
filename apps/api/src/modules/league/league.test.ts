@@ -654,3 +654,65 @@ describe("league results notification", () => {
     expect(to(endpoints[1])[0]?.body).toBe("+1 point. Regarde ta place au classement.");
   });
 });
+
+describe("PUT /v1/tournament-matches/{id}/live", () => {
+  async function bracketOf4() {
+    const { ev } = await leagueEvent(4);
+    const dto = await readJson(
+      await call("POST", `/v1/events/${ev.id}/tournament`, lead.id, {
+        format: "bracket",
+        source: "registered",
+        thirdPlace: false,
+      }),
+      EventLeagueDto,
+    );
+    const [semi, other] = dto.tournament?.rounds[0]?.matches ?? [];
+    const final = dto.tournament?.rounds[1]?.matches[0];
+    if (!semi || !other || !final) throw new Error("bracket");
+    return { ev, semi, other, final };
+  }
+  const live = (matchId: string, value: boolean, userId = lead.id) =>
+    call("PUT", `/v1/tournament-matches/${matchId}/live`, userId, { live: value });
+
+  it("shows a started match as live until its result is recorded", async () => {
+    const { ev, semi } = await bracketOf4();
+    const started = await readJson(await live(semi.id, true), EventLeagueDto);
+    expect(started.tournament?.rounds[0]?.matches[0]?.live).toBe(true);
+    // Everyone signed in sees it (the TV screen).
+    const seen = await eventLeague(ev, student.id);
+    expect(seen.tournament?.rounds[0]?.matches[0]?.live).toBe(true);
+
+    const played = await recordOk(semi, "a");
+    expect(played.tournament?.rounds[0]?.matches[0]?.live).toBe(false);
+    const cleared = await readJson(await record(semi, null), EventLeagueDto);
+    expect(cleared.tournament?.rounds[0]?.matches[0]?.live).toBe(false);
+  });
+
+  it("can be stopped, and refuses a played match or unknown opponents", async () => {
+    const { semi, other, final } = await bracketOf4();
+    await live(semi.id, true);
+    const stopped = await readJson(await live(semi.id, false), EventLeagueDto);
+    expect(stopped.tournament?.rounds[0]?.matches[0]?.live).toBe(false);
+
+    const notReady = await live(final.id, true);
+    expect(notReady.status).toBe(409);
+    expect((await readError(notReady)).code).toBe("MATCH_NOT_READY");
+
+    await recordOk(other, "b");
+    const played = await live(other.id, true);
+    expect(played.status).toBe(409);
+    expect((await readError(played)).code).toBe("MATCH_LOCKED");
+  });
+
+  it("is for the event's organisers", async () => {
+    const { semi } = await bracketOf4();
+    expect(
+      (await call("PUT", `/v1/tournament-matches/${semi.id}/live`, null, { live: true })).status,
+    ).toBe(401);
+    expect((await live(semi.id, true, student.id)).status).toBe(403);
+    expect((await call("PUT", `/v1/tournament-matches/${semi.id}/live`, lead.id, {})).status).toBe(
+      400,
+    );
+    expect((await live(randomUUID(), true)).status).toBe(404);
+  });
+});

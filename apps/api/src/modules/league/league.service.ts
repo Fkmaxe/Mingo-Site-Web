@@ -296,6 +296,7 @@ async function tournamentDto(db: DbOrTx, t: TournamentRow): Promise<TournamentDt
     draw: m.draw,
     scoreA: m.scoreA,
     scoreB: m.scoreB,
+    live: m.startedAt !== null && !m.winnerId && !m.draw,
     editable,
   });
 
@@ -620,6 +621,8 @@ export async function recordMatch(ctx: AuthedCtx, matchId: string, input: Record
     draw: input.result === "draw",
     scoreA: input.result === null ? null : input.scoreA,
     scoreB: input.result === null ? null : input.scoreB,
+    // A result ends the match; clearing it does not restart it.
+    startedAt: null,
     updatedBy: ctx.user.id,
   };
 
@@ -655,6 +658,8 @@ export async function recordMatch(ctx: AuthedCtx, matchId: string, input: Record
             entrantBId: next.b,
             winnerId: next.winner,
             ...(next.winner ? {} : { scoreA: null, scoreB: null }),
+            // New opponents: the match has not started.
+            ...(next.a !== m.entrantAId || next.b !== m.entrantBId ? { startedAt: null } : {}),
           });
         }
       }
@@ -667,6 +672,29 @@ export async function recordMatch(ctx: AuthedCtx, matchId: string, input: Record
       entityId: match.id,
       payload: { result: input.result, scoreA: values.scoreA, scoreB: values.scoreB },
     });
+  });
+  return getEventLeague(ctx, row.id);
+}
+
+/** Marks a match as being played now ("en cours" on the live screen), or not any more. */
+export async function setMatchLive(ctx: AuthedCtx, matchId: string, live: boolean) {
+  const found = await findMatchWithEvent(ctx.db, matchId);
+  if (!found) throw notFound("Ce match n'existe pas.");
+  const row = await findManageableEvent(ctx, found.eventId);
+  const { match } = found;
+  if (live && (!match.entrantAId || !match.entrantBId)) {
+    throw new AppError(
+      "MATCH_NOT_READY",
+      409,
+      "Les deux adversaires de ce match ne sont pas encore connus.",
+    );
+  }
+  if (live && (match.winnerId || match.draw)) {
+    throw locked("Ce match est déjà joué : efface d'abord son résultat.");
+  }
+  await updateMatch(ctx.db, match.id, {
+    startedAt: live ? new Date() : null,
+    updatedBy: ctx.user.id,
   });
   return getEventLeague(ctx, row.id);
 }

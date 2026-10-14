@@ -15,6 +15,7 @@ import {
   pgEnum,
   pgTable,
   text,
+  timestamp,
   unique,
   uniqueIndex,
   uuid,
@@ -131,6 +132,8 @@ export const tournamentMatch = pgTable(
     draw: boolean().notNull().default(false),
     scoreA: integer(),
     scoreB: integer(),
+    /** Set by the organiser when the match starts (shown "en cours"), cleared by its result. */
+    startedAt: timestamp({ withTimezone: true }),
     updatedBy: uuid().references(() => user.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

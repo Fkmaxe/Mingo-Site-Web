@@ -130,7 +130,7 @@ export default async function EventPage({ params }: Props) {
         <RegistrationPanel event={event} signedIn={me !== null} team={team} />
       ) : null}
 
-      {league ? <EventLeagueSection league={league} /> : null}
+      {league ? <EventLeagueSection league={league} slug={event.slug} /> : null}
 
       <StaffVolunteerPanel slots={staffSlots} />
 

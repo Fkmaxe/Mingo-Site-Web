@@ -4,6 +4,7 @@ import {
   LeagueDto,
   LeagueQuery,
   LeagueSeasonInput,
+  MatchLiveInput,
   MyLeagueDto,
   RecordMatchInput,
   SetLeagueSportInput,
@@ -27,6 +28,7 @@ import {
   removeTournament,
   saveSeason,
   setLeagueSport,
+  setMatchLive,
   validateResults,
 } from "./league.service";
 
@@ -178,6 +180,15 @@ const recordMatchRoute = createRoute({
   responses: { 200: json(EventLeagueDto, "Résultat enregistré"), ...eventErrors },
 });
 
+const matchLiveRoute = createRoute({
+  method: "put",
+  path: "/tournament-matches/{id}/live",
+  tags: ["league"],
+  middleware: [requirePermission("events:update")] as const,
+  request: { params: Id, ...body(MatchLiveInput) },
+  responses: { 200: json(EventLeagueDto, "Match lancé ou arrêté"), ...eventErrors },
+});
+
 export function createLeagueRouter() {
   return new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError })
     .openapi(leagueRoute, async (c) =>
@@ -241,6 +252,16 @@ export function createLeagueRouter() {
           authedCtx(c.get("ctx")),
           c.req.valid("param").id,
           RecordMatchInput.parse(await c.req.json()),
+        ),
+        200,
+      ),
+    )
+    .openapi(matchLiveRoute, async (c) =>
+      c.json(
+        await setMatchLive(
+          authedCtx(c.get("ctx")),
+          c.req.valid("param").id,
+          c.req.valid("json").live,
         ),
         200,
       ),

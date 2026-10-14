@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAction } from "@/features/admin/use-action";
 import { cn } from "@/lib/utils";
-import { recordMatchAction } from "./actions";
+import { recordMatchAction, setMatchLiveAction } from "./actions";
 import type { TournamentMatch } from "./types";
 
 type Side = "a" | "b";
@@ -66,6 +66,21 @@ function SideRow({
   );
 }
 
+/** "En cours" label of a started match. */
+export function LiveBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full bg-brand-pink px-2 py-0.5 font-bold text-brand-pink-foreground uppercase tracking-wide",
+        className,
+      )}
+    >
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-brand-pink-foreground" />
+      En cours
+    </span>
+  );
+}
+
 /**
  * One match. For organisers: tap a name to set the winner (tap again elsewhere to correct),
  * or enter the score; draws in pools only.
@@ -101,7 +116,17 @@ export function MatchCard({ match, manage }: { match: TournamentMatch; manage: b
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-primary/5 shadow-sm">
+    <div
+      className={cn(
+        "flex flex-col overflow-hidden rounded-xl border bg-card shadow-primary/5 shadow-sm",
+        match.live && "border-brand-pink",
+      )}
+    >
+      {match.live ? (
+        <p className="bg-brand-pink/10 px-3 py-1 text-center text-xs">
+          <LiveBadge />
+        </p>
+      ) : null}
       {match.draw ? (
         <p className="bg-muted px-3 py-1 text-center font-semibold text-muted-foreground text-xs">
           Match nul
@@ -165,6 +190,17 @@ export function MatchCard({ match, manage }: { match: TournamentMatch; manage: b
                   onClick={() => save("draw", null, null)}
                 >
                   Nul
+                </Button>
+              ) : null}
+              {!decided ? (
+                <Button
+                  size="sm"
+                  variant={match.live ? "ghost" : "outline"}
+                  className="ml-auto"
+                  disabled={pending}
+                  onClick={() => run(() => setMatchLiveAction(match.id, !match.live))}
+                >
+                  {match.live ? "Arrêter" : "Lancer"}
                 </Button>
               ) : null}
               {decided ? (

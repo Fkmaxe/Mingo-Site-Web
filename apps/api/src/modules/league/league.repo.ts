@@ -322,7 +322,14 @@ export async function updateMatch(
   values: Partial<
     Pick<
       typeof tournamentMatch.$inferInsert,
-      "entrantAId" | "entrantBId" | "winnerId" | "draw" | "scoreA" | "scoreB" | "updatedBy"
+      | "entrantAId"
+      | "entrantBId"
+      | "winnerId"
+      | "draw"
+      | "scoreA"
+      | "scoreB"
+      | "startedAt"
+      | "updatedBy"
     >
   >,
 ) {

@@ -5,8 +5,9 @@ import { MatchCard } from "./match-card";
 import type { TournamentMatch } from "./types";
 
 const record = vi.hoisted(() => vi.fn());
+const live = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
-vi.mock("./actions", () => ({ recordMatchAction: record }));
+vi.mock("./actions", () => ({ recordMatchAction: record, setMatchLiveAction: live }));
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";
@@ -24,6 +25,7 @@ function match(overrides: Partial<TournamentMatch> = {}): TournamentMatch {
     draw: false,
     scoreA: null,
     scoreB: null,
+    live: false,
     editable: true,
     ...overrides,
   };
@@ -75,5 +77,16 @@ describe("MatchCard", () => {
       />,
     );
     expect(screen.getByText("Exempt")).toBeInTheDocument();
+  });
+
+  it("starts a match not played yet, and shows it as live", async () => {
+    live.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    const { rerender } = render(<MatchCard match={match()} manage />);
+    await user.click(screen.getByRole("button", { name: "Lancer" }));
+    expect(live).toHaveBeenCalledWith("33333333-3333-4333-8333-333333333333", true);
+
+    rerender(<MatchCard match={match({ live: true })} manage={false} />);
+    expect(screen.getByText("En cours")).toBeInTheDocument();
   });
 });

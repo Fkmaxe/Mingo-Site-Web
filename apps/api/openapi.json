@@ -4835,6 +4835,9 @@
                               "null"
                             ]
                           },
+                          "live": {
+                            "type": "boolean"
+                          },
                           "editable": {
                             "type": "boolean"
                           }
@@ -4851,6 +4854,7 @@
                           "draw",
                           "scoreA",
                           "scoreB",
+                          "live",
                           "editable"
                         ]
                       }
@@ -4964,6 +4968,9 @@
                               "null"
                             ]
                           },
+                          "live": {
+                            "type": "boolean"
+                          },
                           "editable": {
                             "type": "boolean"
                           }
@@ -4980,6 +4987,7 @@
                           "draw",
                           "scoreA",
                           "scoreB",
+                          "live",
                           "editable"
                         ]
                       }
@@ -5082,6 +5090,9 @@
                       "null"
                     ]
                   },
+                  "live": {
+                    "type": "boolean"
+                  },
                   "editable": {
                     "type": "boolean"
                   }
@@ -5098,6 +5109,7 @@
                   "draw",
                   "scoreA",
                   "scoreB",
+                  "live",
                   "editable"
                 ]
               },
@@ -5323,6 +5335,17 @@
         },
         "required": [
           "result"
+        ]
+      },
+      "MatchLiveInput": {
+        "type": "object",
+        "properties": {
+          "live": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "live"
         ]
       },
       "ValidateLeagueResultsInput": {
@@ -14381,6 +14404,106 @@
         "responses": {
           "200": {
             "description": "Résultat enregistré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventLeague"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide, DRAW_NOT_ALLOWED, PLACE_OUT_OF_SCALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pas de session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas organisateur de cet événement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Événement, tournoi ou match introuvable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "TOURNAMENT_EXISTS, BRACKET_EXISTS, POOLS_NOT_FINISHED, MATCH_LOCKED, MATCH_NOT_READY, NOT_A_LEAGUE_EVENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "INVALID_TOURNAMENT, NOT_A_PARTICIPANT, NO_CURRENT_SCHOOL_YEAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tournament-matches/{id}/live": {
+      "put": {
+        "tags": [
+          "league"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchLiveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Match lancé ou arrêté",
             "content": {
               "application/json": {
                 "schema": {

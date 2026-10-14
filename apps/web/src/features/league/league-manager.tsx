@@ -15,6 +15,7 @@ import {
   setLeagueSportAction,
   validateResultsAction,
 } from "./actions";
+import { LiveLink } from "./live-link";
 import { TournamentBoard } from "./tournament-board";
 import type { EventLeague, Tournament } from "./types";
 
@@ -317,13 +318,22 @@ function ResultsForm({ eventId, league }: { eventId: string; league: EventLeague
 }
 
 /** "Ligue & tournoi" section of the event's management page. */
-export function LeagueManager({ eventId, league }: { eventId: string; league: EventLeague }) {
+export function LeagueManager({
+  eventId,
+  slug,
+  league,
+}: {
+  eventId: string;
+  slug: string;
+  league: EventLeague;
+}) {
   return (
     <div className="flex flex-col gap-5">
       <SportPicker eventId={eventId} league={league} sports={league.sports} />
       {league.tournament ? (
         <>
           <TournamentBoard tournament={league.tournament} manage />
+          <LiveLink slug={slug} />
           <TournamentControls eventId={eventId} tournament={league.tournament} />
         </>
       ) : (
