@@ -2,6 +2,7 @@ import { Gift, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPanel, DisplayTitle } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -9,6 +10,7 @@ import { LeagueSettings } from "@/features/league/league-settings";
 import { getLeague } from "@/features/league/queries";
 import { Podium, StandingsList } from "@/features/league/standings";
 import { listClasses } from "@/features/profile/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { formatShortDay } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
@@ -34,6 +36,7 @@ export default async function LeaguePage({
 
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumbs items={[HOME]} current="Ligue" />
       <BrandPanel className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-sm text-white/90">
           <Trophy aria-hidden className="size-4" />

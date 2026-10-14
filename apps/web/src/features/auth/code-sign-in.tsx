@@ -1,9 +1,9 @@
 "use client";
 
-import { ALLOWED_EMAIL_DOMAIN } from "@bde/shared";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { FormAlert, FormField } from "@/components/form-field";
+import { FormAlert } from "@/components/form-field";
+import { SchoolEmailField } from "@/components/school-email-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
@@ -23,11 +23,11 @@ export function CodeSignIn({ next }: { next?: string | undefined }) {
     startTransition(async () => {
       setError(null);
       const response = await authClient.emailOtp.sendVerificationOtp({
-        email: email.trim(),
+        email,
         type: "sign-in",
       });
       if (response.error) return setError(authErrorMessage(response.error));
-      setSentTo(email.trim());
+      setSentTo(email);
       setOtp("");
     });
 
@@ -81,18 +81,13 @@ export function CodeSignIn({ next }: { next?: string | undefined }) {
         </>
       ) : (
         <>
-          <FormField
+          <SchoolEmailField
             id="otp-email"
-            label="Adresse email"
-            type="email"
-            inputMode="email"
             autoComplete="username webauthn"
-            autoCapitalize="none"
-            placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
           />
-          <Button type="submit" size="lg" disabled={pending || !email.includes("@")}>
+          <Button type="submit" size="lg" disabled={pending || !email}>
             {pending ? "Envoi…" : "Recevoir un code"}
           </Button>
         </>

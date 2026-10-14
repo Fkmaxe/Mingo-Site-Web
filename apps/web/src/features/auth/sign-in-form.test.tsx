@@ -11,7 +11,7 @@ vi.mock("@/lib/auth-client", () => ({ authClient: { signIn: { email: signIn } } 
 async function submit(next?: string) {
   const user = userEvent.setup();
   render(<SignInForm next={next} />);
-  await user.type(screen.getByLabelText("Adresse email"), "jeanne@myskolae.fr");
+  await user.type(screen.getByLabelText("Adresse email de l'école"), "jeanne");
   await user.type(screen.getByLabelText("Mot de passe"), "correct-horse-battery");
   await user.click(screen.getByRole("button", { name: "Se connecter" }));
 }

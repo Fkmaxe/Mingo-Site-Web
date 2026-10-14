@@ -4054,13 +4054,273 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Mes tâches */
+                /** @description Mes tâches : assignées et perso */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["Task"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePersonalTaskInput"];
+                };
+            };
+            responses: {
+                /** @description Tâche perso créée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Task"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/board/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Tâches du bureau */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Task"][];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateTaskInput"];
+                };
+            };
+            responses: {
+                /** @description Tâche du bureau créée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Task"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/board/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Membres du bureau de l'année */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PoleMember"][];
                     };
                 };
                 /** @description Données invalides */
@@ -5546,7 +5806,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Totaux de l'année et par événement */
+                /** @description Recettes, dépenses et solde de l'année */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5600,6 +5860,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiError"];
                     };
                 };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
             };
         };
         put?: never;
@@ -5620,6 +5889,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    q?: string;
+                    kind?: "debit" | "credit" | "other";
                     eventId?: string;
                 };
                 header?: never;
@@ -5682,6 +5953,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiError"];
                     };
                 };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
             };
         };
         put?: never;
@@ -5704,7 +5984,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Transaction"];
+                        "application/json": components["schemas"]["TransactionDetail"];
                     };
                 };
                 /** @description Données invalides */
@@ -5745,6 +6025,15 @@ export interface paths {
                 };
                 /** @description Écriture déjà annulée */
                 409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5767,13 +6056,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: {
+        get: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -5782,19 +6065,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["UpdateTransactionInput"];
-                };
-            };
+            requestBody?: never;
             responses: {
-                /** @description Libellé, date ou justificatif modifié */
+                /** @description Écriture et ses justificatifs */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Transaction"];
+                        "application/json": components["schemas"]["TransactionDetail"];
                     };
                 };
                 /** @description Données invalides */
@@ -5835,6 +6114,100 @@ export interface paths {
                 };
                 /** @description Écriture déjà annulée */
                 409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    transactionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateTransactionInput"];
+                };
+            };
+            responses: {
+                /** @description Écriture corrigée (hors montant) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TransactionDetail"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5872,7 +6245,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Transaction"];
+                        "application/json": components["schemas"]["TransactionDetail"];
                     };
                 };
                 /** @description Données invalides */
@@ -5920,8 +6293,303 @@ export interface paths {
                         "application/json": components["schemas"]["ApiError"];
                     };
                 };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/treasury/transactions/{transactionId}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query: {
+                    name: string;
+                };
+                header?: never;
+                path: {
+                    transactionId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Le fichier lui-même : photo ou PDF, 8 Mo au plus */
+            requestBody: {
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                    "image/webp": string;
+                    "application/pdf": string;
+                };
+            };
+            responses: {
+                /** @description Justificatif ajouté */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TransactionDetail"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/treasury/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    attachmentId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Justificatif retiré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TransactionDetail"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/treasury/attachments/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Justificatif */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": string;
+                        "image/png": string;
+                        "image/webp": string;
+                        "application/pdf": string;
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5935,7 +6603,82 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Budget prévu et réalisé */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventBudget"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Écriture déjà annulée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
         put: {
             parameters: {
                 query?: never;
@@ -5998,6 +6741,15 @@ export interface paths {
                 };
                 /** @description Écriture déjà annulée */
                 409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Initiateur hors du BDE, trop de justificatifs */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9343,15 +10095,20 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 alternanceOnly: boolean;
             } | null;
             track: {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
             } | null;
             /** @enum {string|null} */
             rhythm: "initial" | "alternance" | null;
+            classNumber: number | null;
+            januaryIntake: boolean;
+            classCode: string | null;
             avatarUrl: string | null;
             isAdmin: boolean;
             memberships: components["schemas"]["Membership"][];
@@ -9375,7 +10132,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INITIATOR_NOT_MEMBER" | "TOO_MANY_ATTACHMENTS" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -9394,12 +10151,17 @@ export interface components {
              * @enum {string|null}
              */
             rhythm: "initial" | "alternance" | null;
+            /** @default null */
+            classNumber: number | null;
+            /** @default false */
+            januaryIntake: boolean;
         };
         Classes: {
             levels: {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 userCount: number;
                 position: number;
                 alternanceOnly: boolean;
@@ -9409,17 +10171,20 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 name: string;
+                code: string | null;
                 userCount: number;
             }[];
         };
         ClassLevelInput: {
             name: string;
+            code?: string | null;
             position?: number;
             alternanceOnly?: boolean;
             trackIds?: string[];
         };
         TrackInput: {
             name: string;
+            code?: string | null;
         };
         Pole: {
             /** Format: uuid */
@@ -9925,11 +10690,13 @@ export interface components {
             /** @enum {string} */
             status: "todo" | "doing" | "done";
             dueOn: string | null;
+            /** @enum {string} */
+            scope: "pole" | "board" | "personal";
             pole: {
                 /** Format: uuid */
                 id: string;
                 name: string;
-            };
+            } | null;
             assignee: {
                 /** Format: uuid */
                 membershipId: string;
@@ -9946,6 +10713,21 @@ export interface components {
             canMove: boolean;
             /** Format: date-time */
             createdAt: string;
+        };
+        CreatePersonalTaskInput: {
+            title: string;
+            /** @default  */
+            description: string;
+            /**
+             * @default todo
+             * @enum {string}
+             */
+            status: "todo" | "doing" | "done";
+            /**
+             * Format: date
+             * @default null
+             */
+            dueOn: string | null;
         };
         CreateTaskInput: {
             title: string;
@@ -10158,34 +10940,31 @@ export interface components {
             incomeCents: number;
             expenseCents: number;
             balanceCents: number;
-            events: {
-                event: {
-                    /** Format: uuid */
-                    id: string;
-                    title: string;
-                    slug: string;
-                    /** Format: date-time */
-                    startsAt: string;
-                };
-                budgetCents: number | null;
-                incomeCents: number;
-                expenseCents: number;
-                balanceCents: number;
-            }[];
         };
         Transaction: {
             /** Format: uuid */
             id: string;
-            label: string;
+            counterparty: string;
+            initiator: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                avatarUrl: string | null;
+            } | null;
             amountCents: number;
             occurredOn: string;
-            receiptUrl: string | null;
+            /** @enum {string} */
+            kind: "debit" | "credit" | "other";
+            otherLabel: string | null;
+            comment: string;
             event: {
                 /** Format: uuid */
                 id: string;
                 title: string;
                 slug: string;
             } | null;
+            receiptUrl: string | null;
+            attachmentCount: number;
             createdBy: string | null;
             /** Format: uuid */
             reversalOfId: string | null;
@@ -10194,28 +10973,90 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        TransactionDetail: {
+            /** Format: uuid */
+            id: string;
+            counterparty: string;
+            initiator: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                avatarUrl: string | null;
+            } | null;
+            amountCents: number;
+            occurredOn: string;
+            /** @enum {string} */
+            kind: "debit" | "credit" | "other";
+            otherLabel: string | null;
+            comment: string;
+            event: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                slug: string;
+            } | null;
+            receiptUrl: string | null;
+            attachmentCount: number;
+            createdBy: string | null;
+            /** Format: uuid */
+            reversalOfId: string | null;
+            /** Format: uuid */
+            reversedById: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            attachments: components["schemas"]["TreasuryAttachment"][];
+        };
+        TreasuryAttachment: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            contentType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
+            sizeBytes: number;
+            url: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
         CreateTransactionInput: {
+            counterparty: string;
+            /** Format: uuid */
+            initiatorUserId: string;
+            amountCents: number;
+            /** Format: date */
+            occurredOn: string;
+            /** @enum {string} */
+            kind: "debit" | "credit" | "other";
+            /** @default null */
+            otherLabel: string | null;
+            /**
+             * @default null
+             * @enum {string|null}
+             */
+            direction: "in" | "out" | null;
             /**
              * Format: uuid
              * @default null
              */
             eventId: string | null;
-            label: string;
-            amountCents: number;
-            /** Format: date */
-            occurredOn: string;
-            /**
-             * Format: uri
-             * @default null
-             */
-            receiptUrl: string | null;
+            /** @default  */
+            comment: string;
         };
         UpdateTransactionInput: {
-            label?: string;
+            counterparty?: string;
+            /** Format: uuid */
+            initiatorUserId?: string;
             /** Format: date */
             occurredOn?: string;
-            /** Format: uri */
-            receiptUrl?: string | null;
+            otherLabel?: string;
+            /** Format: uuid */
+            eventId?: string | null;
+            comment?: string;
+        };
+        EventBudget: {
+            budgetCents: number | null;
+            incomeCents: number;
+            expenseCents: number;
+            balanceCents: number;
         };
         SetEventBudgetInput: {
             budgetCents: number | null;

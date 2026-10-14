@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/brand";
 import { listPoles } from "@/features/events/queries";
 import { ItemForm } from "@/features/inventory/item-form";
 import { listCategories, listLocations } from "@/features/inventory/queries";
+import { HOME, INVENTORY } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Ajouter du matériel" };
@@ -18,7 +19,11 @@ export default async function NewItemPage() {
   ]);
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Ajouter" description="Seul le nom est obligatoire." />
+      <PageHeader
+        title="Ajouter"
+        description="Seul le nom est obligatoire."
+        breadcrumb={[HOME, INVENTORY]}
+      />
       <ItemForm locations={locations} categories={categories} poles={poles} />
     </div>
   );

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { composeName, isAllowedEmail, SignUpInput, splitName } from "./auth";
+import {
+  composeName,
+  emailLocalPart,
+  isAllowedEmail,
+  SignUpInput,
+  schoolEmail,
+  splitName,
+} from "./auth";
 
 describe("isAllowedEmail", () => {
   it.each([
@@ -12,6 +19,21 @@ describe("isAllowedEmail", () => {
     ["myskolae.fr", false],
   ])("%s -> %s", (email, expected) => {
     expect(isAllowedEmail(email)).toBe(expected);
+  });
+});
+
+describe("emailLocalPart / schoolEmail", () => {
+  it.each([
+    ["j.dupont", "j.dupont", "j.dupont@myskolae.fr"],
+    ["J.Dupont", "J.Dupont", "j.dupont@myskolae.fr"],
+    [" j.dupont ", "j.dupont", "j.dupont@myskolae.fr"],
+    ["j.dupont@myskolae.fr", "j.dupont", "j.dupont@myskolae.fr"],
+    ["j.dupont@gmail.com", "j.dupont", "j.dupont@myskolae.fr"],
+    ["", "", ""],
+    ["@myskolae.fr", "", ""],
+  ])("%s -> %s / %s", (typed, local, email) => {
+    expect(emailLocalPart(typed)).toBe(local);
+    expect(schoolEmail(typed)).toBe(email);
   });
 });
 

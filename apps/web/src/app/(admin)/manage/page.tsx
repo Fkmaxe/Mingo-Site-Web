@@ -2,6 +2,7 @@ import {
   BarChart3,
   CalendarDays,
   ChevronRight,
+  ClipboardList,
   GraduationCap,
   PiggyBank,
   ShieldCheck,
@@ -10,6 +11,8 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
+import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Gestion" };
@@ -46,9 +49,16 @@ export default async function ManagePage() {
       show: me.permissions.includes("members:manage"),
     },
     {
+      href: "/tasks?scope=board",
+      title: "Tâches du bureau",
+      description: "Le tableau du bureau, à côté de tes tâches perso",
+      icon: ClipboardList,
+      show: me.permissions.includes("poles:all"),
+    },
+    {
       href: "/manage/treasury",
       title: "Trésorerie",
-      description: "Budgets, dépenses et recettes",
+      description: "Écritures, justificatifs, recettes et dépenses",
       icon: PiggyBank,
       show: me.permissions.includes("budget:read"),
     },
@@ -72,9 +82,7 @@ export default async function ManagePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Gestion
-      </h1>
+      <PageHeader title="Gestion" breadcrumb={[HOME]} />
       <ul className="flex flex-col gap-3">
         {links.map(({ href, title, description, icon: Icon }) => (
           <li key={href}>

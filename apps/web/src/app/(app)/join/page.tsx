@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/brand";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { ApplyForm } from "@/features/applications/apply-form";
 import { APPLICATION_STATUS_LABELS } from "@/features/applications/labels";
 import { getMyApplication } from "@/features/applications/queries";
 import { WithdrawButton } from "@/features/applications/withdraw-button";
 import { listPoles } from "@/features/events/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Rejoindre le BDE" };
@@ -31,9 +33,7 @@ export default async function JoinPage() {
   const [application, poles] = await Promise.all([getMyApplication(), listPoles()]);
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Rejoindre le BDE
-      </h1>
+      <PageHeader title="Rejoindre le BDE" breadcrumb={[HOME]} />
       {application ? (
         <Card>
           <CardTitle>

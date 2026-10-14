@@ -8,31 +8,53 @@ import { Input } from "@/components/ui/input";
 import { createLevelAction, createTrackAction, editLevelAction, editTrackAction } from "./actions";
 import { useAction } from "./use-action";
 
-type Entry = { id: string; name: string; userCount: number; position?: number };
+type Entry = {
+  id: string;
+  name: string;
+  code: string | null;
+  userCount: number;
+  position?: number;
+};
 type LevelEntry = Entry & { position: number; alternanceOnly: boolean; trackIds: string[] };
 
+/** Name and short code (used in the class code: "4" + "AL" + number = 4AL1). */
 function EntryRow({
   entry,
-  onRename,
+  onSave,
   move,
 }: {
   entry: Entry;
-  onRename: (name: string) => void;
+  onSave: (name: string, code: string | null) => void;
   move?: { up: (() => void) | null; down: (() => void) | null };
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(entry.name);
+  const [code, setCode] = useState(entry.code ?? "");
   return (
     <div className="flex min-h-14 items-center gap-2 px-4 py-2">
       {editing ? (
         <>
-          <Input value={name} maxLength={40} autoFocus onChange={(e) => setName(e.target.value)} />
+          <Input
+            value={name}
+            maxLength={40}
+            autoFocus
+            aria-label="Nom"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Input
+            value={code}
+            maxLength={6}
+            aria-label="Code"
+            placeholder="Code"
+            className="w-20 shrink-0 font-mono uppercase"
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+          />
           <Button
             size="icon"
             aria-label="Enregistrer"
             disabled={name.trim().length === 0}
             onClick={() => {
-              onRename(name.trim());
+              onSave(name.trim(), code || null);
               setEditing(false);
             }}
           >
@@ -50,7 +72,14 @@ function EntryRow({
       ) : (
         <>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="font-semibold">{entry.name}</span>
+            <span className="font-semibold">
+              {entry.name}
+              {entry.code ? (
+                <span className="ml-2 rounded-md bg-muted px-1.5 py-0.5 font-mono text-muted-foreground text-xs">
+                  {entry.code}
+                </span>
+              ) : null}
+            </span>
             <span className="text-muted-foreground text-xs">
               {entry.userCount} étudiant{entry.userCount > 1 ? "s" : ""}
             </span>
@@ -80,7 +109,7 @@ function EntryRow({
           <Button
             size="icon"
             variant="ghost"
-            aria-label={`Renommer ${entry.name}`}
+            aria-label={`Modifier ${entry.name}`}
             onClick={() => setEditing(true)}
           >
             <Pencil aria-hidden />
@@ -206,7 +235,7 @@ export function ClassesAdmin({ levels, tracks }: { levels: LevelEntry[]; tracks:
                 <li key={l.id}>
                   <EntryRow
                     entry={l}
-                    onRename={(name) => run(() => editLevelAction(l.id, { name }))}
+                    onSave={(name, code) => run(() => editLevelAction(l.id, { name, code }))}
                     move={{
                       up: prev ? () => swap(l, prev) : null,
                       down: next ? () => swap(l, next) : null,
@@ -233,7 +262,10 @@ export function ClassesAdmin({ levels, tracks }: { levels: LevelEntry[]; tracks:
           <ul className="flex flex-col divide-y rounded-2xl border bg-card shadow-primary/5 shadow-sm">
             {tracks.map((t) => (
               <li key={t.id}>
-                <EntryRow entry={t} onRename={(name) => run(() => editTrackAction(t.id, name))} />
+                <EntryRow
+                  entry={t}
+                  onSave={(name, code) => run(() => editTrackAction(t.id, { name, code }))}
+                />
               </li>
             ))}
           </ul>
@@ -244,8 +276,10 @@ export function ClassesAdmin({ levels, tracks }: { levels: LevelEntry[]; tracks:
         />
       </section>
       <p className="text-muted-foreground text-xs">
-        Renommer une année ou une filière met à jour la classe affichée de tous les étudiants
-        concernés. Une année en alternance obligatoire passe tous ses étudiants en alternance.
+        Renommer une année ou une filière, ou changer son code, met à jour la classe affichée de
+        tous les étudiants concernés. Le code de classe ESGI assemble le code de l'année, celui de
+        la filière (ou A / I selon le rythme si elle n'en a pas) et le numéro : 4AL1, 1A3, 2I8. Une
+        année en alternance obligatoire passe tous ses étudiants en alternance.
       </p>
     </div>
   );

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { listMyTickets } from "@/features/registrations/queries";
 import { TicketList } from "@/features/registrations/ticket-card";
+import { HOME } from "@/lib/breadcrumbs";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Mes billets" };
@@ -15,9 +17,7 @@ export default async function TicketsPage({
   const tickets = await listMyTickets(scope);
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Mes billets
-      </h1>
+      <PageHeader title="Mes billets" breadcrumb={[HOME]} />
       <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
         {(
           [

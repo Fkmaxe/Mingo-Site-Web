@@ -1,4 +1,9 @@
-import { formatAnswer, type OpenPointsStatus, type RegistrationStatus } from "@bde/shared";
+import {
+  formatAnswer,
+  type OpenPointsStatus,
+  type RegistrationStatus,
+  TREASURY_KIND_LABELS,
+} from "@bde/shared";
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx } from "../../core/context";
 import { parisDateTime } from "../../core/time";
@@ -156,13 +161,28 @@ export async function exportTreasury(ctx: AuthedCtx): Promise<CsvFile> {
   const { year, rows } = await yearTransactions(ctx);
   const euros = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
   const content = toCsv(
-    ["Date", "Libellé", "Événement", "Montant (€)", "Justificatif", "Saisi par", "Annule"],
+    [
+      "Date",
+      "Contrepartie",
+      "Initiateur",
+      "Type",
+      "Événement",
+      "Montant (€)",
+      "Commentaire",
+      "Justificatifs",
+      "Saisi par",
+      "Annule",
+    ],
     rows.map((t) => [
       t.occurredOn,
-      t.label,
+      t.counterparty,
+      t.initiator?.name,
+      t.kind === "other" ? t.otherLabel : TREASURY_KIND_LABELS[t.kind],
       t.event?.title,
       euros(t.amountCents),
-      t.receiptUrl,
+      t.comment,
+      // Uploaded receipts, plus the link of an older entry.
+      String(t.attachmentCount + (t.receiptUrl ? 1 : 0)),
       t.createdBy,
       t.reversalOfId ? "oui" : "",
     ]),

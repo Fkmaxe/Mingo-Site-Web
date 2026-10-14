@@ -1,9 +1,11 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 
 export const metadata: Metadata = { title: "Gestion des événements" };
 
@@ -15,17 +17,18 @@ export default async function ManageEventsPage() {
   const hrefOf = (event: { id: string }) => `/manage/events/${event.id}`;
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Mes événements
-        </h1>
-        <Button asChild>
-          <Link href="/manage/events/new">
-            <Plus aria-hidden />
-            Créer
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        title="Mes événements"
+        breadcrumb={manageTrail()}
+        action={
+          <Button asChild>
+            <Link href="/manage/events/new">
+              <Plus aria-hidden />
+              Créer
+            </Link>
+          </Button>
+        }
+      />
       <section className="flex flex-col gap-3">
         <h2 className="font-medium text-muted-foreground text-sm">À venir et brouillons</h2>
         <EventList events={upcoming.items} hrefOf={hrefOf} empty="Aucun événement à venir." />

@@ -5,6 +5,7 @@ import {
   index,
   integer,
   pgTable,
+  smallint,
   text,
   timestamp,
   uuid,
@@ -33,17 +34,27 @@ export const user = pgTable(
     emailVerified: boolean().notNull().default(false),
     /** Profile photo: file name in the uploads directory (served under /avatars/). */
     image: text(),
-    /** Display label of the class ("1A · MCSI · Alternance"), kept in sync with the columns below. */
+    /**
+     * Display label of the class ("4AL1 · 4A · Architecture logicielle"), kept in sync with the
+     * columns below by refreshPromo.
+     */
     promo: text(),
     levelId: uuid().references(() => classLevel.id, { onDelete: "set null" }),
     trackId: uuid().references(() => track.id, { onDelete: "set null" }),
     /** Initial or work-study; always work-study in an alternance-only year. */
     rhythm: studyRhythm(),
+    /** Number of the class in its year, 1 to 9 (4AL1). */
+    classNumber: smallint(),
+    /** Started in January (rentrée décalée). */
+    januaryIntake: boolean().notNull().default(false),
     isAdmin: boolean().notNull().default(false),
     createdAt: createdAt(),
     updatedAt: authUpdatedAt(),
   },
-  (t) => [check("user_email_domain_check", sql`${t.email} like '%@myskolae.fr'`)],
+  (t) => [
+    check("user_email_domain_check", sql`${t.email} like '%@myskolae.fr'`),
+    check("user_class_number_check", sql`${t.classNumber} between 1 and 9`),
+  ],
 );
 
 export const session = pgTable(

@@ -1,7 +1,7 @@
 // Grants (or revokes) the site administrator right, by email. For the first administrator,
 // or to recover access. The account must exist (created on the site, address confirmed).
-//   Docker : docker compose exec api node dist/make-admin.js prenom.nom@myskolae.fr [--revoke]
-//   dev    : pnpm --filter api make-admin prenom.nom@myskolae.fr [--revoke]
+//   Docker : docker compose exec api node dist/make-admin.js j.dupont@myskolae.fr [--revoke]
+//   dev    : pnpm --filter api make-admin j.dupont@myskolae.fr [--revoke]
 import { z } from "zod";
 import { createDb } from "../db/client";
 import { loadEnv } from "../env";

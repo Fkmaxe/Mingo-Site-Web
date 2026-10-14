@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/brand";
 import { DownloadLink } from "@/components/download-link";
 import { Button } from "@/components/ui/button";
 import { PendingReview } from "@/features/open-points/pending-review";
 import { listAllPending } from "@/features/open-points/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Points open à valider" };
@@ -15,16 +17,17 @@ export default async function ManageOpenPointsPage() {
   const pending = await listAllPending();
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Points open
-        </h1>
-        {me.permissions.includes("open-points:adjust") ? (
-          <Button asChild variant="outline">
-            <Link href="/manage/open-points/adjust">Ajuster</Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        title="Points open"
+        breadcrumb={manageTrail()}
+        action={
+          me.permissions.includes("open-points:adjust") ? (
+            <Button asChild variant="outline">
+              <Link href="/manage/open-points/adjust">Ajuster</Link>
+            </Button>
+          ) : null
+        }
+      />
       <p className="text-muted-foreground text-sm">
         Points gagnés aux événements, en attente de validation avant transmission à l'école.
       </p>

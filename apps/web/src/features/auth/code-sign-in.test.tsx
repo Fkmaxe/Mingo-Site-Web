@@ -14,7 +14,7 @@ vi.mock("@/lib/auth-client", () => ({
 async function requestCode(next?: string) {
   const user = userEvent.setup();
   render(<CodeSignIn next={next} />);
-  await user.type(screen.getByLabelText("Adresse email"), " jeanne@myskolae.fr ");
+  await user.type(screen.getByLabelText("Adresse email de l'école"), " jeanne@myskolae.fr ");
   await user.click(screen.getByRole("button", { name: "Recevoir un code" }));
   return user;
 }

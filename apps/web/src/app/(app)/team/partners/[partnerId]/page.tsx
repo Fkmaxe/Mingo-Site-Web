@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { DisplayTitle } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { listDirectory } from "@/features/members/queries";
 import { PARTNER_STATUS_LABELS } from "@/features/partners/labels";
 import { PartnerForm } from "@/features/partners/partner-form";
 import { getPartnerOr404 } from "@/features/partners/queries";
+import { HOME, PARTNERS, TEAM } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Partenaire" };
@@ -19,18 +22,16 @@ export default async function PartnerPage({ params }: { params: Promise<{ partne
       : undefined;
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
-          {partner.name}
-        </h1>
+        <Breadcrumbs items={[HOME, TEAM, PARTNERS]} current={partner.name} />
+        <DisplayTitle className="text-2xl normal-case leading-tight">{partner.name}</DisplayTitle>
         <PartnerForm partner={partner} owners={owners} canDelete={isBoard} />
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="font-display font-extrabold text-2xl italic leading-tight tracking-tight">
-        {partner.name}
-      </h1>
+      <Breadcrumbs items={[HOME, TEAM, PARTNERS]} current={partner.name} />
+      <DisplayTitle className="text-2xl normal-case leading-tight">{partner.name}</DisplayTitle>
       <p className="text-sm">Statut : {PARTNER_STATUS_LABELS[partner.status]}</p>
       <p className="text-sm">Référent : {partner.owner?.name ?? "personne"}</p>
       {partner.contactName || partner.contactEmail ? (

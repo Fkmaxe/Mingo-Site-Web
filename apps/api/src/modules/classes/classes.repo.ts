@@ -1,4 +1,4 @@
-import type { StudyRhythm } from "@bde/shared";
+import { JANUARY_INTAKE_LABEL, type StudyRhythm } from "@bde/shared";
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { classLevel, classLevelTrack, track, user } from "../../db/schema";
@@ -13,6 +13,7 @@ export function findLevels(db: DbOrTx) {
     .select({
       id: classLevel.id,
       name: classLevel.name,
+      code: classLevel.code,
       position: classLevel.position,
       alternanceOnly: classLevel.alternanceOnly,
       trackIds: levelTrackIds,
@@ -27,6 +28,7 @@ export function findTracks(db: DbOrTx) {
     .select({
       id: track.id,
       name: track.name,
+      code: track.code,
       userCount: sql<number>`(select count(*) from "user" u where u."track_id" = "track"."id")`,
     })
     .from(track)
@@ -38,6 +40,7 @@ export async function findLevel(db: DbOrTx, id: string) {
     .select({
       id: classLevel.id,
       name: classLevel.name,
+      code: classLevel.code,
       position: classLevel.position,
       alternanceOnly: classLevel.alternanceOnly,
       trackIds: levelTrackIds,
@@ -103,7 +106,7 @@ export async function maxLevelPosition(db: DbOrTx): Promise<number> {
 
 export async function insertLevel(
   db: DbOrTx,
-  values: { name: string; position: number; alternanceOnly: boolean },
+  values: { name: string; code: string | null; position: number; alternanceOnly: boolean },
 ) {
   const [row] = await db.insert(classLevel).values(values).returning({ id: classLevel.id });
   if (!row) throw new Error("insertLevel: aucune ligne insérée");
@@ -113,24 +116,29 @@ export async function insertLevel(
 export async function updateLevel(
   db: DbOrTx,
   id: string,
-  values: { name: string; position?: number; alternanceOnly?: boolean },
+  values: { name: string; code?: string | null; position?: number; alternanceOnly?: boolean },
 ) {
   await db.update(classLevel).set(values).where(eq(classLevel.id, id));
 }
 
-export async function insertTrack(db: DbOrTx, name: string) {
-  const [row] = await db.insert(track).values({ name }).returning({ id: track.id });
+export async function insertTrack(db: DbOrTx, values: { name: string; code: string | null }) {
+  const [row] = await db.insert(track).values(values).returning({ id: track.id });
   if (!row) throw new Error("insertTrack: aucune ligne insérée");
   return row.id;
 }
 
-export async function updateTrack(db: DbOrTx, id: string, name: string) {
-  await db.update(track).set({ name }).where(eq(track.id, id));
+export async function updateTrack(
+  db: DbOrTx,
+  id: string,
+  values: { name: string; code?: string | null },
+) {
+  await db.update(track).set(values).where(eq(track.id, id));
 }
 
 /**
- * Recomputes the class label ("1A · MCSI · Alternance") of the given accounts, or of every account of a level
- * or track after a rename. Same rule as promoLabel in @bde/shared.
+ * Recomputes the class label ("4AL1 · 4A · Architecture logicielle") of the given accounts, or of
+ * every account of a level or track after a change. Same rules as classCode and promoLabel in
+ * @bde/shared.
  */
 export async function refreshPromo(
   db: DbOrTx,
@@ -142,18 +150,32 @@ export async function refreshPromo(
       ? sql`u."level_id" = ${where.levelId}`
       : sql`u."track_id" = ${where.trackId ?? null}`;
   await db.execute(sql`update "user" u set "promo" = nullif(concat_ws(' · ',
+      case when u."class_number" is not null then
+        (select l."code" from "class_level" l where l."id" = u."level_id")
+        || case when coalesce((select l."alternance_only" from "class_level" l where l."id" = u."level_id"), false)
+          then coalesce((select t."code" from "track" t where t."id" = u."track_id"),
+            case u."rhythm" when 'alternance' then 'A' when 'initial' then 'I' else '' end)
+          else case u."rhythm" when 'alternance' then 'A' when 'initial' then 'I' else '' end end
+        || u."class_number"::text end,
       (select l."name" from "class_level" l where l."id" = u."level_id"),
       (select t."name" from "track" t where t."id" = u."track_id"),
       case when coalesce((select l."alternance_only" from "class_level" l where l."id" = u."level_id"), false) then null
         when u."rhythm" = 'initial' then 'Initial'
-        when u."rhythm" = 'alternance' then 'Alternance' end), '')
+        when u."rhythm" = 'alternance' then 'Alternance' end,
+      case when u."january_intake" and u."level_id" is not null then ${JANUARY_INTAKE_LABEL}::text end), '')
     where ${filter}`);
 }
 
 export async function setUserClass(
   db: DbOrTx,
   userId: string,
-  values: { levelId: string | null; trackId: string | null; rhythm: StudyRhythm | null },
+  values: {
+    levelId: string | null;
+    trackId: string | null;
+    rhythm: StudyRhythm | null;
+    classNumber: number | null;
+    januaryIntake: boolean;
+  },
 ) {
   await db.update(user).set(values).where(eq(user.id, userId));
 }

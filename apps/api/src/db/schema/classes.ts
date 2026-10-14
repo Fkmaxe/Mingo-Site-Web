@@ -2,6 +2,7 @@ import { STUDY_RHYTHMS } from "@bde/shared";
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   pgEnum,
@@ -21,12 +22,17 @@ export const classLevel = pgTable(
   {
     id: id(),
     name: text().notNull(),
+    /** Short code in the class code ("4" for 4A): see classCode in @bde/shared. */
+    code: text(),
     position: integer().notNull().default(0),
     /** Work-study only (3rd year on at ESGI): every student of this year is in alternance. */
     alternanceOnly: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
-  (t) => [uniqueIndex("class_level_name_unique").on(sql`lower(${t.name})`)],
+  (t) => [
+    uniqueIndex("class_level_name_unique").on(sql`lower(${t.name})`),
+    check("class_level_code_check", sql`${t.code} ~ '^[A-Z0-9]{1,6}$'`),
+  ],
 );
 
 /** Programme (Dev, Cyber, Data…). Managed by administrators. */
@@ -35,9 +41,14 @@ export const track = pgTable(
   {
     id: id(),
     name: text().notNull(),
+    /** Short code in the class code ("AL"); none = the letter of the rhythm (A, I). */
+    code: text(),
     createdAt: createdAt(),
   },
-  (t) => [uniqueIndex("track_name_unique").on(sql`lower(${t.name})`)],
+  (t) => [
+    uniqueIndex("track_name_unique").on(sql`lower(${t.name})`),
+    check("track_code_check", sql`${t.code} ~ '^[A-Z0-9]{1,6}$'`),
+  ],
 );
 
 /** Programmes offered in a year (1A, 2A: tronc commun or MCSI). No row for a year = all. */

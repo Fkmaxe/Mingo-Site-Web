@@ -3,7 +3,7 @@ import { createApp, OPENAPI_CONFIG } from "../app";
 import { createDb } from "../db/client";
 import { createMemoryMailer } from "../lib/mailer";
 import { createDisabledPusher } from "../lib/push";
-import { createMemoryPhotoStore } from "../lib/storage";
+import { createMemoryPhotoStore, createMemoryReceiptStore } from "../lib/storage";
 
 // Builds the OpenAPI document without starting the server nor touching the database
 // (postgres.js connects lazily), so it also runs in CI.
@@ -20,6 +20,7 @@ const app = createApp({
   mailer: createMemoryMailer(),
   pusher: createDisabledPusher(),
   photos: createMemoryPhotoStore(),
+  receipts: createMemoryReceiptStore(),
 });
 const document = app.getOpenAPI31Document(OPENAPI_CONFIG);
 writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`);

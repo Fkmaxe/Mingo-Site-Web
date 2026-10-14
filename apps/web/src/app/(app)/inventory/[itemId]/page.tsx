@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DisplayTitle } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { listEvents, listPoles } from "@/features/events/queries";
 import { ConditionBadge } from "@/features/inventory/condition-badge";
@@ -16,6 +17,7 @@ import {
   listLocations,
 } from "@/features/inventory/queries";
 import { QrCode } from "@/features/registrations/qr-code";
+import { HOME, INVENTORY } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Matériel" };
@@ -49,12 +51,7 @@ export default async function ItemPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <Link
-        href="/inventory"
-        className="font-semibold text-primary text-sm underline-offset-4 hover:underline"
-      >
-        ← Inventaire
-      </Link>
+      <Breadcrumbs items={[HOME, INVENTORY]} current={item.name} />
 
       {item.photoUrl ? (
         // biome-ignore lint/performance/noImgElement: private photo through the web proxy.

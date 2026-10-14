@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ItemList } from "@/features/inventory/item-list";
 import { listCategories, listItems, listLocations } from "@/features/inventory/queries";
+import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,7 @@ export default async function InventoryPage({
     <div className="flex flex-col gap-4 pb-16">
       <PageHeader
         title="Inventaire"
+        breadcrumb={[HOME]}
         description={`${items.length} objet${items.length > 1 ? "s" : ""}${archived ? " archivés" : ""}`}
         action={
           <Button asChild variant="ghost" size="icon" aria-label="Historique de l'inventaire">

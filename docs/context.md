@@ -13,6 +13,7 @@ BDE de l'ESGI Paris. Organisation :
 ## Utilisateurs et connexion
 
 - Tout le monde se connecte avec son adresse école **@myskolae.fr** (élèves et membres) et un **mot de passe** choisi à l'inscription. Aucun autre domaine n'est accepté.
+- Les adresses de l'école sont de la forme `j.dupont@myskolae.fr` (initiale du prénom, un point, nom de famille). Les formulaires ne demandent que cet identifiant : `@myskolae.fr` est affiché, collé au champ, et ne se modifie pas. Une adresse complète collée ou proposée par le navigateur ne garde que l'identifiant.
 - L'adresse est **confirmée par un code à 6 chiffres** envoyé par mail (valable 10 minutes, 3 essais) avant la première connexion : c'est ce qui prouve que l'étudiant possède bien cette adresse. Un code plutôt qu'un lien : les filtres de Microsoft 365 de l'école mettent beaucoup moins ces mails en quarantaine. Une fois l'adresse confirmée, l'étudiant est connecté directement. Mot de passe oublié → lien de réinitialisation par mail.
 - Trois façons de se connecter, au choix sur `/login` :
   - **mot de passe** ;
@@ -46,12 +47,16 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 ## Classes et profil
 
-- Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière** et son **rythme** (initial ou alternance). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, et pour chaque année : filières proposées, alternance obligatoire).
+- Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière**, son **rythme** (initial ou alternance), son **numéro de classe** (1 à 9, obligatoire dès qu'une année est choisie) et s'il a fait la **rentrée de janvier** (non par défaut). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, donner un **code**, et pour chaque année : filières proposées, alternance obligatoire).
+- **Code de classe ESGI** : code de l'année + numéro de classe, avec entre les deux :
+  - en **1A et 2A** (années où l'on choisit son rythme) : la **lettre du rythme** (A = alternance, I = initial), en tronc commun comme en MCSI ;
+  - à partir de la **3A** (années en alternance obligatoire) : le **code de la filière** (la lettre A pour une filière sans code).
+  Exemples : `4AL1` (4A, architecture logicielle, classe 1), `1A3` (1A en alternance, classe 3), `2I8` (2A en initial, classe 8), `1I2` (1A MCSI en initial, classe 2). Codes posés par la migration, modifiables : années `1` à `5`, MCSI `MCSI`, architecture logicielle `AL`, réseaux `SRC`, sécurité `SI` (à vérifier par le bureau).
 - Organisation de l'ESGI (mise en place par la migration, modifiable) :
   - **1A et 2A** : **tronc commun** ou **MCSI**, en **initial ou en alternance** au choix ;
   - **à partir de la 3A** : une filière de spécialité (architecture logicielle, réseaux, sécurité, MCSI…), **forcément en alternance**.
 - Le profil ne propose que les filières de l'année choisie (une année sans filière cochée les propose toutes) ; l'API refuse une filière non proposée. Dans une année en alternance obligatoire, le rythme n'est pas demandé : l'étudiant est en alternance (et passe en alternance si l'année le devient).
-- La classe s'affiche « 1A · MCSI · Alternance » ou « 3A · Sécurité » (le rythme n'est pas répété quand il est obligatoire) dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière met à jour tous les étudiants concernés.
+- La classe s'affiche « 4AL1 · 4A · Architecture logicielle », « 1A3 · 1A · Tronc commun · Alternance · Rentrée de janvier » ou « 3A · Sécurité » sans numéro (le rythme n'est pas répété quand il est obligatoire) dans les listes d'inscrits, le pointage, les exports et le classement de la ligue. Renommer une année ou une filière, ou changer son code, met à jour tous les étudiants concernés.
 - Filtres par classe : liste des inscrits d'un événement (année, filière, rythme, « non renseigné »), classement de la ligue (année, filière), statistiques de l'année (participants par année, filière, rythme, selon la classe actuelle de chacun).
 - **Photo de profil** : prise ou choisie depuis le profil, recadrée en carré et réduite dans le navigateur ; visible par les personnes connectées (en-tête, annuaire, équipes, ligue). Sans photo : les initiales.
 
@@ -128,11 +133,17 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Gestion interne
 
 - Annuaire des membres (pôle, rôle, promo, contact).
-- Tâches par pôle (à faire / en cours / fait, responsable, échéance).
+- Tâches (à faire / en cours / fait, responsable, échéance), sur `/tasks` en onglets :
+  - **Mes tâches** : celles qui me sont assignées et mes **tâches perso**. Une tâche perso est créée par n'importe quel membre de l'année, n'est assignée à personne et n'est visible que par son auteur (ni le bureau ni les admins ne la voient) ;
+  - **Bureau** : le tableau du bureau, visible et géré par le bureau seulement (et les admins) ; on l'assigne à un membre du bureau. Accessible aussi depuis Gestion ;
+  - **Pôle X** : le tableau de chaque pôle (le responsable gère, les membres du pôle voient, l'assigné déplace sa tâche).
 - Réunions : ordre du jour, compte rendu, présences.
 - Recrutement : candidatures, affectation à un pôle.
 - Partenariats : fiches partenaires, contacts, statut, contreparties. Gérées par le bureau ; le membre référent d'un partenaire peut modifier sa fiche. Les partenaires actifs (nom, site, avantages) sont affichés publiquement.
-- Trésorerie simple : budget par événement, dépenses / recettes, justificatifs.
+- Trésorerie (Gestion → Trésorerie, le trésorier saisit, le bureau consulte) : en haut les totaux de l'année (**Recettes**, **Dépenses**, **Solde**), puis le tableau des écritures, filtrable par type et cherchable (contrepartie, initiateur, commentaire). Un bouton « Ajouter » mène au formulaire de création, chaque ligne à la page de l'écriture.
+  - Une écriture : **nom de la contrepartie**, **initiateur** (membre du BDE de l'année, cherché par son nom avec sa photo), **montant total**, **date de l'opération**, **type** (Débit = sortie, Crédit = entrée, ou **Autre** avec un nom libre et le sens, entrée ou sortie, qui la compte en recette ou en dépense), événement facultatif, **commentaire** facultatif et **justificatifs de paiement** : plusieurs photos ou PDF (8 Mo au plus chacun, 10 par écriture), affichés dans la page de l'écriture.
+  - C'est un **journal** : le montant, le type et le sens ne changent jamais ; une erreur se corrige par « Annuler l'écriture » (écriture inverse datée du jour). L'annulation compte du côté de l'écriture annulée : annuler une dépense fait baisser les dépenses, ce n'est pas une recette. Le reste se corrige, justificatifs compris ; tout est tracé dans l'audit.
+  - Le **budget par événement** (prévu, dépenses, recettes, solde) se lit et se fixe sur la page de gestion de l'événement.
 
 ## Notifications push
 

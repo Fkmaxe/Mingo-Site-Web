@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
 import { PARTNER_STATUS_LABELS } from "@/features/partners/labels";
 import { listPartners } from "@/features/partners/queries";
+import { HOME, TEAM } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Partenaires (interne)" };
@@ -20,16 +22,17 @@ export default async function TeamPartnersPage() {
   const partners = await listPartners();
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-          Partenaires
-        </h1>
-        {me.permissions.includes("partners:manage") ? (
-          <Button asChild>
-            <Link href="/team/partners/new">Ajouter</Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        title="Partenaires"
+        breadcrumb={[HOME, TEAM]}
+        action={
+          me.permissions.includes("partners:manage") ? (
+            <Button asChild>
+              <Link href="/team/partners/new">Ajouter</Link>
+            </Button>
+          ) : null
+        }
+      />
       {partners.length === 0 ? (
         <p className="rounded-xl border border-dashed p-6 text-center text-muted-foreground text-sm">
           Aucun partenaire pour l'instant.

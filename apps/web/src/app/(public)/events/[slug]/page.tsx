@@ -2,6 +2,7 @@ import { CalendarDays, Clock, MapPin, Shield, Sparkles, Users } from "lucide-rea
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPanel, DisplayTitle, Pill } from "@/components/brand";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/events/event-badges";
 import { getEventOr404 } from "@/features/events/queries";
@@ -11,6 +12,7 @@ import { getMyTeam } from "@/features/registrations/queries";
 import { RegistrationPanel } from "@/features/registrations/registration-panel";
 import { listStaffSlots } from "@/features/staff/queries";
 import { StaffVolunteerPanel } from "@/features/staff/staff-volunteer-panel";
+import { EVENTS } from "@/lib/breadcrumbs";
 import { formatDateTime, formatEventRange, formatShortDay } from "@/lib/paris-time";
 import { getMe } from "@/lib/session";
 
@@ -32,6 +34,7 @@ export default async function EventPage({ params }: Props) {
   ]);
   return (
     <article className="flex flex-col gap-5">
+      <Breadcrumbs items={[EVENTS]} current={event.title} />
       <BrandPanel className="flex flex-col gap-4 pt-6 pb-6">
         <div className="flex flex-wrap gap-2">
           {event.status !== "published" ? <StatusBadge status={event.status} /> : null}

@@ -63,7 +63,11 @@ describe("a student's class", () => {
     const third = await level("3A");
     const dev = await track("Dev");
     const me = await readJson(
-      await call("PUT", "/v1/me/class", student.id, { levelId: third, trackId: dev }),
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: third,
+        trackId: dev,
+        classNumber: 1,
+      }),
       MeDto,
     );
     expect(me).toMatchObject({ promo: "3A · Dev", level: { name: "3A" }, track: { name: "Dev" } });
@@ -86,6 +90,7 @@ describe("a student's class", () => {
     const res = await call("PUT", "/v1/me/class", student.id, {
       levelId: "00000000-0000-4000-8000-000000000000",
       trackId: null,
+      classNumber: 1,
     });
     expect(res.status).toBe(404);
   });
@@ -117,6 +122,7 @@ describe("ESGI rules: programmes per year, work-study", () => {
         levelId: first.id,
         trackId: mcsi,
         rhythm: "alternance",
+        classNumber: 2,
       }),
       MeDto,
     );
@@ -130,6 +136,7 @@ describe("ESGI rules: programmes per year, work-study", () => {
       levelId: first.id,
       trackId: secu,
       rhythm: "initial",
+      classNumber: 2,
     });
     expect(refused.status).toBe(422);
     expect(await readError(refused)).toMatchObject({
@@ -146,6 +153,7 @@ describe("ESGI rules: programmes per year, work-study", () => {
         levelId: third.id,
         trackId: secu,
         rhythm: "initial",
+        classNumber: 1,
       }),
       MeDto,
     );
@@ -158,6 +166,7 @@ describe("ESGI rules: programmes per year, work-study", () => {
       levelId: fourth.id,
       trackId: null,
       rhythm: "initial",
+      classNumber: 1,
     });
     let [row] = await getTestDb().select().from(user).where(eq(user.id, student.id));
     expect(row?.promo).toBe("4A · Initial");
@@ -181,6 +190,149 @@ describe("ESGI rules: programmes per year, work-study", () => {
       trackIds: ["00000000-0000-4000-8000-000000000000"],
     });
     expect(res.status).toBe(404);
+  });
+});
+
+describe("class code, number and January intake", () => {
+  /** A year or programme with its code; from 3A on, years are alternance only (ESGI). */
+  async function coded(
+    kind: "levels" | "tracks",
+    name: string,
+    code: string,
+    alternanceOnly = false,
+  ) {
+    const dto = await readJson(
+      await call("POST", `/v1/admin/${kind}`, admin.id, {
+        name,
+        code,
+        ...(kind === "levels" ? { alternanceOnly } : {}),
+      }),
+      ClassesDto,
+    );
+    const found = dto[kind].find((c) => c.name === name);
+    if (!found) throw new Error(kind);
+    return found;
+  }
+
+  it("builds the ESGI code from the year, the programme and the number", async () => {
+    const fourth = await coded("levels", "4A", "4", true);
+    const al = await coded("tracks", "Architecture logicielle", "al");
+    expect(al.code).toBe("AL");
+    const me = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: fourth.id,
+        trackId: al.id,
+        rhythm: "alternance",
+        classNumber: 1,
+      }),
+      MeDto,
+    );
+    expect(me).toMatchObject({
+      classCode: "4AL1",
+      classNumber: 1,
+      januaryIntake: false,
+      promo: "4AL1 · 4A · Architecture logicielle",
+    });
+  });
+
+  it("uses the rhythm letter in 1A and 2A, MCSI included, the programme's code from 3A", async () => {
+    const first = await coded("levels", "1A", "1");
+    const third = await coded("levels", "3A", "3", true);
+    const mcsi = await coded("tracks", "MCSI", "MCSI");
+    const put = (levelId: string, rhythm: "initial" | "alternance") =>
+      call("PUT", "/v1/me/class", student.id, {
+        levelId,
+        trackId: mcsi.id,
+        rhythm,
+        classNumber: 2,
+      }).then((res) => readJson(res, MeDto));
+    expect(await put(first.id, "initial")).toMatchObject({
+      classCode: "1I2",
+      promo: "1I2 · 1A · MCSI · Initial",
+    });
+    expect(await put(third.id, "initial")).toMatchObject({
+      classCode: "3MCSI2",
+      promo: "3MCSI2 · 3A · MCSI",
+    });
+  });
+
+  it("uses the rhythm letter for a programme without code, and shows the January intake", async () => {
+    const first = await coded("levels", "1A", "1");
+    const tronc = await track("Tronc commun");
+    const me = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: first.id,
+        trackId: tronc,
+        rhythm: "alternance",
+        classNumber: 3,
+        januaryIntake: true,
+      }),
+      MeDto,
+    );
+    expect(me).toMatchObject({
+      classCode: "1A3",
+      januaryIntake: true,
+      promo: "1A3 · 1A · Tronc commun · Alternance · Rentrée de janvier",
+    });
+
+    const initial = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: first.id,
+        trackId: tronc,
+        rhythm: "initial",
+        classNumber: 8,
+      }),
+      MeDto,
+    );
+    expect(initial).toMatchObject({ classCode: "1I8", januaryIntake: false });
+  });
+
+  it("follows a code change of the year or the programme", async () => {
+    const fourth = await coded("levels", "4A", "4", true);
+    const al = await coded("tracks", "Architecture logicielle", "AL");
+    await call("PUT", "/v1/me/class", student.id, {
+      levelId: fourth.id,
+      trackId: al.id,
+      classNumber: 2,
+    });
+    await call("PUT", `/v1/admin/tracks/${al.id}`, admin.id, { name: al.name, code: "ARL" });
+    let [row] = await getTestDb().select().from(user).where(eq(user.id, student.id));
+    expect(row?.promo).toBe("4ARL2 · 4A · Architecture logicielle");
+
+    await call("PUT", `/v1/admin/levels/${fourth.id}`, admin.id, { name: "4A", code: "" });
+    [row] = await getTestDb().select().from(user).where(eq(user.id, student.id));
+    expect(row?.promo).toBe("4A · Architecture logicielle");
+  });
+
+  it("requires a number from 1 to 9 once a year is chosen, and clears it with the year", async () => {
+    const fourth = await coded("levels", "4A", "4", true);
+    const missing = await call("PUT", "/v1/me/class", student.id, {
+      levelId: fourth.id,
+      trackId: null,
+    });
+    expect(missing.status).toBe(400);
+    const tooHigh = await call("PUT", "/v1/me/class", student.id, {
+      levelId: fourth.id,
+      trackId: null,
+      classNumber: 10,
+    });
+    expect(tooHigh.status).toBe(400);
+
+    const cleared = await readJson(
+      await call("PUT", "/v1/me/class", student.id, {
+        levelId: null,
+        trackId: null,
+        classNumber: 4,
+        januaryIntake: true,
+      }),
+      MeDto,
+    );
+    expect(cleared).toMatchObject({ classNumber: null, januaryIntake: false, promo: null });
+  });
+
+  it("refuses a code with spaces or symbols", async () => {
+    const res = await call("POST", "/v1/admin/tracks", admin.id, { name: "Data", code: "A L" });
+    expect(res.status).toBe(400);
   });
 });
 

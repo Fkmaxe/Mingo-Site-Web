@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/brand";
 import { MembersView } from "@/features/stats/members-view";
 import { OverviewView } from "@/features/stats/overview";
 import { getMemberInvolvement, getYearOverview } from "@/features/stats/queries";
+import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,11 @@ export default async function StatsPage({
   const year = (overview ?? involvement)?.schoolYear.label;
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Statistiques" description={year ? `Année ${year}` : undefined} />
+      <PageHeader
+        title="Statistiques"
+        description={year ? `Année ${year}` : undefined}
+        breadcrumb={manageTrail()}
+      />
       <nav aria-label="Vue" className="grid grid-cols-2 rounded-full bg-muted p-1 text-sm">
         {VIEWS.map(([value, label]) => (
           <Link

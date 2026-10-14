@@ -1,12 +1,13 @@
 "use client";
 
-import { ALLOWED_EMAIL_DOMAIN, SignInInput } from "@bde/shared";
+import { SignInInput } from "@bde/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { FormAlert, FormField } from "@/components/form-field";
+import { Controller, useForm } from "react-hook-form";
+import { FormAlert } from "@/components/form-field";
+import { SchoolEmailField } from "@/components/school-email-field";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
@@ -19,6 +20,7 @@ export function SignInForm({ next }: { next?: string | undefined }) {
   const [error, setError] = useState<string | null>(null);
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignInInput>({ resolver: zodResolver(SignInInput) });
@@ -45,16 +47,21 @@ export function SignInForm({ next }: { next?: string | undefined }) {
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
-      <FormField
-        id="email"
-        label="Adresse email"
-        type="email"
-        inputMode="email"
-        autoComplete="username webauthn"
-        autoCapitalize="none"
-        placeholder={`prenom.nom@${ALLOWED_EMAIL_DOMAIN}`}
-        error={errors.email?.message}
-        {...register("email")}
+      <Controller
+        control={control}
+        name="email"
+        render={({ field }) => (
+          <SchoolEmailField
+            id="email"
+            autoComplete="username webauthn"
+            error={errors.email?.message}
+            ref={field.ref}
+            name={field.name}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+          />
+        )}
       />
       <PasswordField
         id="password"

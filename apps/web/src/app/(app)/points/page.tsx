@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/brand";
 import { Card, CardDescription } from "@/components/ui/card";
 import { formatPoints } from "@/features/open-points/labels";
 import { MovementList } from "@/features/open-points/movement-list";
 import { getMyOpenPoints } from "@/features/open-points/queries";
+import { HOME } from "@/lib/breadcrumbs";
 
 export const metadata: Metadata = { title: "Mes points open" };
 
@@ -10,9 +12,7 @@ export default async function PointsPage() {
   const points = await getMyOpenPoints();
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Mes points open
-      </h1>
+      <PageHeader title="Mes points open" breadcrumb={[HOME]} />
       {points.isMember ? (
         <Card>
           <CardDescription>

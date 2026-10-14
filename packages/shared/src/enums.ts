@@ -45,6 +45,10 @@ export type GradeStatus = (typeof GRADE_STATUSES)[number];
 export const TASK_STATUSES = ["todo", "doing", "done"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
+/** Board of a pole, of the bureau, or personal (seen only by its author). */
+export const TASK_SCOPES = ["pole", "board", "personal"] as const;
+export type TaskScope = (typeof TASK_SCOPES)[number];
+
 export const APPLICATION_STATUSES = ["new", "interview", "accepted", "rejected"] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
@@ -98,3 +102,11 @@ export type LeaguePointsReason = (typeof LEAGUE_POINTS_REASONS)[number];
 /** Initial training or work-study (alternance). From some years on, work-study only. */
 export const STUDY_RHYTHMS = ["initial", "alternance"] as const;
 export type StudyRhythm = (typeof STUDY_RHYTHMS)[number];
+
+/** Treasury entry: money out (debit), money in (credit), or another kind named by the treasurer. */
+export const TREASURY_KINDS = ["debit", "credit", "other"] as const;
+export type TreasuryKind = (typeof TREASURY_KINDS)[number];
+
+/** Direction of an « other » treasury entry: money in or out. */
+export const TREASURY_DIRECTIONS = ["in", "out"] as const;
+export type TreasuryDirection = (typeof TREASURY_DIRECTIONS)[number];

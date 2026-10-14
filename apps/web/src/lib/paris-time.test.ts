@@ -5,6 +5,7 @@ import {
   formatEventTimes,
   isoToParisInput,
   parisInputToIso,
+  parisToday,
 } from "./paris-time";
 
 describe("Paris time conversions", () => {
@@ -57,5 +58,13 @@ describe("formatEventTimes", () => {
     expect(formatEventTimes("2026-12-10T20:00:00.000Z", "2026-12-11T04:00:00.000Z")).toMatch(
       /^21:00 → .*11.* 05:00$/,
     );
+  });
+});
+
+describe("parisToday", () => {
+  it("is already the next day in Paris late in the UTC evening", () => {
+    expect(parisToday(new Date("2026-10-13T23:30:00Z"))).toBe("2026-10-14");
+    expect(parisToday(new Date("2026-12-31T22:59:00Z"))).toBe("2026-12-31");
+    expect(parisToday(new Date("2026-12-31T23:01:00Z"))).toBe("2027-01-01");
   });
 });

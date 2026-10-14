@@ -1,19 +1,21 @@
 import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/brand";
 import { listPublicPartners } from "@/features/partners/queries";
+import { HOME, SITE_HOME } from "@/lib/breadcrumbs";
+import { getMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Partenaires" };
 
 export default async function PartnersPage() {
-  const partners = await listPublicPartners();
+  const [partners, me] = await Promise.all([listPublicPartners(), getMe()]);
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display font-extrabold text-[1.75rem] uppercase italic leading-none tracking-tight">
-        Nos partenaires
-      </h1>
-      <p className="text-muted-foreground text-sm">
-        Les bons plans négociés par le BDE pour les élèves.
-      </p>
+      <PageHeader
+        title="Nos partenaires"
+        description="Les bons plans négociés par le BDE pour les élèves."
+        breadcrumb={[me ? HOME : SITE_HOME]}
+      />
       {partners.length === 0 ? (
         <p className="rounded-xl border border-dashed p-6 text-center text-muted-foreground text-sm">
           Les partenariats arrivent bientôt.

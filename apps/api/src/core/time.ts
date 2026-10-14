@@ -22,3 +22,15 @@ export function parisTime(date: Date): string {
 export function parisDateTime(date: Date): string {
   return dateTimeFormatter.format(date).replace(",", "");
 }
+
+const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Europe/Paris",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** "2026-10-14": the day in Paris (a `date` column), whatever the server TZ. */
+export function parisDate(date: Date): string {
+  return dateFormatter.format(date);
+}

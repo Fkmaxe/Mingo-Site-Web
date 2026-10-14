@@ -1,8 +1,15 @@
 export {
   createDiskPhotoStore,
+  createDiskReceiptStore,
   createMemoryPhotoStore,
+  createMemoryReceiptStore,
+  type FileStore,
   type MemoryPhotoStore,
+  type MemoryReceiptStore,
   type PhotoStore,
   type PhotoType,
+  type ReceiptStore,
+  type ReceiptType,
   sniffPhotoType,
+  sniffReceiptType,
 } from "./photo-store";

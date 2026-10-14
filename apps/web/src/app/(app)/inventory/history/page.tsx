@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { HistoryList } from "@/features/inventory/history-list";
 import { listHistory } from "@/features/inventory/queries";
+import { HOME, INVENTORY } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Historique de l'inventaire" };
@@ -19,14 +20,9 @@ export default async function InventoryHistoryPage({
   const history = await listHistory(cursor ? { cursor } : {});
   return (
     <div className="flex flex-col gap-5">
-      <Link
-        href="/inventory"
-        className="font-semibold text-primary text-sm underline-offset-4 hover:underline"
-      >
-        ← Inventaire
-      </Link>
       <PageHeader
         title="Historique"
+        breadcrumb={[HOME, INVENTORY]}
         description="Toutes les actions sur le matériel, avec leur auteur."
       />
       <HistoryList movements={history.items} showItem />

@@ -27,11 +27,11 @@ Un utilisateur sans `membership` actif sur l'année courante est un **étudiant*
 
 | Table | Colonnes clés | Contraintes |
 | --- | --- | --- |
-| `class_level` | name, position, alternance_only | nom unique (insensible à la casse) |
+| `class_level` | name, code (`4`), position, alternance_only | nom unique (insensible à la casse) ; code `[A-Z0-9]{1,6}` |
 | `class_level_track` | level_id, track_id | filières proposées dans l'année ; aucune ligne = toutes |
-| `track` | name | nom unique (insensible à la casse) |
+| `track` | name, code (`AL`, null = lettre du rythme) | nom unique (insensible à la casse) ; code `[A-Z0-9]{1,6}` |
 
-`user.level_id` / `user.track_id` / `user.rhythm` (`initial`, `alternance`, nullables ; toujours `alternance` dans une année `alternance_only`) ; `user.promo` est le **libellé calculé** (« 1A · MCSI · Alternance », « 3A · Sécurité »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
+`user.level_id` / `user.track_id` / `user.rhythm` (`initial`, `alternance`, nullables ; toujours `alternance` dans une année `alternance_only`) / `user.class_number` (1 à 9, null sans année) / `user.january_intake` (false par défaut) ; `user.promo` est le **libellé calculé** (« 4AL1 · 4A · Architecture logicielle », « 3A · Sécurité »), tenu à jour par l'API à chaque changement de classe ou renommage ; `user.image` = nom du fichier de la photo de profil.
 
 ### Événements
 
@@ -81,12 +81,13 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 
 | Table | Colonnes clés |
 | --- | --- |
-| `task` | pole_id, title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on, deleted_at |
+| `task` | scope (`pole`, `board`, `personal`), pole_id (ssi `pole`), owner_user_id (ssi `personal`, sans assigné), title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on, deleted_at |
 | `meeting` | pole_id (nullable = réunion générale), title, starts_at, location, agenda, minutes, deleted_at |
 | `meeting_attendance` | meeting_id, user_id, marked_by — une ligne par présent, comptée dans la note |
 | `application` | user_id, school_year_id, wished_pole_id, motivation, status (`new`, `interview`, `accepted`, `rejected`) |
 | `partner` | name, website, contact_name, contact_email, status (`prospect`, `contacted`, `negotiating`, `active`, `ended`), benefits, notes, owner_membership_id |
-| `treasury_transaction` | event_id (nullable), school_year_id, label, amount_cents (int signé, non nul, jamais modifié), occurred_on, receipt_url, reversal_of_id (unique : écriture d'annulation), created_by |
+| `treasury_transaction` | event_id (nullable), school_year_id, counterparty, initiator_user_id, kind (`debit`, `credit`, `other`, jamais modifié), other_label (ssi `other`), amount_cents (int signé, non nul, jamais modifié ; débit < 0, crédit > 0 hors annulation), occurred_on, comment, receipt_url (ancien lien, lecture seule), reversal_of_id (unique : écriture d'annulation), created_by |
+| `treasury_attachment` | transaction_id, file_name (unique, nom dans le stockage), original_name, content_type (photo ou PDF), size_bytes, uploaded_by — justificatifs, 10 par écriture |
 | `event_budget` | event_id (unique), budget_cents (≥ 0), updated_by |
 | `export_target` | kind (`registrations`, `attendance`, `open_points`, `grades`, `members`, `budget`), spreadsheet_id, sheet_name, auto_sync, last_synced_at |
 | `audit_log` | actor_user_id, action, entity, entity_id, payload (jsonb), created_at |
