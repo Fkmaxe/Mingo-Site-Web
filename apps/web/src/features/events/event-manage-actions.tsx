@@ -57,7 +57,7 @@ export function EventManageActions({ event }: { event: Event }) {
         )
       ) : null}
 
-      {event.status === "draft" ? (
+      {event.status === "draft" || event.status === "cancelled" ? (
         confirming === "delete" ? (
           <div className="flex gap-2">
             <Button
@@ -66,7 +66,9 @@ export function EventManageActions({ event }: { event: Event }) {
               disabled={pending}
               onClick={() => run(() => deleteEventAction(event.id))}
             >
-              Confirmer la suppression
+              {event.status === "draft"
+                ? "Confirmer la suppression"
+                : "Supprimer : il ne sera plus visible"}
             </Button>
             <Button variant="outline" onClick={() => setConfirming(null)}>
               Retour
@@ -78,7 +80,7 @@ export function EventManageActions({ event }: { event: Event }) {
             className="text-destructive"
             onClick={() => setConfirming("delete")}
           >
-            Supprimer le brouillon
+            {event.status === "draft" ? "Supprimer le brouillon" : "Supprimer l'événement"}
           </Button>
         )
       ) : null}

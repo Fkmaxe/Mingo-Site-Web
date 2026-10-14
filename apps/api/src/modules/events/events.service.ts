@@ -16,6 +16,7 @@ import { emit } from "../../core/events";
 import { decodeCursor, type Page, toPage } from "../../core/http";
 import { assertPoleAccess } from "../../core/permissions";
 import { inTransaction, inTransactionWithEffects } from "../../core/tx";
+import { eventHasLeaguePoints } from "../league/points";
 import { getPole } from "../poles";
 import { isTeamEvent, registrationState } from "../registrations/rules";
 import { type RegistrationSummary, registrationSummaries } from "../registrations/summary";
@@ -321,11 +322,19 @@ export function cancelEvent(ctx: AuthedCtx, eventId: string) {
 
 export async function deleteEvent(ctx: AuthedCtx, eventId: string): Promise<void> {
   const existing = await findManageableEvent(ctx, eventId);
-  if (existing.status !== "draft") {
+  // A published event is cancelled first, so that its registrants are told; a past one is kept.
+  if (existing.status !== "draft" && existing.status !== "cancelled") {
     throw new AppError(
       "INVALID_STATUS_TRANSITION",
       409,
-      "Seul un brouillon peut être supprimé. Annule plutôt l'événement.",
+      "Annule l'événement avant de le supprimer. Un événement terminé ne se supprime pas.",
+    );
+  }
+  if (await eventHasLeaguePoints(ctx.db, existing.id)) {
+    throw new AppError(
+      "EVENT_HAS_LEAGUE_POINTS",
+      409,
+      "Cet événement compte pour la ligue : retire d'abord son classement validé.",
     );
   }
   await inTransaction(ctx.db, async (tx) => {
@@ -335,7 +344,7 @@ export async function deleteEvent(ctx: AuthedCtx, eventId: string): Promise<void
       action: "event.deleted",
       entity: "event",
       entityId: existing.id,
-      payload: { title: existing.title },
+      payload: { title: existing.title, status: existing.status },
     });
   });
 }

@@ -94,10 +94,10 @@ const deleteRoute = createRoute({
   middleware: [requirePermission("events:delete")] as const,
   request: { params: EventIdParams },
   responses: {
-    204: { description: "Brouillon supprimé" },
+    204: { description: "Événement (brouillon ou annulé) supprimé : il n'est plus visible" },
     403: errorResponse("Pas le droit de supprimer cet événement"),
     404: errorResponse("Événement introuvable"),
-    409: errorResponse("Seul un brouillon peut être supprimé"),
+    409: errorResponse("Événement publié ou terminé, ou qui compte pour la ligue"),
   },
 });
 

@@ -328,6 +328,7 @@
                   "MATCH_NOT_READY",
                   "DRAW_NOT_ALLOWED",
                   "NOT_A_LEAGUE_EVENT",
+                  "EVENT_HAS_LEAGUE_POINTS",
                   "PLACE_OUT_OF_SCALE",
                   "NOT_A_PARTICIPANT",
                   "TRACK_NOT_OFFERED",
@@ -7393,7 +7394,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Brouillon supprimé"
+            "description": "Événement (brouillon ou annulé) supprimé : il n'est plus visible"
           },
           "403": {
             "description": "Pas le droit de supprimer cet événement",
@@ -7416,7 +7417,7 @@
             }
           },
           "409": {
-            "description": "Seul un brouillon peut être supprimé",
+            "description": "Événement publié ou terminé, ou qui compte pour la ligue",
             "content": {
               "application/json": {
                 "schema": {

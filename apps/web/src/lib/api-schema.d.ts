@@ -988,7 +988,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Brouillon supprimé */
+                /** @description Événement (brouillon ou annulé) supprimé : il n'est plus visible */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -1013,7 +1013,7 @@ export interface paths {
                         "application/json": components["schemas"]["ApiError"];
                     };
                 };
-                /** @description Seul un brouillon peut être supprimé */
+                /** @description Événement publié ou terminé, ou qui compte pour la ligue */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -10132,7 +10132,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INITIATOR_NOT_MEMBER" | "TOO_MANY_ATTACHMENTS" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "EVENT_HAS_LEAGUE_POINTS" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INITIATOR_NOT_MEMBER" | "TOO_MANY_ATTACHMENTS" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };

@@ -2,7 +2,7 @@ import { ApiErrorBody, EventDto } from "@bde/shared";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { auditLog, event } from "../../db/schema";
+import { auditLog, event, leaguePoints, schoolYear } from "../../db/schema";
 import { authHeaders } from "../../test/auth";
 import { getTestDb } from "../../test/db";
 import { createTestApp } from "../../test/env";
@@ -360,6 +360,58 @@ describe("publish, cancel and delete", () => {
 
     const res = await send("DELETE", `/v1/events/${published.id}`, lead.id);
     expect(res.status).toBe(409);
+  });
+
+  it("hides a cancelled event, and keeps a done or league one", async () => {
+    const cancelled = await createEvent({
+      poleId: sport.id,
+      status: "cancelled",
+      title: "Afterwork",
+    });
+    const done = await createEvent({ poleId: sport.id, status: "done" });
+    const league = await createEvent({ poleId: sport.id, status: "cancelled" });
+    const lead = await createPersona("pole_lead", { poleId: sport.id });
+    const [year] = await getTestDb().select().from(schoolYear);
+    const points = { schoolYearId: year?.id ?? "", eventId: league.id, userId: lead.id };
+    await getTestDb()
+      .insert(leaguePoints)
+      .values([
+        { ...points, points: 3, reason: "placement" },
+        { ...points, points: -3, reason: "reversal" },
+      ]);
+
+    // Points validated then cancelled: it no longer counts, it can go.
+    expect((await send("DELETE", `/v1/events/${league.id}`, lead.id)).status).toBe(204);
+    expect((await send("DELETE", `/v1/events/${cancelled.id}`, lead.id)).status).toBe(204);
+    const list = await (await get("/v1/events?manageable=true", lead.id)).text();
+    expect(list).not.toContain("Afterwork");
+    const audit = await getTestDb()
+      .select()
+      .from(auditLog)
+      .where(eq(auditLog.entityId, cancelled.id));
+    expect(audit.map((a) => a.payload)).toContainEqual({ title: "Afterwork", status: "cancelled" });
+
+    const refused = await send("DELETE", `/v1/events/${done.id}`, lead.id);
+    expect(refused.status).toBe(409);
+    expect((await readError(refused)).code).toBe("INVALID_STATUS_TRANSITION");
+  });
+
+  it("refuses to delete an event that counts for the league", async () => {
+    const created = await createEvent({ poleId: sport.id, status: "cancelled" });
+    const board = await createPersona("board");
+    const [year] = await getTestDb().select().from(schoolYear);
+    await getTestDb()
+      .insert(leaguePoints)
+      .values({
+        schoolYearId: year?.id ?? "",
+        eventId: created.id,
+        userId: board.id,
+        points: 1,
+        reason: "participation",
+      });
+    const res = await send("DELETE", `/v1/events/${created.id}`, board.id);
+    expect(res.status).toBe(409);
+    expect((await readError(res)).code).toBe("EVENT_HAS_LEAGUE_POINTS");
   });
 
   it("refuses actions to a simple member", async () => {
