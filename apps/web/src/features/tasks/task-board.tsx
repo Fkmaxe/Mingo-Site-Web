@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
-import { formatShortDay } from "@/lib/paris-time";
+import { formatShortDay, parisToday } from "@/lib/paris-time";
 import { cn } from "@/lib/utils";
 import { deleteTaskAction, moveTaskAction } from "./actions";
 import { NEXT_STATUS, PREVIOUS_STATUS, TASK_STATUS_LABELS, taskOrigin } from "./labels";
@@ -27,8 +27,7 @@ function TaskCard({
 }) {
   const previous = PREVIOUS_STATUS[task.status];
   const next = NEXT_STATUS[task.status];
-  const late =
-    task.dueOn && task.status !== "done" && task.dueOn < new Date().toISOString().slice(0, 10);
+  const late = task.dueOn && task.status !== "done" && task.dueOn < parisToday();
   return (
     <li className="flex flex-col gap-2 rounded-2xl border bg-card p-3 shadow-primary/5 shadow-sm">
       <div className="flex items-start justify-between gap-2">

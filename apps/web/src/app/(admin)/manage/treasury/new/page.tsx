@@ -5,6 +5,7 @@ import { listInitiators, listTreasuryEvents } from "@/features/treasury/queries"
 import { TransactionForm } from "@/features/treasury/transaction-form";
 import { emptyTransactionForm } from "@/features/treasury/transaction-form-values";
 import { manageTrail, TREASURY } from "@/lib/breadcrumbs";
+import { parisToday } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Nouvelle écriture" };
@@ -13,7 +14,6 @@ export default async function NewTransactionPage() {
   const me = await requireMe();
   if (!me.permissions.includes("budget:manage")) notFound();
   const [initiators, events] = await Promise.all([listInitiators(), listTreasuryEvents()]);
-  const today = new Date().toISOString().slice(0, 10);
   // The treasurer usually records what they paid themselves.
   const initiator = initiators.some((i) => i.id === me.id) ? me.id : null;
   return (
@@ -26,7 +26,7 @@ export default async function NewTransactionPage() {
       <TransactionForm
         initiators={initiators}
         events={events}
-        defaultValues={emptyTransactionForm(today, initiator)}
+        defaultValues={emptyTransactionForm(parisToday(), initiator)}
       />
     </div>
   );

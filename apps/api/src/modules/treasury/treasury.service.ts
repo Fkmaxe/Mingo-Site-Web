@@ -13,6 +13,7 @@ import {
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
+import { parisDate } from "../../core/time";
 import { inTransaction } from "../../core/tx";
 import { type ReceiptStore, sniffReceiptType } from "../../lib/storage";
 import { findVisibleEvent } from "../events";
@@ -212,7 +213,7 @@ export async function reverseTransaction(
       kind: t.kind,
       otherLabel: t.otherLabel,
       amountCents: -t.amountCents,
-      occurredOn: now.toISOString().slice(0, 10),
+      occurredOn: parisDate(now),
       reversalOfId: t.id,
       createdBy: ctx.user.id,
     });

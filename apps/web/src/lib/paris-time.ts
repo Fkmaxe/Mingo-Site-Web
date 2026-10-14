@@ -32,6 +32,11 @@ export function isoToParisInput(iso: string): string {
   return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`;
 }
 
+/** Today in Paris as an `<input type="date">` value ("2026-10-14"), whatever the server TZ. */
+export function parisToday(now: Date = new Date()): string {
+  return isoToParisInput(now.toISOString()).slice(0, 10);
+}
+
 /** Value of an `<input type="datetime-local">` read as Paris time -> ISO instant. Null if invalid. */
 export function parisInputToIso(value: string): string | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
