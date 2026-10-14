@@ -175,6 +175,26 @@ describe("bureau tasks", () => {
     expect((await call("GET", "/v1/board/tasks", null)).status).toBe(401);
   });
 
+  it("are hidden from anyone outside the bureau, who cannot move or delete them", async () => {
+    const board = await createPersona("board");
+    const created = await readJson(
+      await call("POST", "/v1/board/tasks", board.id, { title: "Budget annuel" }),
+      TaskDto,
+    );
+    for (const outsider of [lead, member]) {
+      const moved = await call("PATCH", `/v1/tasks/${created.id}`, outsider.id, { status: "done" });
+      expect(moved.status).toBe(404);
+      expect((await call("DELETE", `/v1/tasks/${created.id}`, outsider.id)).status).toBe(404);
+      const theirs = await readJson(
+        await call("GET", "/v1/me/tasks", outsider.id),
+        z.array(TaskDto),
+      );
+      expect(theirs).toHaveLength(0);
+    }
+    const kept = await readJson(await call("GET", "/v1/board/tasks", board.id), z.array(TaskDto));
+    expect(kept.map((t) => [t.title, t.status])).toEqual([["Budget annuel", "todo"]]);
+  });
+
   it("refuses an assignee outside the bureau", async () => {
     const board = await createPersona("board");
     const res = await call("POST", "/v1/board/tasks", board.id, {
