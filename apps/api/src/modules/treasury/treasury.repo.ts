@@ -162,11 +162,14 @@ export async function deleteAttachment(db: DbOrTx, attachmentId: string) {
 
 // --- Totals and budgets ---
 
+// A reversal counts on the side of the entry it cancels (its amount has the opposite sign):
+// cancelling an expense lowers the expenses, it is not an income.
+const entrySign = sql`case when ${treasuryTransaction.reversalOfId} is null then sign(${treasuryTransaction.amountCents}) else -sign(${treasuryTransaction.amountCents}) end`;
 const income = sum(
-  sql`case when ${treasuryTransaction.amountCents} > 0 then ${treasuryTransaction.amountCents} else 0 end`,
+  sql`case when ${entrySign} > 0 then ${treasuryTransaction.amountCents} else 0 end`,
 ).mapWith(Number);
 const expense = sum(
-  sql`case when ${treasuryTransaction.amountCents} < 0 then ${treasuryTransaction.amountCents} else 0 end`,
+  sql`case when ${entrySign} < 0 then ${treasuryTransaction.amountCents} else 0 end`,
 ).mapWith(Number);
 
 export async function findYearTotals(db: DbOrTx, schoolYearId: string) {

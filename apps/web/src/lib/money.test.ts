@@ -5,6 +5,7 @@ describe("money", () => {
   it("formats cents in French euros", () => {
     expect(formatCents(123456).replace(/\s/g, " ")).toBe("1 234,56 €");
     expect(formatCents(-4550).replace(/\s/g, " ")).toBe("-45,50 €");
+    expect(formatCents(-0).replace(/\s/g, " ")).toBe("0,00 €");
   });
 
   it("parses typed amounts to cents", () => {

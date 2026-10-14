@@ -186,7 +186,12 @@ describe("treasury entries", () => {
       (await call("POST", `/v1/treasury/transactions/${reversal.id}/reverse`, treasurer.id)).status,
     ).toBe(409);
 
-    expect((await summary(treasurer.id)).balanceCents).toBe(0);
+    // Cancelling an expense is not an income: both sides go back to zero.
+    expect(await summary(treasurer.id)).toMatchObject({
+      incomeCents: 0,
+      expenseCents: 0,
+      balanceCents: 0,
+    });
     const actions = (await getTestDb().select().from(auditLog)).map((a) => a.action);
     expect(actions).toEqual(
       expect.arrayContaining(["treasury.created", "treasury.updated", "treasury.reversed"]),
