@@ -6,7 +6,7 @@ export const RHYTHM_LABELS: Record<StudyRhythm, string> = {
   alternance: "Alternance",
 };
 
-/** Letter of the rhythm in a class code, for a programme without its own code (tronc commun). */
+/** Letter of the rhythm in the class code of the years where students choose it (1A, 2A). */
 export const RHYTHM_CODES: Record<StudyRhythm, string> = { initial: "I", alternance: "A" };
 
 /** Classes of a year are numbered 1 to 9 (4AL1, 1A3, 2I8). */
@@ -15,18 +15,21 @@ export const CLASS_NUMBER_MAX = 9;
 export const JANUARY_INTAKE_LABEL = "Rentrée de janvier";
 
 /**
- * ESGI class code: code of the year, then code of the programme (AL, SRC…) or, for a programme
- * without one, the letter of the rhythm (A = alternance, I = initial), then the class number.
- * "4AL1", "1A3", "2I8". Null without a year code or a class number.
+ * ESGI class code: code of the year, then, in a year where students choose (1A, 2A), the letter
+ * of the rhythm (A = alternance, I = initial), even in MCSI; from the alternance-only years on
+ * (3A…), the code of the programme (AL, SRC…). Then the class number: "4AL1", "1A3", "2I8".
+ * Null without a year code or a class number.
  */
 export function classCode(
   levelCode: string | null | undefined,
   trackCode: string | null | undefined,
   rhythm: StudyRhythm | null | undefined,
   classNumber: number | null | undefined,
+  alternanceOnly = false,
 ): string | null {
   if (!levelCode || !classNumber) return null;
-  return `${levelCode}${trackCode || (rhythm ? RHYTHM_CODES[rhythm] : "")}${classNumber}`;
+  const letter = rhythm ? RHYTHM_CODES[rhythm] : "";
+  return `${levelCode}${alternanceOnly ? trackCode || letter : letter}${classNumber}`;
 }
 
 /**

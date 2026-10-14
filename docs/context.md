@@ -48,7 +48,10 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Classes et profil
 
 - Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière**, son **rythme** (initial ou alternance), son **numéro de classe** (1 à 9, obligatoire dès qu'une année est choisie) et s'il a fait la **rentrée de janvier** (non par défaut). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, donner un **code**, et pour chaque année : filières proposées, alternance obligatoire).
-- **Code de classe ESGI** : code de l'année + code de la filière, ou, pour une filière sans code (tronc commun), la lettre du rythme (A = alternance, I = initial) + numéro. Exemples : `4AL1` (4A, architecture logicielle, classe 1), `1A3` (1A tronc commun en alternance, classe 3), `2I8` (2A tronc commun en initial, classe 8). Codes posés par la migration, modifiables : années `1` à `5`, MCSI `MCSI`, architecture logicielle `AL`, réseaux `SRC`, sécurité `SI` (à vérifier par le bureau).
+- **Code de classe ESGI** : code de l'année + numéro de classe, avec entre les deux :
+  - en **1A et 2A** (années où l'on choisit son rythme) : la **lettre du rythme** (A = alternance, I = initial), en tronc commun comme en MCSI ;
+  - à partir de la **3A** (années en alternance obligatoire) : le **code de la filière** (la lettre A pour une filière sans code).
+  Exemples : `4AL1` (4A, architecture logicielle, classe 1), `1A3` (1A en alternance, classe 3), `2I8` (2A en initial, classe 8), `1I2` (1A MCSI en initial, classe 2). Codes posés par la migration, modifiables : années `1` à `5`, MCSI `MCSI`, architecture logicielle `AL`, réseaux `SRC`, sécurité `SI` (à vérifier par le bureau).
 - Organisation de l'ESGI (mise en place par la migration, modifiable) :
   - **1A et 2A** : **tronc commun** ou **MCSI**, en **initial ou en alternance** au choix ;
   - **à partir de la 3A** : une filière de spécialité (architecture logicielle, réseaux, sécurité, MCSI…), **forcément en alternance**.

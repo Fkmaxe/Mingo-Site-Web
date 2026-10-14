@@ -28,7 +28,13 @@ export async function getMe(ctx: AuthedCtx): Promise<MeDto> {
   const { image, level, track, ...rest } = user;
   return {
     ...rest,
-    classCode: classCode(level?.code, track?.code, rest.rhythm, rest.classNumber),
+    classCode: classCode(
+      level?.code,
+      track?.code,
+      rest.rhythm,
+      rest.classNumber,
+      level?.alternanceOnly ?? false,
+    ),
     level: level?.id ? level : null,
     track: track?.id ? track : null,
     avatarUrl: image ? avatarPath(image) : null,

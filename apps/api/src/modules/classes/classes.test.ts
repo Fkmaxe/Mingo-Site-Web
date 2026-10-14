@@ -194,9 +194,19 @@ describe("ESGI rules: programmes per year, work-study", () => {
 });
 
 describe("class code, number and January intake", () => {
-  async function coded(kind: "levels" | "tracks", name: string, code: string) {
+  /** A year or programme with its code; from 3A on, years are alternance only (ESGI). */
+  async function coded(
+    kind: "levels" | "tracks",
+    name: string,
+    code: string,
+    alternanceOnly = false,
+  ) {
     const dto = await readJson(
-      await call("POST", `/v1/admin/${kind}`, admin.id, { name, code }),
+      await call("POST", `/v1/admin/${kind}`, admin.id, {
+        name,
+        code,
+        ...(kind === "levels" ? { alternanceOnly } : {}),
+      }),
       ClassesDto,
     );
     const found = dto[kind].find((c) => c.name === name);
@@ -205,7 +215,7 @@ describe("class code, number and January intake", () => {
   }
 
   it("builds the ESGI code from the year, the programme and the number", async () => {
-    const fourth = await coded("levels", "4A", "4");
+    const fourth = await coded("levels", "4A", "4", true);
     const al = await coded("tracks", "Architecture logicielle", "al");
     expect(al.code).toBe("AL");
     const me = await readJson(
@@ -221,7 +231,28 @@ describe("class code, number and January intake", () => {
       classCode: "4AL1",
       classNumber: 1,
       januaryIntake: false,
-      promo: "4AL1 · 4A · Architecture logicielle · Alternance",
+      promo: "4AL1 · 4A · Architecture logicielle",
+    });
+  });
+
+  it("uses the rhythm letter in 1A and 2A, MCSI included, the programme's code from 3A", async () => {
+    const first = await coded("levels", "1A", "1");
+    const third = await coded("levels", "3A", "3", true);
+    const mcsi = await coded("tracks", "MCSI", "MCSI");
+    const put = (levelId: string, rhythm: "initial" | "alternance") =>
+      call("PUT", "/v1/me/class", student.id, {
+        levelId,
+        trackId: mcsi.id,
+        rhythm,
+        classNumber: 2,
+      }).then((res) => readJson(res, MeDto));
+    expect(await put(first.id, "initial")).toMatchObject({
+      classCode: "1I2",
+      promo: "1I2 · 1A · MCSI · Initial",
+    });
+    expect(await put(third.id, "initial")).toMatchObject({
+      classCode: "3MCSI2",
+      promo: "3MCSI2 · 3A · MCSI",
     });
   });
 
@@ -257,7 +288,7 @@ describe("class code, number and January intake", () => {
   });
 
   it("follows a code change of the year or the programme", async () => {
-    const fourth = await coded("levels", "4A", "4");
+    const fourth = await coded("levels", "4A", "4", true);
     const al = await coded("tracks", "Architecture logicielle", "AL");
     await call("PUT", "/v1/me/class", student.id, {
       levelId: fourth.id,
@@ -274,7 +305,7 @@ describe("class code, number and January intake", () => {
   });
 
   it("requires a number from 1 to 9 once a year is chosen, and clears it with the year", async () => {
-    const fourth = await coded("levels", "4A", "4");
+    const fourth = await coded("levels", "4A", "4", true);
     const missing = await call("PUT", "/v1/me/class", student.id, {
       levelId: fourth.id,
       trackId: null,

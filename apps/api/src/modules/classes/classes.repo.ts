@@ -152,8 +152,10 @@ export async function refreshPromo(
   await db.execute(sql`update "user" u set "promo" = nullif(concat_ws(' · ',
       case when u."class_number" is not null then
         (select l."code" from "class_level" l where l."id" = u."level_id")
-        || coalesce((select t."code" from "track" t where t."id" = u."track_id"),
-          case u."rhythm" when 'alternance' then 'A' when 'initial' then 'I' else '' end)
+        || case when coalesce((select l."alternance_only" from "class_level" l where l."id" = u."level_id"), false)
+          then coalesce((select t."code" from "track" t where t."id" = u."track_id"),
+            case u."rhythm" when 'alternance' then 'A' when 'initial' then 'I' else '' end)
+          else case u."rhythm" when 'alternance' then 'A' when 'initial' then 'I' else '' end end
         || u."class_number"::text end,
       (select l."name" from "class_level" l where l."id" = u."level_id"),
       (select t."name" from "track" t where t."id" = u."track_id"),

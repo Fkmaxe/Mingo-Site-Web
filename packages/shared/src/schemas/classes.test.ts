@@ -5,16 +5,24 @@ const LEVEL = "00000000-0000-4000-8000-000000000001";
 
 describe("classCode", () => {
   it.each([
-    ["4", "AL", "alternance", 1, "4AL1"],
-    ["1", null, "alternance", 3, "1A3"],
-    ["2", null, "initial", 8, "2I8"],
-    ["1", "MCSI", "initial", 2, "1MCSI2"],
-    ["3", null, null, 4, "34"],
-    [null, "AL", "alternance", 1, null],
-    ["4", "AL", "alternance", null, null],
-  ] as const)("%s %s %s %s -> %s", (level, track, rhythm, number, expected) => {
-    expect(classCode(level, track, rhythm, number)).toBe(expected);
-  });
+    // From 3A (alternance only): the programme's code.
+    ["4", "AL", "alternance", 1, true, "4AL1"],
+    ["3", "MCSI", "alternance", 2, true, "3MCSI2"],
+    ["3", null, "alternance", 4, true, "3A4"],
+    // 1A, 2A: the rhythm's letter, whatever the programme (tronc commun or MCSI).
+    ["1", null, "alternance", 3, false, "1A3"],
+    ["2", null, "initial", 8, false, "2I8"],
+    ["1", "MCSI", "initial", 2, false, "1I2"],
+    ["2", "MCSI", "alternance", 5, false, "2A5"],
+    ["1", "MCSI", null, 6, false, "16"],
+    [null, "AL", "alternance", 1, true, null],
+    ["4", "AL", "alternance", null, true, null],
+  ] as const)(
+    "%s %s %s %s (alternance only: %s) -> %s",
+    (level, track, rhythm, number, only, expected) => {
+      expect(classCode(level, track, rhythm, number, only)).toBe(expected);
+    },
+  );
 });
 
 describe("promoLabel", () => {

@@ -56,6 +56,7 @@ export function ClassForm({
     tracks.find((t) => t.id === track)?.code,
     effectiveRhythm,
     number ? Number(number) : null,
+    alternanceOnly,
   );
   const changed =
     level !== (levelId ?? "") ||
