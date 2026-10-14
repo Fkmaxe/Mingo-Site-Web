@@ -3,6 +3,7 @@ import {
   type CustomFieldType,
   eventDateIssues,
   fieldKey,
+  isChoiceField,
   teamSizeIssues,
 } from "@bde/shared";
 import type { FieldErrors, ResolverResult } from "react-hook-form";
@@ -33,18 +34,23 @@ export type CustomFieldFormValues = {
   /** Kept for existing fields (answers are stored under it); empty for new ones. */
   key: string;
   label: string;
+  /** Shown under the label, line breaks kept. */
+  description: string;
   type: CustomFieldType;
   required: boolean;
-  /** Choices of a select, one per line. */
+  /** Choices of a choice field, one per line. */
   options: string;
+  allowOther: boolean;
 };
 
 export const emptyCustomField = (): CustomFieldFormValues => ({
   key: "",
   label: "",
+  description: "",
   type: "text",
   required: false,
   options: "",
+  allowOther: false,
 });
 
 /** Existing keys are kept; new fields get a key from their label, made unique. */
@@ -65,9 +71,12 @@ function toCustomFields(rows: CustomFieldFormValues[]) {
     return {
       key,
       label: row.label,
+      ...(row.description.trim() ? { description: row.description } : {}),
       type: row.type,
       required: row.required,
-      ...(row.type === "select" ? { options } : {}),
+      ...(isChoiceField(row.type)
+        ? { options, ...(row.allowOther ? { allowOther: true } : {}) }
+        : {}),
     };
   });
 }
@@ -111,9 +120,11 @@ export function eventToForm(event: Event): EventFormValues {
     customFields: event.customFields.map((f) => ({
       key: f.key,
       label: f.label,
+      description: f.description ?? "",
       type: f.type,
       required: f.required,
       options: (f.options ?? []).join("\n"),
+      allowOther: f.allowOther ?? false,
     })),
   };
 }

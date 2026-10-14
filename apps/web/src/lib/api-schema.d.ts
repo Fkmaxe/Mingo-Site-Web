@@ -10253,10 +10253,12 @@ export interface components {
         CustomField: {
             key: string;
             label: string;
+            description?: string;
             /** @enum {string} */
-            type: "text" | "number" | "select" | "checkbox";
+            type: "text" | "longtext" | "number" | "select" | "multiselect" | "checkbox";
             required: boolean;
             options?: string[];
+            allowOther?: boolean;
         };
         CreateEventInput: {
             /** Format: uuid */
@@ -10329,7 +10331,7 @@ export interface components {
             /** Format: date-time */
             cancelledAt: string | null;
             answers: {
-                [key: string]: string | number | boolean;
+                [key: string]: string | number | boolean | string[];
             };
             team: {
                 /** Format: uuid */
@@ -10368,7 +10370,7 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
             answers: {
-                [key: string]: string | number | boolean;
+                [key: string]: string | number | boolean | string[];
             };
             team: string | null;
             user: {

@@ -1,7 +1,19 @@
 import { z } from "zod";
 
-export const CUSTOM_FIELD_TYPES = ["text", "number", "select", "checkbox"] as const;
+export const CUSTOM_FIELD_TYPES = [
+  "text",
+  "longtext",
+  "number",
+  "select",
+  "multiselect",
+  "checkbox",
+] as const;
 export type CustomFieldType = (typeof CUSTOM_FIELD_TYPES)[number];
+
+/** Types answered by picking among `options`: one (`select`, radio buttons) or several. */
+export const CHOICE_FIELD_TYPES = ["select", "multiselect"] as const;
+export const isChoiceField = (type: CustomFieldType) =>
+  (CHOICE_FIELD_TYPES as readonly string[]).includes(type);
 
 export const MAX_CUSTOM_FIELDS = 10;
 
@@ -9,17 +21,22 @@ export const CustomFieldDef = z
   .object({
     /** Stable key of the answer, derived from the label when created. */
     key: z.string().regex(/^[a-z][a-z0-9_]{0,39}$/, "Clé de champ invalide"),
-    label: z.string().trim().min(1, "Le libellé est obligatoire").max(80, "Libellé trop long"),
+    label: z.string().trim().min(1, "Le libellé est obligatoire").max(200, "Libellé trop long"),
+    /** Text shown under the label, on several lines ("- Discord : @pseudo"…). */
+    description: z.string().trim().max(1000, "Explication trop longue").optional(),
     type: z.enum(CUSTOM_FIELD_TYPES, "Type de champ invalide"),
     required: z.boolean(),
-    /** Choices of a `select` field. */
+    /** Choices of a `select` or `multiselect` field. */
     options: z
       .array(z.string().trim().min(1, "Choix vide").max(60, "Choix trop long"))
       .max(30, "30 choix maximum")
       .optional(),
+    /** Choice fields: an "Autre" choice with a free text answer. */
+    allowOther: z.boolean().optional(),
   })
   .superRefine((field, ctx) => {
-    if (field.type === "select" && (field.options?.length ?? 0) < 2) {
+    const choices = (field.options?.length ?? 0) + (field.allowOther ? 1 : 0);
+    if (isChoiceField(field.type) && choices < 2) {
       ctx.addIssue({ code: "custom", path: ["options"], message: "Indique au moins 2 choix" });
     }
   })
@@ -43,7 +60,7 @@ export const CustomFieldsSchema = z
     });
   });
 
-export type AnswerValue = string | number | boolean;
+export type AnswerValue = string | number | boolean | string[];
 export type Answers = Record<string, AnswerValue>;
 
 /** Turns a label into an answer key: "Taille de t-shirt" -> "taille_de_t_shirt". */
@@ -59,10 +76,26 @@ export function fieldKey(label: string): string {
   return /^[a-z]/.test(key) ? key : `champ_${key}`.slice(0, 40);
 }
 
+export const OTHER_ANSWER_MAX = 100;
+
+/** A listed choice, or (with `allowOther`) the free text typed after "Autre". */
+function choiceSchema(field: CustomFieldDef): z.ZodType<string> {
+  const options = field.options ?? [];
+  const listed = z.string().refine((v) => options.includes(v), "Choix invalide");
+  if (!field.allowOther) return listed;
+  return z
+    .string()
+    .trim()
+    .min(1, "Précise ta réponse")
+    .max(OTHER_ANSWER_MAX, `Réponse trop longue (${OTHER_ANSWER_MAX} caractères max)`);
+}
+
 function answerSchema(field: CustomFieldDef): z.ZodType {
   switch (field.type) {
-    case "text": {
-      const text = z.string().trim().max(300, "Réponse trop longue (300 caractères max)");
+    case "text":
+    case "longtext": {
+      const max = field.type === "text" ? 300 : 2000;
+      const text = z.string().trim().max(max, `Réponse trop longue (${max} caractères max)`);
       return field.required ? text.min(1, "Ce champ est obligatoire") : text.optional();
     }
     case "number": {
@@ -70,8 +103,18 @@ function answerSchema(field: CustomFieldDef): z.ZodType {
       return field.required ? number : number.optional();
     }
     case "select": {
-      const choice = z.enum((field.options ?? []) as [string, ...string[]], "Choix invalide");
+      const choice = choiceSchema(field);
       return field.required ? choice : choice.optional();
+    }
+    case "multiselect": {
+      const max = (field.options?.length ?? 0) + (field.allowOther ? 1 : 0);
+      const choices = z
+        .array(choiceSchema(field), "Choix invalide")
+        .max(max, "Choix invalide")
+        .refine((list) => new Set(list).size === list.length, "Choix en double");
+      return field.required
+        ? choices.refine((list) => list.length > 0, "Coche au moins un choix")
+        : choices.optional();
     }
     case "checkbox":
       return field.required
@@ -89,5 +132,6 @@ export function answersSchema(fields: CustomFieldDef[]) {
 export function formatAnswer(value: AnswerValue | undefined): string {
   if (value === undefined) return "";
   if (typeof value === "boolean") return value ? "Oui" : "Non";
+  if (Array.isArray(value)) return value.join(", ");
   return String(value);
 }

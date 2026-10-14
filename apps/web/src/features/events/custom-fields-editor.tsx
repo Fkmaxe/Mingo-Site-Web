@@ -1,19 +1,25 @@
 "use client";
 
-import { CUSTOM_FIELD_TYPES, type CustomFieldType, MAX_CUSTOM_FIELDS } from "@bde/shared";
+import {
+  CUSTOM_FIELD_TYPES,
+  type CustomFieldType,
+  isChoiceField,
+  MAX_CUSTOM_FIELDS,
+} from "@bde/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { type Control, type UseFormRegister, useFieldArray, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { type EventFormValues, emptyCustomField } from "./event-form-values";
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
-  text: "Texte libre",
+  text: "Texte court",
+  longtext: "Texte long",
   number: "Nombre",
-  select: "Liste de choix",
+  select: "Choix unique",
+  multiselect: "Choix multiples",
   checkbox: "Case à cocher",
 };
 
@@ -42,7 +48,12 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
             <div className="flex items-end gap-2">
               <div className="flex flex-1 flex-col gap-2">
                 <Label htmlFor={`${id}-label`}>Question {index + 1}</Label>
-                <Input id={`${id}-label`} {...register(`customFields.${index}.label`)} />
+                <Textarea
+                  id={`${id}-label`}
+                  rows={1}
+                  className="min-h-11"
+                  {...register(`customFields.${index}.label`)}
+                />
               </div>
               <Button
                 type="button"
@@ -53,6 +64,16 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
               >
                 <Trash2 aria-hidden />
               </Button>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`${id}-description`}>Explication (facultatif)</Label>
+              <Textarea
+                id={`${id}-description`}
+                rows={2}
+                className="min-h-16"
+                placeholder={"Merci d'utiliser ce format :\n- Discord : @pseudo"}
+                {...register(`customFields.${index}.description`)}
+              />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
@@ -74,7 +95,7 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                 Obligatoire
               </label>
             </div>
-            {types?.[index]?.type === "select" ? (
+            {isChoiceField(types?.[index]?.type ?? "text") ? (
               <div className="flex flex-col gap-2">
                 <Label htmlFor={`${id}-options`}>Choix (un par ligne)</Label>
                 <Textarea
@@ -83,6 +104,14 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                   className="min-h-20"
                   {...register(`customFields.${index}.options`)}
                 />
+                <label className="flex min-h-11 items-center gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-5 accent-primary"
+                    {...register(`customFields.${index}.allowOther`)}
+                  />
+                  Proposer « Autre » avec une réponse libre
+                </label>
               </div>
             ) : null}
           </div>

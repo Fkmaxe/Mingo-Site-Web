@@ -57,9 +57,33 @@ describe("custom fields in the event form", () => {
     const input = formToInput({
       ...filled,
       customFields: [
-        { key: "taille", label: "Taille", type: "select", required: true, options: "S\n M \n\nL" },
-        { key: "", label: "Régime", type: "text", required: false, options: "" },
-        { key: "", label: "Régime", type: "text", required: false, options: "ignored" },
+        {
+          key: "taille",
+          label: "Taille",
+          type: "select",
+          description: "",
+          required: true,
+          options: "S\n M \n\nL",
+          allowOther: false,
+        },
+        {
+          key: "",
+          label: "Régime",
+          type: "text",
+          description: "",
+          required: false,
+          options: "",
+          allowOther: false,
+        },
+        {
+          key: "",
+          label: "Régime",
+          type: "text",
+          description: "",
+          required: false,
+          options: "ignored",
+          allowOther: false,
+        },
       ],
     });
     expect(input.customFields).toEqual([
@@ -72,7 +96,17 @@ describe("custom fields in the event form", () => {
   it("reports a select without enough choices", () => {
     const { errors } = eventFormResolver({
       ...filled,
-      customFields: [{ key: "", label: "Taille", type: "select", required: true, options: "S" }],
+      customFields: [
+        {
+          key: "",
+          label: "Taille",
+          type: "select",
+          description: "",
+          required: true,
+          options: "S",
+          allowOther: false,
+        },
+      ],
     });
     expect(errors.customFields?.message).toBe("Champ 1 : Indique au moins 2 choix");
   });

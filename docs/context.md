@@ -107,7 +107,7 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Un événement appartient à un pôle organisateur.
 - Visibilité : `public`, `students` (élèves ESGI connectés), `members` (membres BDE seulement : réunions, événements internes).
 - Capacité maximale, date limite d'inscription, **liste d'attente** automatique : quand une place se libère, le premier en attente passe inscrit et reçoit un mail.
-- Champs d'inscription personnalisables par événement (taille de t-shirt, régime alimentaire, pseudo en jeu…), stockés en JSON validé par un schéma défini sur l'événement.
+- Champs d'inscription personnalisables par événement (taille de t-shirt, régime alimentaire, pseudo en jeu…), stockés en JSON validé par un schéma défini sur l'événement (10 questions max). Chaque question a un libellé, une **explication** facultative sur plusieurs lignes (consignes, liste « - Discord : @pseudo »…) et un type : texte court, texte long, nombre, **choix unique** (boutons radio, ex. Oui / Non), **choix multiples** (cases), case à cocher. Les choix peuvent proposer **« Autre »** avec une réponse libre (100 caractères), enregistrée telle quelle. Les réponses à choix multiples s'affichent et s'exportent séparées par des virgules.
 - Chaque inscription confirmée a un **QR code** (token aléatoire, non devinable) affiché dans l'espace perso.
 
 ### Tournois (inscription par équipe)

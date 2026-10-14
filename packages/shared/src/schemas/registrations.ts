@@ -11,7 +11,10 @@ const EventSummary = z.object({
   status: z.enum(["draft", "published", "cancelled", "done"]),
 });
 
-const AnswersDto = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
+const AnswersDto = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
+);
 
 /** Answers to the event's custom fields; checked by the API against the event's definition. */
 export const RegisterInput = z

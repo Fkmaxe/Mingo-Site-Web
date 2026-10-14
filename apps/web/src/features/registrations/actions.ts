@@ -1,5 +1,6 @@
 "use server";
 
+import type { AnswerValue } from "@bde/shared";
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
@@ -12,7 +13,7 @@ function revalidateRegistrations() {
 
 export async function registerAction(
   eventId: string,
-  answers: Record<string, string | number | boolean> = {},
+  answers: Record<string, AnswerValue> = {},
 ): Promise<ActionResult & { registrationId?: string }> {
   const { data, error } = await (await api()).POST("/v1/events/{eventId}/registrations", {
     params: { path: { eventId } },
@@ -35,7 +36,7 @@ export async function cancelRegistrationAction(registrationId: string): Promise<
 export async function createTeamAction(
   eventId: string,
   name: string,
-  answers: Record<string, string | number | boolean> = {},
+  answers: Record<string, AnswerValue> = {},
 ): Promise<ActionResult> {
   const { error } = await (await api()).POST("/v1/events/{eventId}/teams", {
     params: { path: { eventId } },
@@ -49,7 +50,7 @@ export async function createTeamAction(
 export async function joinTeamAction(
   eventId: string,
   code: string,
-  answers: Record<string, string | number | boolean> = {},
+  answers: Record<string, AnswerValue> = {},
 ): Promise<ActionResult> {
   const { error } = await (await api()).POST("/v1/events/{eventId}/teams/join", {
     params: { path: { eventId } },

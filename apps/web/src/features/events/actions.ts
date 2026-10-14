@@ -10,9 +10,13 @@ import { api } from "@/lib/api";
 function toBody(input: CreateEventData) {
   return {
     ...input,
-    customFields: input.customFields.map(({ options, ...field }) =>
-      options ? { ...field, options } : field,
-    ),
+    // The API's types have no `undefined` for optional keys: leave them out.
+    customFields: input.customFields.map(({ options, description, allowOther, ...field }) => ({
+      ...field,
+      ...(options ? { options } : {}),
+      ...(description ? { description } : {}),
+      ...(allowOther ? { allowOther } : {}),
+    })),
   };
 }
 
