@@ -1,10 +1,16 @@
-import type { TaskStatus } from "@bde/shared";
+import type { TaskPriority, TaskStatus } from "@bde/shared";
 import type { Task } from "./types";
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   todo: "À faire",
   doing: "En cours",
   done: "Fait",
+};
+
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: "Basse",
+  normal: "Normale",
+  high: "Haute",
 };
 
 export const NEXT_STATUS: Record<TaskStatus, TaskStatus | null> = {
@@ -25,3 +31,12 @@ export function taskOrigin(task: Pick<Task, "scope" | "pole">): string {
   if (task.scope === "board") return "Bureau";
   return task.pole ? `Pôle ${task.pole.name}` : "Pôle";
 }
+
+/** "Sport, Léa" · "Personne". */
+export const assigneeNames = (task: Pick<Task, "assignees">) =>
+  task.assignees.length > 0 ? task.assignees.map((a) => a.user.name).join(", ") : "Non assignée";
+
+export const fileSizeLabel = (bytes: number) =>
+  bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} Ko`
+    : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { PageHeader } from "@/components/brand";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listPoles } from "@/features/events/queries";
-import { NewTaskForm } from "@/features/tasks/new-task-form";
 import {
   listBoardMembers,
   listBoardTasks,
@@ -12,6 +11,7 @@ import {
   listPoleTasks,
 } from "@/features/tasks/queries";
 import { TaskBoard } from "@/features/tasks/task-board";
+import { NewTaskForm } from "@/features/tasks/task-form";
 import type { PoleMember, Task, TaskTarget } from "@/features/tasks/types";
 import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";

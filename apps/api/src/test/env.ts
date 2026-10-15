@@ -1,7 +1,11 @@
 import { type AppDeps, createApp } from "../app";
 import { createMemoryMailer, type MemoryMailer } from "../lib/mailer";
 import { createMemoryPusher, type MemoryPusher } from "../lib/push";
-import { createMemoryPhotoStore, createMemoryReceiptStore } from "../lib/storage";
+import {
+  createMemoryPhotoStore,
+  createMemoryReceiptStore,
+  createMemoryTaskFileStore,
+} from "../lib/storage";
 import { createNotifier } from "../modules/push";
 import { getTestDb } from "./db";
 
@@ -19,6 +23,7 @@ export const testPusher = createMemoryPusher();
 export const testNotifier = createNotifier(getTestDb(), testPusher);
 export const testPhotos = createMemoryPhotoStore();
 export const testReceipts = createMemoryReceiptStore();
+export const testTaskFiles = createMemoryTaskFileStore();
 
 export function createTestApp(
   overrides: Partial<Omit<AppDeps, "mailer" | "pusher">> & {
@@ -33,6 +38,7 @@ export function createTestApp(
     db: getTestDb(),
     photos: testPhotos,
     receipts: testReceipts,
+    taskFiles: testTaskFiles,
     ...overrides,
     mailer,
     pusher,

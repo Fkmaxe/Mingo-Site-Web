@@ -1,4 +1,4 @@
-import { PHOTO_MAX_BYTES, RECEIPT_MAX_BYTES } from "@bde/shared";
+import { PHOTO_MAX_BYTES, RECEIPT_MAX_BYTES, TASK_FILE_MAX_BYTES } from "@bde/shared";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import type { Context } from "hono";
@@ -9,7 +9,7 @@ import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import type { Pusher } from "./lib/push";
-import type { PhotoStore, ReceiptStore } from "./lib/storage";
+import type { PhotoStore, ReceiptStore, TaskFileStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCheckinRouter } from "./modules/checkin";
@@ -33,7 +33,12 @@ import { createStatsRouter } from "./modules/stats";
 import { createTasksRouter } from "./modules/tasks";
 import { createTreasuryRouter } from "./modules/treasury";
 
-export type AppDeps = AuthDeps & { pusher: Pusher; photos: PhotoStore; receipts: ReceiptStore };
+export type AppDeps = AuthDeps & {
+  pusher: Pusher;
+  photos: PhotoStore;
+  receipts: ReceiptStore;
+  taskFiles: TaskFileStore;
+};
 
 export const OPENAPI_CONFIG = {
   openapi: "3.1.0",
@@ -60,7 +65,12 @@ export function createApp(deps: AppDeps) {
     maxSize: RECEIPT_MAX_BYTES + 64 * 1024,
     onError: (c) => tooLargeError(c),
   });
+  const taskFileLimit = bodyLimit({
+    maxSize: TASK_FILE_MAX_BYTES + 64 * 1024,
+    onError: (c) => tooLargeError(c),
+  });
   app.use("*", (c, next) => {
+    if (/^\/v1\/tasks\/[^/]+\/attachments$/.test(c.req.path)) return taskFileLimit(c, next);
     if (/^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)) {
       return photoLimit(c, next);
     }
@@ -95,7 +105,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createExportsRouter());
   app.route("/v1", createStaffRouter());
   app.route("/v1", createGradesRouter());
-  app.route("/v1", createTasksRouter());
+  app.route("/v1", createTasksRouter(deps.taskFiles));
   app.route("/v1", createMeetingsRouter());
   app.route("/v1", createApplicationsRouter());
   app.route("/v1", createMembersRouter());

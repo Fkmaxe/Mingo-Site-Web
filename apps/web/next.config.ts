@@ -17,7 +17,7 @@ const config: NextConfig = {
   poweredByHeader: false,
   // Inventory photos (resized by the browser) and payment receipts (PDF up to 8 MB) go
   // through a server action.
-  experimental: { serverActions: { bodySizeLimit: "10mb" } },
+  experimental: { serverActions: { bodySizeLimit: "11mb" } },
   async headers() {
     const common = [
       { key: "X-Content-Type-Options", value: "nosniff" },

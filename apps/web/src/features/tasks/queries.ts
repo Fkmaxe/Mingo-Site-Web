@@ -1,6 +1,8 @@
 import "server-only";
+import type { TaskStatus } from "@bde/shared";
+import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
-import type { PoleMember, Task } from "./types";
+import type { PoleMember, Task, TaskDetail } from "./types";
 
 export async function listMyTasks(): Promise<Task[]> {
   const { data, response } = await (await api()).GET("/v1/me/tasks");
@@ -34,5 +36,30 @@ export async function listBoardTasks(): Promise<Task[]> {
 export async function listBoardMembers(): Promise<PoleMember[]> {
   const { data, response } = await (await api()).GET("/v1/board/members");
   if (!data) throw new Error(`GET /v1/board/members a échoué (${response.status})`);
+  return data;
+}
+
+export async function getTaskOr404(taskId: string): Promise<TaskDetail> {
+  const { data, response } = await (await api()).GET("/v1/tasks/{taskId}", {
+    params: { path: { taskId } },
+  });
+  if (response.status === 404 || response.status === 400) notFound();
+  if (!data) throw new Error(`GET task a échoué (${response.status})`);
+  return data;
+}
+
+/** Filters of Gestion → Tâches, as in the page's URL. */
+export type ManagedTasksQuery = {
+  board?: string;
+  status?: TaskStatus;
+  assigneeUserId?: string;
+  late?: "true";
+  q?: string;
+};
+
+/** Gestion → Tâches: the bureau board and every pole, filtered. */
+export async function listManagedTasks(query: ManagedTasksQuery): Promise<Task[]> {
+  const { data, response } = await (await api()).GET("/v1/tasks", { params: { query } });
+  if (!data) throw new Error(`GET /v1/tasks a échoué (${response.status})`);
   return data;
 }

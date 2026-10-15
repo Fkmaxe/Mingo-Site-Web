@@ -260,6 +260,20 @@
       "when": 1791982668065,
       "tag": "0036_meeting_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792082788393,
+      "tag": "0037_task_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792082800982,
+      "tag": "0038_drop_task_assignee_column",
+      "breakpoints": true
     }
   ]
 }

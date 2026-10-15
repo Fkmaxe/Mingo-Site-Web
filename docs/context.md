@@ -135,7 +135,14 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 ## Gestion interne
 
 - Annuaire des membres (pôle, rôle, promo, contact).
-- Tâches (à faire / en cours / fait, responsable, échéance), sur `/tasks` en onglets :
+- Tâches (à faire / en cours / fait), sur `/tasks` en onglets. Chaque tâche a sa page (`/tasks/<id>`) :
+  - **titre, description, priorité** (basse, normale, haute), **délai** facultatif (« Sans délai ») et **plusieurs assignés** (membres du pôle, ou membres du bureau pour une tâche du bureau ; personne pour une tâche perso) ;
+  - **étapes** (checklist, 50 au plus) avec l'avancement affiché sur la carte ;
+  - **pièces jointes** : photos, PDF, Word, Excel, PowerPoint, texte, CSV ; 10 Mo et 10 fichiers au plus. Le type réel est vérifié sur le contenu du fichier ;
+  - **messages** (fil de discussion) et **historique** (création, modifications, étapes cochées, fichiers), lu depuis le journal d'audit.
+  - Droits : ceux qui gèrent la tâche (responsable du pôle, bureau, auteur d'une tâche perso) modifient tout et suppriment. Les assignés déplacent le statut, cochent les étapes, écrivent des messages, joignent des fichiers et retirent les leurs.
+  - **Gestion → Tâches** (`/manage/tasks`) : le bureau voit son tableau et tous les pôles ; un responsable voit **tous les pôles** mais ne modifie que les siens. Filtres par tableau, statut, « assignées à moi », en retard, recherche. Une tâche se crée sur le tableau choisi dans les filtres.
+  - Tableaux :
   - **Mes tâches** : celles qui me sont assignées et mes **tâches perso**. Une tâche perso est créée par n'importe quel membre de l'année, n'est assignée à personne et n'est visible que par son auteur (ni le bureau ni les admins ne la voient) ;
   - **Bureau** : le tableau du bureau, visible et géré par le bureau seulement (et les admins) ; on l'assigne à un membre du bureau. Accessible aussi depuis Gestion ;
   - **Pôle X** : le tableau de chaque pôle (le responsable gère, les membres du pôle voient, l'assigné déplace sa tâche).

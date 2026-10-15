@@ -50,11 +50,11 @@ export default async function ManagePage() {
       show: me.permissions.includes("members:manage"),
     },
     {
-      href: "/tasks?scope=board",
-      title: "Tâches du bureau",
-      description: "Le tableau du bureau, à côté de tes tâches perso",
+      href: "/manage/tasks",
+      title: "Tâches",
+      description: "Le bureau et tous les pôles : suivre, assigner, joindre des fichiers",
       icon: ClipboardList,
-      show: me.permissions.includes("poles:all"),
+      show: me.permissions.includes("poles:all") || me.roles.includes("pole_lead"),
     },
     {
       href: "/meetings/new",

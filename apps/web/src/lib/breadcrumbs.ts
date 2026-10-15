@@ -12,6 +12,7 @@ export const EVENTS: Crumb = { label: "Événements", href: "/events" };
 export const TICKETS: Crumb = { label: "Mes billets", href: "/tickets" };
 export const INVENTORY: Crumb = { label: "Inventaire", href: "/inventory" };
 export const MEETINGS: Crumb = { label: "Réunions", href: "/meetings" };
+export const TASKS: Crumb = { label: "Tâches", href: "/tasks" };
 export const TEAM: Crumb = { label: "L'équipe", href: "/team" };
 export const PARTNERS: Crumb = { label: "Partenaires", href: "/team/partners" };
 

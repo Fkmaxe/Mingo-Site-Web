@@ -1,15 +1,16 @@
 "use client";
 
 import { TASK_STATUSES, type TaskStatus } from "@bde/shared";
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
-import { formatShortDay, parisToday } from "@/lib/paris-time";
 import { cn } from "@/lib/utils";
 import { deleteTaskAction, moveTaskAction } from "./actions";
-import { NEXT_STATUS, PREVIOUS_STATUS, TASK_STATUS_LABELS, taskOrigin } from "./labels";
+import { NEXT_STATUS, PREVIOUS_STATUS, TASK_STATUS_LABELS } from "./labels";
+import { TaskMeta } from "./task-meta";
 import type { Task } from "./types";
 
 function TaskCard({
@@ -27,45 +28,38 @@ function TaskCard({
 }) {
   const previous = PREVIOUS_STATUS[task.status];
   const next = NEXT_STATUS[task.status];
-  const late = task.dueOn && task.status !== "done" && task.dueOn < parisToday();
   return (
     <li className="flex flex-col gap-2 rounded-2xl border bg-card p-3 shadow-primary/5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
-        <span className="font-medium leading-tight">{task.title}</span>
+        <Link href={`/tasks/${task.id}`} className="font-medium leading-tight hover:underline">
+          {task.title}
+        </Link>
         {task.canEdit ? (
-          <Button
-            size="icon"
-            variant="ghost"
-            aria-label={`Supprimer « ${task.title} »`}
-            disabled={pending}
-            onClick={onDelete}
-          >
-            <Trash2 aria-hidden />
-          </Button>
+          <div className="flex shrink-0">
+            <Button asChild size="icon" variant="ghost">
+              <Link href={`/tasks/${task.id}`} aria-label={`Modifier « ${task.title} »`}>
+                <Pencil aria-hidden />
+              </Link>
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label={`Supprimer « ${task.title} »`}
+              disabled={pending}
+              onClick={onDelete}
+            >
+              <Trash2 aria-hidden />
+            </Button>
+          </div>
         ) : null}
       </div>
       {task.description ? (
-        <p className="whitespace-pre-line text-muted-foreground text-sm">{task.description}</p>
+        <p className="line-clamp-3 whitespace-pre-line text-muted-foreground text-sm">
+          {task.description}
+        </p>
       ) : null}
-      <p className="flex flex-wrap items-center gap-x-1 text-muted-foreground text-xs">
-        {showOrigin ? (
-          <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground">
-            {taskOrigin(task)}
-          </span>
-        ) : null}
-        {task.scope === "personal"
-          ? null
-          : task.assignee
-            ? task.assignee.user.name
-            : "Non assignée"}
-        {task.dueOn ? (
-          <span className={cn(late && "font-medium text-destructive")}>
-            {" "}
-            · avant le {formatShortDay(`${task.dueOn}T12:00:00Z`)}
-          </span>
-        ) : null}
-      </p>
-      {task.canMove ? (
+      <TaskMeta task={task} showOrigin={showOrigin} />
+      {task.canContribute ? (
         <div className="flex gap-2">
           {previous ? (
             <Button size="sm" variant="outline" disabled={pending} onClick={() => onMove(previous)}>

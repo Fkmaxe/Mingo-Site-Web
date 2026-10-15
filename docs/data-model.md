@@ -81,7 +81,11 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 
 | Table | Colonnes clés |
 | --- | --- |
-| `task` | scope (`pole`, `board`, `personal`), pole_id (ssi `pole`), owner_user_id (ssi `personal`, sans assigné), title, description, status (`todo`, `doing`, `done`), assignee_membership_id, due_on, deleted_at |
+| `task` | scope (`pole`, `board`, `personal`), pole_id (ssi `pole`), owner_user_id (ssi `personal`, sans assigné), title, description, status (`todo`, `doing`, `done`), priority (`low`, `normal`, `high`), due_on, deleted_at |
+| `task_assignee` | task_id, membership_id, assigned_by | unique (task_id, membership_id) ; jamais sur une tâche perso (vérifié par l'API) |
+| `task_checklist_item` | task_id, label, done, position | |
+| `task_comment` | task_id, author_user_id, body, deleted_at | |
+| `task_attachment` | task_id, file_name (unique, magasin `task-files`), original_name, content_type, size_bytes, uploaded_by | |
 | `meeting` | kind (`pole`, `general`, `board`, `leads`), pole_id (rempli seulement pour `pole`), title, starts_at, location, agenda, minutes, deleted_at |
 | `meeting_attendance` | meeting_id, user_id, marked_by — une ligne par présent, comptée dans la note |
 | `application` | user_id, school_year_id, wished_pole_id, motivation, status (`new`, `interview`, `accepted`, `rejected`) |
