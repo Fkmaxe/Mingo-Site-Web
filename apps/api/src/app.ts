@@ -12,6 +12,7 @@ import type { Pusher } from "./lib/push";
 import type { PhotoStore, ReceiptStore, TaskFileStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
+import { createCalendarRouter } from "./modules/calendar";
 import { createCheckinRouter } from "./modules/checkin";
 import { createClassesRouter } from "./modules/classes";
 import { createEventsRouter } from "./modules/events";
@@ -106,6 +107,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createStaffRouter());
   app.route("/v1", createGradesRouter());
   app.route("/v1", createTasksRouter(deps.taskFiles));
+  app.route("/v1", createCalendarRouter());
   app.route("/v1", createMeetingsRouter());
   app.route("/v1", createApplicationsRouter());
   app.route("/v1", createMembersRouter());

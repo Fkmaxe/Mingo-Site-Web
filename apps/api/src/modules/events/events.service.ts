@@ -25,6 +25,7 @@ import {
   type EventVisibilityFilter,
   findEventByRef,
   findEvents,
+  findEventsBetween,
   insertEvent,
   slugExists,
   updateEvent as updateEventRow,
@@ -131,6 +132,11 @@ export async function listEvents(
     (row) => ({ s: row.startsAt.toISOString(), id: row.id }),
   );
   return { items: await toDtos(ctx, page.items, now), nextCursor: page.nextCursor };
+}
+
+/** Published, cancelled and finished events overlapping [from, to) that the user sees. */
+export function listEventsBetween(ctx: Ctx, from: Date, to: Date): Promise<EventRow[]> {
+  return findEventsBetween(ctx.db, visibleVisibilities(ctx), from, to);
 }
 
 /** Finds a visible event by id or slug (404 otherwise, so hidden events are not revealed). */

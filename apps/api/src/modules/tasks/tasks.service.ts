@@ -14,14 +14,22 @@ import {
   type UpdateTaskData,
 } from "@bde/shared";
 import { writeAudit } from "../../core/audit";
-import type { AuthedCtx } from "../../core/context";
+import type { AuthedCtx, Services } from "../../core/context";
 import { AppError } from "../../core/errors";
-import { parisDate } from "../../core/time";
-import { inTransaction } from "../../core/tx";
+import { nextParisDay, parisDate, parisHour } from "../../core/time";
+import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
 import { sniffTaskFileType, type TaskFileStore } from "../../lib/storage";
 import { getPole } from "../poles";
 import {
+  taskAssignedEmail,
+  taskAssignedPush,
+  taskDueEmail,
+  taskDuePush,
+  taskPath,
+} from "./tasks.notifications";
+import {
+  claimDueTaskReminders,
   countAttachments,
   deleteAttachment,
   deleteChecklistItem as deleteChecklistItemRow,
@@ -37,9 +45,11 @@ import {
   findComments,
   findCounts,
   findCurrentPoleMemberships,
+  findDueTasksOfUser,
   findHistory,
   findManagedTasks,
   findPoleTasks,
+  findReminderRecipients,
   findTask,
   findTasksOfUser,
   insertAttachment,
@@ -159,11 +169,11 @@ function invalidAssignees(message: string) {
   });
 }
 
-type Person = { name: string };
+type Person = { userId: string; name: string; email: string };
 
 /**
  * A pole task goes to members of the pole, a bureau task to seats of the bureau. Returns the
- * people of the valid memberships, for the history.
+ * people of the valid memberships, for the history and the notifications.
  */
 async function checkAssignees(db: DbOrTx, membershipIds: string[], t: Owned) {
   const ids = [...new Set(membershipIds)];
@@ -178,6 +188,27 @@ async function checkAssignees(db: DbOrTx, membershipIds: string[], t: Owned) {
     );
   }
   return { ids, people: new Map(valid.map(({ id, ...person }) => [id, person])) };
+}
+
+/** Mail and push to the people just put on the task, except the one who did it. */
+function notifyAssigned(
+  ctx: AuthedCtx,
+  defer: (effect: () => Promise<void>) => void,
+  task: { id: string; title: string; dueOn: string | null },
+  people: Person[],
+) {
+  const others = people.filter((p) => p.userId !== ctx.user.id);
+  if (others.length === 0) return;
+  const url = `${ctx.services.webOrigin}${taskPath(task.id)}`;
+  for (const person of others) {
+    defer(() => ctx.services.mailer.send(taskAssignedEmail(person, task, ctx.user.name, url)));
+  }
+  defer(async () => {
+    await ctx.services.notifier.notifyUsers(
+      others.map((p) => p.userId),
+      taskAssignedPush(task, ctx.user.name),
+    );
+  });
 }
 
 const audit = (
@@ -333,7 +364,7 @@ async function create(
 ) {
   const { assigneeMembershipIds = [], ...fields } = input;
   const { ids, people } = await checkAssignees(ctx.db, assigneeMembershipIds, owned);
-  const id = await inTransaction(ctx.db, async (tx) => {
+  const id = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     const taskId = await insertTask(tx, { ...fields, ...owned, createdBy: ctx.user.id });
     await setAssignees(tx, taskId, ids, ctx.user.id);
     await audit(tx, ctx, taskId, "task.created", {
@@ -342,6 +373,7 @@ async function create(
       poleId: owned.poleId,
       ...(ids.length > 0 ? { assigned: [...people.values()].map((p) => p.name) } : {}),
     });
+    notifyAssigned(ctx, defer, { id: taskId, ...fields }, [...people.values()]);
     return taskId;
   });
   return getTask(ctx, id);
@@ -384,7 +416,7 @@ export async function updateTask(ctx: AuthedCtx, taskId: string, input: UpdateTa
       ? null
       : await checkAssignees(ctx.db, assigneeMembershipIds, row.task);
 
-  await inTransaction(ctx.db, async (tx) => {
+  await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     await updateTaskRow(tx, row.task.id, fields);
     const diff = checked ? await setAssignees(tx, row.task.id, checked.ids, ctx.user.id) : null;
     const before = new Map(assignees.map((a) => [a.membershipId, a.user.name]));
@@ -394,6 +426,16 @@ export async function updateTask(ctx: AuthedCtx, taskId: string, input: UpdateTa
     });
     const assigned = added.map((p) => p.name);
     const unassigned = diff?.removed.map((id) => before.get(id) ?? "?") ?? [];
+    notifyAssigned(
+      ctx,
+      defer,
+      {
+        id: row.task.id,
+        title: fields.title ?? row.task.title,
+        dueOn: fields.dueOn === undefined ? row.task.dueOn : fields.dueOn,
+      },
+      added,
+    );
     if (changed.length === 0 && assigned.length === 0 && unassigned.length === 0) return;
     await audit(tx, ctx, row.task.id, "task.updated", {
       fields: changed,
@@ -578,4 +620,49 @@ export async function readAttachment(ctx: AuthedCtx, files: TaskFileStore, fileN
   const file = await files.read(attachment.fileName);
   if (!file) throw new AppError("NOT_FOUND", 404, "Ce fichier n'existe pas.");
   return { ...file, name: attachment.originalName };
+}
+
+// --- Day-before reminders and calendar ---
+
+/** Reminders are sent from 9:00 (Paris), not in the night. */
+const REMINDER_HOUR = 9;
+
+/**
+ * Mail and push the day before a task's deadline, to its assignees (or the author of a personal
+ * task). Sent once per deadline: moving the deadline gets a new reminder. Returns people reached.
+ */
+export async function sendTaskReminders(
+  deps: { db: DbOrTx; services: Services },
+  now: Date = new Date(),
+): Promise<number> {
+  if (parisHour(now) < REMINDER_HOUR) return 0;
+  const tomorrow = nextParisDay(parisDate(now));
+  return inTransactionWithEffects(deps.db, async (tx, defer) => {
+    const due = await claimDueTaskReminders(tx, tomorrow);
+    const recipients = await findReminderRecipients(
+      tx,
+      due.map((t) => t.id),
+    );
+    for (const t of due) {
+      const people = recipients.filter((r) => r.taskId === t.id);
+      const url = `${deps.services.webOrigin}${taskPath(t.id)}`;
+      for (const person of people) {
+        defer(() => deps.services.mailer.send(taskDueEmail(person, t, url)));
+      }
+      if (people.length > 0) {
+        defer(async () => {
+          await deps.services.notifier.notifyUsers(
+            people.map((p) => p.id),
+            taskDuePush(t),
+          );
+        });
+      }
+    }
+    return recipients.length;
+  });
+}
+
+/** My open tasks with a deadline between the two days (inclusive), for the calendar. */
+export async function listMyDueTasks(ctx: AuthedCtx, from: string, to: string) {
+  return toDtos(ctx, await findDueTasksOfUser(ctx.db, ctx.user.id, from, to));
 }

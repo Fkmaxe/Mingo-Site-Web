@@ -202,7 +202,7 @@ export async function findCurrentPoleMemberships(
 ) {
   if (membershipIds.length === 0) return [];
   return db
-    .select({ id: membership.id, name: user.name })
+    .select({ id: membership.id, userId: user.id, name: user.name, email: user.email })
     .from(membership)
     .innerJoin(user, eq(user.id, membership.userId))
     .innerJoin(schoolYear, eq(schoolYear.id, membership.schoolYearId))
@@ -409,6 +409,73 @@ export function findHistory(db: DbOrTx, taskId: string) {
     .where(and(eq(auditLog.entity, "task"), eq(auditLog.entityId, taskId)))
     .orderBy(desc(auditLog.createdAt))
     .limit(100);
+}
+
+// --- Day-before reminders ---
+
+/**
+ * Claims the open tasks due on `day` whose reminder was not sent for that deadline, and marks
+ * it sent (skip locked: two runs never send twice).
+ */
+export async function claimDueTaskReminders(db: DbOrTx, day: string) {
+  const due = await db
+    .select({ id: task.id, title: task.title, dueOn: task.dueOn })
+    .from(task)
+    .where(
+      and(
+        eq(task.dueOn, day),
+        ne(task.status, "done"),
+        live,
+        or(isNull(task.reminderSentFor), ne(task.reminderSentFor, day)),
+      ),
+    )
+    .limit(500)
+    .for("update", { skipLocked: true });
+  if (due.length === 0) return [];
+  await db
+    .update(task)
+    .set({ reminderSentFor: day })
+    .where(
+      inArray(
+        task.id,
+        due.map((t) => t.id),
+      ),
+    );
+  return due;
+}
+
+/** Who is reminded: the assignees, or the author of a personal task. */
+export async function findReminderRecipients(db: DbOrTx, taskIds: string[]) {
+  if (taskIds.length === 0) return [];
+  const person = { id: user.id, name: user.name, email: user.email };
+  const [assignees, owners] = await Promise.all([
+    db
+      .selectDistinct({ taskId: taskAssignee.taskId, ...person })
+      .from(taskAssignee)
+      .innerJoin(membership, eq(membership.id, taskAssignee.membershipId))
+      .innerJoin(user, eq(user.id, membership.userId))
+      .where(inArray(taskAssignee.taskId, taskIds)),
+    db
+      .select({ taskId: task.id, ...person })
+      .from(task)
+      .innerJoin(user, eq(user.id, task.ownerUserId))
+      .where(and(inArray(task.id, taskIds), eq(task.scope, "personal"))),
+  ]);
+  return [...assignees, ...owners];
+}
+
+/** Tasks with a deadline in [from, to] for the calendar: assigned to the user, or theirs. */
+export function findDueTasksOfUser(db: DbOrTx, userId: string, from: string, to: string) {
+  return baseQuery(db)
+    .where(
+      and(
+        or(assignedTo(userId), eq(task.ownerUserId, userId)),
+        live,
+        ne(task.status, "done"),
+        sql`${task.dueOn} between ${from}::date and ${to}::date`,
+      ),
+    )
+    .orderBy(asc(task.dueOn), asc(task.createdAt));
 }
 
 // --- Writes on the task ---

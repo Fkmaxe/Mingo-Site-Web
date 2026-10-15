@@ -34,3 +34,21 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
 export function parisDate(date: Date): string {
   return dateFormatter.format(date);
 }
+
+const hourFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Paris",
+  hour: "2-digit",
+  hourCycle: "h23",
+});
+
+/** The hour in Paris (0–23), whatever the server TZ: for jobs that wait for the morning. */
+export function parisHour(date: Date): number {
+  return Number(hourFormatter.format(date));
+}
+
+/** The Paris day after `day` ("2026-10-31" → "2026-11-01"). */
+export function nextParisDay(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}

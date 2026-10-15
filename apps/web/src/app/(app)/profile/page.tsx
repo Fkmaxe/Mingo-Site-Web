@@ -1,4 +1,5 @@
 import {
+  CalendarDays,
   ChevronRight,
   ClipboardList,
   GraduationCap,
@@ -40,6 +41,7 @@ export default async function ProfilePage() {
     ? [
         { href: "/grades", label: "Ma note et mes présences", icon: GraduationCap },
         { href: "/tasks", label: "Mes tâches", icon: ClipboardList },
+        { href: "/calendar", label: "Mon calendrier", icon: CalendarDays },
       ]
     : [{ href: "/points", label: "Mes points open", icon: Sparkles }];
   return (

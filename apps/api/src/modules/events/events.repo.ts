@@ -85,6 +85,30 @@ export async function findEvents(
   return rows.map(toRow);
 }
 
+/** Events overlapping [from, to), drafts excepted: for the calendar. */
+export function findEventsBetween(
+  db: DbOrTx,
+  visibilities: EventVisibility[],
+  from: Date,
+  to: Date,
+): Promise<EventRow[]> {
+  return db
+    .select(selection)
+    .from(event)
+    .innerJoin(pole, eq(pole.id, event.poleId))
+    .where(
+      and(
+        isNull(event.deletedAt),
+        visibleWhere({ visibilities, draftPoles: [] }),
+        lt(event.startsAt, to),
+        gte(event.endsAt, from),
+      ),
+    )
+    .orderBy(asc(event.startsAt), asc(event.id))
+    .limit(500)
+    .then((rows) => rows.map(toRow));
+}
+
 export async function findEventByRef(db: DbOrTx, ref: { id: string } | { slug: string }) {
   const [row] = await db
     .select(selection)

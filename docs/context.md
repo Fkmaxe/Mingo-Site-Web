@@ -154,10 +154,16 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
   - C'est un **journal** : le montant, le type et le sens ne changent jamais ; une erreur se corrige par « Annuler l'écriture » (écriture inverse datée du jour). L'annulation compte du côté de l'écriture annulée : annuler une dépense fait baisser les dépenses, ce n'est pas une recette. Le reste se corrige, justificatifs compris ; tout est tracé dans l'audit.
   - Le **budget par événement** (prévu, dépenses, recettes, solde) se lit et se fixe sur la page de gestion de l'événement.
 
+## Calendrier
+
+- Page **Calendrier** (`/calendar`) pour les membres de l'année : vue du mois (pastilles par jour), puis la liste jour par jour. On y trouve **tous les événements** visibles (publiés, terminés ou annulés, pas les brouillons), les **réunions** où le membre est attendu et ses **tâches non faites avec un délai** (assignées ou perso, le jour du délai).
+- **Abonnement** : chaque membre crée un lien iCal privé (`/calendar/feed/<jeton>.ics`), à ajouter en un clic dans **Apple Calendar** (`webcal://`) ou dans **Google Agenda** (« Ajouter par URL » ; Google rafraîchit à son rythme, quelques heures). Lecture seule, de deux mois en arrière à un an devant. Le membre peut créer un **nouveau lien** (l'ancien cesse de marcher) ou le supprimer. Quelqu'un qui quitte le BDE reçoit un calendrier vide.
+
 ## Notifications push
 
 - Chacun active les notifications sur ses appareils, depuis son profil (sur iPhone : une fois l'appli ajoutée à l'écran d'accueil). Elles complètent les mails, ne les remplacent pas.
 - Notifications personnelles : **place libérée** (liste d'attente, y compris l'équipe entière d'un tournoi), **rappel la veille**, **événement annulé**, **résultats de la ligue** (points et place, à chaque personne qui a marqué, aussi après une correction). Pas de mail pour les résultats : un envoi à tous les participants à chaque événement ferait classer les mails du BDE en indésirables.
+- **Tâches** (push et mail) : **assigné·e à une tâche** (à chaque personne ajoutée, jamais à celle qui l'ajoute) et **délai demain** (la veille du délai, à partir de 9 h, aux assignés ou à l'auteur d'une tâche perso ; une fois par délai, un délai déplacé donne un nouveau rappel ; rien pour une tâche faite).
 - **Nouvel événement publié** : envoyé aux appareils qui l'acceptent (case « Me prévenir des nouveaux événements », cochée par défaut), seulement à ceux qui peuvent voir l'événement (événements « membres » : membres de l'année), jamais à la personne qui publie.
 - Se déconnecter désabonne l'appareil : un téléphone prêté ne reçoit pas les notifications d'un autre compte.
 

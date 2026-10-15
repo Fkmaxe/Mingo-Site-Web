@@ -81,7 +81,8 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 
 | Table | Colonnes clés |
 | --- | --- |
-| `task` | scope (`pole`, `board`, `personal`), pole_id (ssi `pole`), owner_user_id (ssi `personal`, sans assigné), title, description, status (`todo`, `doing`, `done`), priority (`low`, `normal`, `high`), due_on, deleted_at |
+| `task` | scope (`pole`, `board`, `personal`), pole_id (ssi `pole`), owner_user_id (ssi `personal`, sans assigné), title, description, status (`todo`, `doing`, `done`), priority (`low`, `normal`, `high`), due_on, reminder_sent_for (délai déjà rappelé), deleted_at |
+| `calendar_feed` | user_id (unique), token (unique, 43 caractères aléatoires), last_fetched_at | lien iCal privé du membre |
 | `task_assignee` | task_id, membership_id, assigned_by | unique (task_id, membership_id) ; jamais sur une tâche perso (vérifié par l'API) |
 | `task_checklist_item` | task_id, label, done, position | |
 | `task_comment` | task_id, author_user_id, body, deleted_at | |

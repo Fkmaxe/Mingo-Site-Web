@@ -46,6 +46,36 @@ export function findMeetings(
     .limit(100);
 }
 
+/** Visible meetings (same rule as `findMeetings`) starting in [from, to): for the calendar. */
+export function findMeetingsBetween(
+  db: DbOrTx,
+  visible: "all" | { kinds: Exclude<MeetingKind, "pole">[]; poleIds: string[] },
+  from: Date,
+  to: Date,
+) {
+  const poleFilter =
+    visible === "all"
+      ? undefined
+      : or(
+          inArray(meeting.kind, visible.kinds),
+          visible.poleIds.length > 0 ? inArray(meeting.poleId, visible.poleIds) : undefined,
+        );
+  return db
+    .select(selection)
+    .from(meeting)
+    .leftJoin(pole, eq(pole.id, meeting.poleId))
+    .where(
+      and(
+        isNull(meeting.deletedAt),
+        poleFilter,
+        gte(meeting.startsAt, from),
+        lt(meeting.startsAt, to),
+      ),
+    )
+    .orderBy(asc(meeting.startsAt))
+    .limit(500);
+}
+
 export async function findMeeting(db: DbOrTx, meetingId: string) {
   const [row] = await db
     .select(selection)

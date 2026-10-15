@@ -8,6 +8,7 @@ import {
   findExpectedMembers,
   findMeeting,
   findMeetings,
+  findMeetingsBetween,
   findPresentUserIds,
   insertMeeting,
   type MeetingRow,
@@ -107,6 +108,12 @@ export async function listMeetings(
     since: new Date(now.getTime() - UPCOMING_GRACE_MS),
   });
   return Promise.all(rows.map((row) => toDto(ctx, row, false)));
+}
+
+/** Meetings the member sees (those they are expected at), starting in [from, to). */
+export async function listMeetingsBetween(ctx: AuthedCtx, from: Date, to: Date) {
+  if (!ctx.roles.includes("member")) return [];
+  return findMeetingsBetween(ctx.db, visibleTo(ctx), from, to);
 }
 
 export async function getMeeting(ctx: AuthedCtx, meetingId: string) {

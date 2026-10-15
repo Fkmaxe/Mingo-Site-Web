@@ -5,6 +5,7 @@ export * from "./errors";
 export * from "./permissions";
 export * from "./schemas/admin";
 export * from "./schemas/applications";
+export * from "./schemas/calendar";
 export * from "./schemas/checkin";
 export * from "./schemas/classes";
 export * from "./schemas/custom-fields";

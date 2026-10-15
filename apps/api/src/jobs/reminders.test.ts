@@ -56,12 +56,12 @@ describe("day-before reminders", () => {
     await call("POST", `/v1/registrations/${leaving.ticket.id}/cancel`, leaving.student.id);
     testMailer.sent.length = 0;
 
-    expect(await runReminders(deps())).toEqual({ participants: 1, staff: 0 });
+    expect(await runReminders(deps())).toEqual({ participants: 1, staff: 0, tasks: 0 });
     expect(testMailer.sent.map((m) => m.to)).toEqual(["a@myskolae.fr"]);
     expect(testMailer.lastTo("a@myskolae.fr")?.text).toContain(`/tickets/${ticket.id}`);
 
     testMailer.sent.length = 0;
-    expect(await runReminders(deps())).toEqual({ participants: 0, staff: 0 });
+    expect(await runReminders(deps())).toEqual({ participants: 0, staff: 0, tasks: 0 });
     expect(testMailer.sent).toHaveLength(0);
   });
 

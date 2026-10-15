@@ -13,8 +13,10 @@ export function startScheduler(deps: JobDeps): () => void {
     running = true;
     try {
       const sent = await runReminders(deps);
-      if (sent.participants + sent.staff > 0) {
-        console.log(`Rappels envoyés : ${sent.participants} participant(s), ${sent.staff} staff`);
+      if (sent.participants + sent.staff + sent.tasks > 0) {
+        console.log(
+          `Rappels envoyés : ${sent.participants} participant(s), ${sent.staff} staff, ${sent.tasks} tâche(s)`,
+        );
       }
     } catch (error) {
       console.error("Job des rappels en échec", error);

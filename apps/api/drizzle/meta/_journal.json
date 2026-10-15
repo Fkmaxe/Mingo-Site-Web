@@ -274,6 +274,13 @@
       "when": 1792082800982,
       "tag": "0038_drop_task_assignee_column",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792084737280,
+      "tag": "0039_calendar_and_task_reminders",
+      "breakpoints": true
     }
   ]
 }

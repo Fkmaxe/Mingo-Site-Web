@@ -11,6 +11,7 @@ const PRIVATE_PATHS = [
   "/tasks",
   "/team",
   "/meetings",
+  "/calendar",
   "/inventory",
   "/join",
   "/manage",

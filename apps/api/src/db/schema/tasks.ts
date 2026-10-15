@@ -39,6 +39,8 @@ export const task = pgTable(
     status: taskStatus().notNull().default("todo"),
     priority: taskPriority().notNull().default("normal"),
     dueOn: date(),
+    /** The deadline whose day-before reminder was sent: a new deadline gets its own. */
+    reminderSentFor: date(),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

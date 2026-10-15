@@ -1,4 +1,5 @@
 import {
+  CalendarDays,
   ClipboardList,
   type LucideIcon,
   Package,
@@ -61,6 +62,12 @@ export default async function HomePage() {
         { href: "/tickets", label: "Mes billets", hint: "QR code à l'entrée", icon: Ticket },
         { href: "/tasks", label: "Mes tâches", hint: "Le tableau du pôle", icon: ClipboardList },
         { href: "/meetings", label: "Réunions", hint: "Ordres du jour, CR", icon: Video },
+        {
+          href: "/calendar",
+          label: "Calendrier",
+          hint: "Événements, réunions, délais",
+          icon: CalendarDays,
+        },
         { href: "/team", label: "L'équipe", hint: "Annuaire, partenaires", icon: Users },
         { href: "/inventory", label: "Inventaire", hint: "Matériel du BDE", icon: Package },
       ]
