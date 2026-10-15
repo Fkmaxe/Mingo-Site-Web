@@ -1,13 +1,19 @@
-import { index, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { MEETING_KINDS } from "@bde/shared";
+import { sql } from "drizzle-orm";
+import { check, index, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { createdAt, id, updatedAt } from "./columns";
 import { pole } from "./organization";
+
+export const meetingKind = pgEnum("meeting_kind", MEETING_KINDS);
 
 export const meeting = pgTable(
   "meeting",
   {
     id: id(),
-    /** Null: general meeting of the whole BDE. */
+    /** Who it is for: a pole, the whole BDE, the bureau, or the bureau and the pole leads. */
+    kind: meetingKind().notNull(),
+    /** Set for a pole meeting only. */
     poleId: uuid().references(() => pole.id, { onDelete: "restrict" }),
     title: text().notNull(),
     startsAt: timestamp({ withTimezone: true }).notNull(),
@@ -23,6 +29,7 @@ export const meeting = pgTable(
     index("meeting_pole_id_idx").on(t.poleId),
     index("meeting_starts_at_idx").on(t.startsAt),
     index("meeting_created_by_idx").on(t.createdBy),
+    check("meeting_pole_kind_check", sql`(${t.kind} = 'pole') = (${t.poleId} is not null)`),
   ],
 );
 

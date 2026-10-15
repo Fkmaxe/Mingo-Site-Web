@@ -1,4 +1,4 @@
-import type { CreateMeetingData, MeetingDto, UpdateMeetingData } from "@bde/shared";
+import type { CreateMeetingData, MeetingDto, MeetingKind, UpdateMeetingData } from "@bde/shared";
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
@@ -17,31 +17,49 @@ import {
 } from "./meetings.repo";
 
 type AuthzCtx = Pick<AuthedCtx, "user" | "roles" | "permissions" | "memberships">;
+type Target = { kind: MeetingKind; poleId: string | null };
 
-/** General meetings: the board. Pole meetings: the pole's lead or the board. */
-function canManage(ctx: AuthzCtx, poleId: string | null): boolean {
+/** Meetings without a pole: the board. Pole meetings: the pole's lead or the board. */
+function canManage(ctx: AuthzCtx, t: Target): boolean {
   if (!ctx.permissions.has("meetings:manage")) return false;
   if (ctx.permissions.has("poles:all")) return true;
   return (
-    poleId !== null && ctx.memberships.some((m) => m.role === "pole_lead" && m.poleId === poleId)
+    t.kind === "pole" &&
+    ctx.memberships.some((m) => m.role === "pole_lead" && m.poleId === t.poleId)
   );
 }
 
-function canView(ctx: AuthzCtx, poleId: string | null): boolean {
+/** Kinds of meetings without a pole the user sees (the board sees them all). */
+function visibleKinds(ctx: AuthzCtx): Exclude<MeetingKind, "pole">[] {
+  return ctx.roles.includes("pole_lead") ? ["general", "leads"] : ["general"];
+}
+
+/** What `findMeetings` may return: everything for the board, else kinds and poles. */
+function visibleTo(ctx: AuthzCtx) {
+  return ctx.permissions.has("poles:all")
+    ? ("all" as const)
+    : {
+        kinds: visibleKinds(ctx),
+        poleIds: ctx.memberships.flatMap((m) => (m.poleId ? [m.poleId] : [])),
+      };
+}
+
+function canView(ctx: AuthzCtx, t: Target): boolean {
   if (!ctx.roles.includes("member")) return false;
-  if (poleId === null || ctx.permissions.has("poles:all")) return true;
-  return ctx.memberships.some((m) => m.poleId === poleId);
+  if (ctx.permissions.has("poles:all")) return true;
+  if (t.kind === "pole") return ctx.memberships.some((m) => m.poleId === t.poleId);
+  return visibleKinds(ctx).includes(t.kind);
 }
 
 const notFound = () => new AppError("NOT_FOUND", 404, "Cette réunion n'existe pas.");
 const forbidden = () => new AppError("FORBIDDEN", 403, "Tu n'as pas les droits pour faire ça.");
 
 async function toDto(ctx: AuthedCtx, row: MeetingRow, withAttendees: boolean): Promise<MeetingDto> {
-  const manager = canManage(ctx, row.meeting.poleId);
+  const manager = canManage(ctx, row.meeting);
   const present = await findPresentUserIds(ctx.db, row.meeting.id);
   const attendees =
     manager && withAttendees
-      ? (await findExpectedMembers(ctx.db, row.meeting.poleId)).map((u) => ({
+      ? (await findExpectedMembers(ctx.db, row.meeting)).map((u) => ({
           user: u,
           present: present.has(u.id),
         }))
@@ -53,6 +71,7 @@ async function toDto(ctx: AuthedCtx, row: MeetingRow, withAttendees: boolean): P
     location: row.meeting.location,
     agenda: row.meeting.agenda,
     minutes: row.meeting.minutes,
+    kind: row.meeting.kind,
     pole: row.pole?.id && row.pole.name ? { id: row.pole.id, name: row.pole.name } : null,
     canManage: manager,
     present: present.has(ctx.user.id),
@@ -62,13 +81,13 @@ async function toDto(ctx: AuthedCtx, row: MeetingRow, withAttendees: boolean): P
 
 async function visibleMeeting(ctx: AuthedCtx, meetingId: string) {
   const row = await findMeeting(ctx.db, meetingId);
-  if (!row || !canView(ctx, row.meeting.poleId)) throw notFound();
+  if (!row || !canView(ctx, row.meeting)) throw notFound();
   return row;
 }
 
 async function manageableMeeting(ctx: AuthedCtx, meetingId: string) {
   const row = await visibleMeeting(ctx, meetingId);
-  if (!canManage(ctx, row.meeting.poleId)) throw forbidden();
+  if (!canManage(ctx, row.meeting)) throw forbidden();
   return row;
 }
 
@@ -81,11 +100,9 @@ export async function listMeetings(
   now: Date = new Date(),
 ): Promise<MeetingDto[]> {
   if (!ctx.roles.includes("member")) return [];
-  const poleIds = ctx.permissions.has("poles:all")
-    ? ("all" as const)
-    : ctx.memberships.flatMap((m) => (m.poleId ? [m.poleId] : []));
+  const visible = visibleTo(ctx);
   const rows = await findMeetings(ctx.db, {
-    poleIds,
+    visible,
     scope,
     since: new Date(now.getTime() - UPCOMING_GRACE_MS),
   });
@@ -98,7 +115,7 @@ export async function getMeeting(ctx: AuthedCtx, meetingId: string) {
 
 export async function createMeeting(ctx: AuthedCtx, input: CreateMeetingData) {
   if (input.poleId) await getPole(ctx, input.poleId);
-  if (!canManage(ctx, input.poleId)) throw forbidden();
+  if (!canManage(ctx, input)) throw forbidden();
   const id = await insertMeeting(ctx.db, {
     ...input,
     startsAt: new Date(input.startsAt),
@@ -137,7 +154,7 @@ export async function setAttendance(
   input: { userId: string; present: boolean },
 ) {
   const row = await manageableMeeting(ctx, meetingId);
-  const expected = await findExpectedMembers(ctx.db, row.meeting.poleId);
+  const expected = await findExpectedMembers(ctx.db, row.meeting);
   if (!expected.some((u) => u.id === input.userId)) {
     throw new AppError("NOT_A_MEMBER", 422, "Cette personne n'est pas attendue à cette réunion.");
   }

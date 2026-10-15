@@ -2735,6 +2735,15 @@
           "minutes": {
             "type": "string"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "pole",
+              "general",
+              "board",
+              "leads"
+            ]
+          },
           "pole": {
             "type": [
               "object",
@@ -2774,6 +2783,7 @@
           "location",
           "agenda",
           "minutes",
+          "kind",
           "pole",
           "canManage",
           "present",
@@ -2818,6 +2828,15 @@
       "CreateMeetingInput": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "pole",
+              "general",
+              "board",
+              "leads"
+            ]
+          },
           "poleId": {
             "type": [
               "string",
@@ -2846,6 +2865,7 @@
           }
         },
         "required": [
+          "kind",
           "poleId",
           "title",
           "startsAt"

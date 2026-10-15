@@ -253,6 +253,13 @@
       "when": 1791981568573,
       "tag": "0035_match_started",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791982668065,
+      "tag": "0036_meeting_kind",
+      "breakpoints": true
     }
   ]
 }

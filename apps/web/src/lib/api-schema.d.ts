@@ -10865,6 +10865,8 @@ export interface components {
             location: string;
             agenda: string;
             minutes: string;
+            /** @enum {string} */
+            kind: "pole" | "general" | "board" | "leads";
             pole: {
                 /** Format: uuid */
                 id: string;
@@ -10884,6 +10886,8 @@ export interface components {
             present: boolean;
         };
         CreateMeetingInput: {
+            /** @enum {string} */
+            kind: "pole" | "general" | "board" | "leads";
             /** Format: uuid */
             poleId: string | null;
             title: string;

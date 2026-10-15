@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Sparkles,
   UserPlus,
+  Users,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -54,6 +55,13 @@ export default async function ManagePage() {
       description: "Le tableau du bureau, à côté de tes tâches perso",
       icon: ClipboardList,
       show: me.permissions.includes("poles:all"),
+    },
+    {
+      href: "/meetings/new",
+      title: "Création des réunions",
+      description: "Réunion de pôle, générale, du bureau ou bureau + responsables",
+      icon: Users,
+      show: me.permissions.includes("meetings:manage"),
     },
     {
       href: "/manage/treasury",

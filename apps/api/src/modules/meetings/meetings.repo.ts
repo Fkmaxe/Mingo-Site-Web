@@ -1,3 +1,4 @@
+import type { MeetingKind } from "@bde/shared";
 import { and, asc, desc, eq, gte, inArray, isNull, lt, ne, or } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
 import { compact, type Patch } from "../../db/patch";
@@ -7,17 +8,28 @@ export type MeetingRow = NonNullable<Awaited<ReturnType<typeof findMeeting>>>;
 
 const selection = { meeting, pole: { id: pole.id, name: pole.name } };
 
-/** Visible meetings: general ones, and those of `poleIds` ("all" for the board). */
+/**
+ * Visible meetings: those of the `kinds` without a pole, and those of `poleIds`; "all" for the
+ * board.
+ */
 export function findMeetings(
   db: DbOrTx,
-  params: { poleIds: "all" | string[]; scope: "upcoming" | "past"; since: Date },
+  params:
+    | { visible: "all"; scope: "upcoming" | "past"; since: Date }
+    | {
+        visible: { kinds: Exclude<MeetingKind, "pole">[]; poleIds: string[] };
+        scope: "upcoming" | "past";
+        since: Date;
+      },
 ) {
+  const { visible } = params;
   const poleFilter =
-    params.poleIds === "all"
+    visible === "all"
       ? undefined
-      : params.poleIds.length > 0
-        ? or(isNull(meeting.poleId), inArray(meeting.poleId, params.poleIds))
-        : isNull(meeting.poleId);
+      : or(
+          inArray(meeting.kind, visible.kinds),
+          visible.poleIds.length > 0 ? inArray(meeting.poleId, visible.poleIds) : undefined,
+        );
   const upcoming = params.scope === "upcoming";
   return db
     .select(selection)
@@ -59,8 +71,22 @@ export async function updateMeeting(
   await db.update(meeting).set(changes).where(eq(meeting.id, meetingId));
 }
 
-/** Who is expected: members of the pole, or every active member for a general meeting. */
-export function findExpectedMembers(db: DbOrTx, poleId: string | null) {
+/**
+ * Who is expected: the members of the pole, every active member (general), the bureau, or the
+ * bureau and the pole leads.
+ */
+export function findExpectedMembers(
+  db: DbOrTx,
+  target: { kind: MeetingKind; poleId: string | null },
+) {
+  const audience = {
+    pole: target.poleId
+      ? and(eq(membership.poleId, target.poleId), ne(membership.role, "board"))
+      : undefined,
+    general: undefined,
+    board: eq(membership.role, "board"),
+    leads: inArray(membership.role, ["board", "pole_lead"]),
+  }[target.kind];
   return db
     .selectDistinct({ id: user.id, name: user.name, promo: user.promo })
     .from(membership)
@@ -71,7 +97,7 @@ export function findExpectedMembers(db: DbOrTx, poleId: string | null) {
         eq(schoolYear.isCurrent, true),
         eq(membership.isActive, true),
         isNull(membership.deletedAt),
-        poleId ? and(eq(membership.poleId, poleId), ne(membership.role, "board")) : undefined,
+        audience,
       ),
     )
     .orderBy(asc(user.name));

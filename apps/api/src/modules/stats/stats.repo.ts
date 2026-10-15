@@ -1,5 +1,6 @@
 // Read-only reporting: these aggregates span the tables of several modules by nature, so this
 // repository reads them directly (never writes). Static SQL, every value is a parameter.
+import { MEETING_KINDS } from "@bde/shared";
 import { type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DbOrTx } from "../../db/client";
@@ -243,16 +244,17 @@ export function yearStaffShifts(db: DbOrTx, range: YearRange) {
 }
 
 const yearMeetings = (range: YearRange) => sql`
-  select id, pole_id from meeting
-  where starts_at <= ${range.now.toISOString()}::timestamptz
+  select id, kind, pole_id from meeting
+  where deleted_at is null and starts_at <= ${range.now.toISOString()}::timestamptz
     and (starts_at at time zone 'Europe/Paris')::date between ${range.startsOn}::date and ${range.endsOn}::date`;
 
-/** Past meetings of the year per pole (null: general meetings). */
+/** Past meetings of the year per kind and pole (null for the kinds without a pole). */
 export function yearMeetingsHeld(db: DbOrTx, range: YearRange) {
   return rows(
     db,
-    z.object({ pole_id: z.uuid().nullable(), n: Count }),
-    sql`with mt as (${yearMeetings(range)}) select pole_id, count(*) as n from mt group by pole_id`,
+    z.object({ kind: z.enum(MEETING_KINDS), pole_id: z.uuid().nullable(), n: Count }),
+    sql`with mt as (${yearMeetings(range)})
+        select kind, pole_id, count(*) as n from mt group by kind, pole_id`,
   );
 }
 

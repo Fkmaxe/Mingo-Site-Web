@@ -238,10 +238,18 @@ describe("GET /v1/stats/members", () => {
     const meetings = await db
       .insert(meeting)
       .values([
-        { title: "AG", poleId: null, startsAt: hours(-48) },
-        { title: "Réunion sport", poleId: sport.id, startsAt: hours(-24) },
-        { title: "Réunion com", poleId: com.id, startsAt: hours(-24) },
-        { title: "Plus tard", poleId: sport.id, startsAt: hours(48) },
+        { title: "AG", kind: "general", poleId: null, startsAt: hours(-48) },
+        { title: "Réunion sport", kind: "pole", poleId: sport.id, startsAt: hours(-24) },
+        { title: "Réunion com", kind: "pole", poleId: com.id, startsAt: hours(-24) },
+        { title: "Plus tard", kind: "pole", poleId: sport.id, startsAt: hours(48) },
+        { title: "Bureau", kind: "board", poleId: null, startsAt: hours(-24) },
+        {
+          title: "Supprimée",
+          kind: "general",
+          poleId: null,
+          startsAt: hours(-24),
+          deletedAt: hours(-1),
+        },
       ])
       .returning();
     const [ag, sportMeeting] = meetings;
@@ -264,7 +272,7 @@ describe("GET /v1/stats/members", () => {
       meetingRate: 1,
     });
     expect(of(quiet.id)).toMatchObject({ staffShifts: 0, meetingsAttended: 0, meetingRate: 0 });
-    expect(of(board.id)).toMatchObject({ board: true, poles: [], meetingsHeld: 1 });
+    expect(of(board.id)).toMatchObject({ board: true, poles: [], meetingsHeld: 2 });
     expect(involvement.byPole).toEqual([
       { pole: { id: sport.id, name: "Sport" }, members: 2, staffShifts: 1, meetingsAttended: 2 },
     ]);

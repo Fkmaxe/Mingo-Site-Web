@@ -1,5 +1,6 @@
 "use client";
 
+import type { MeetingKind } from "@bde/shared";
 import { useState, useTransition } from "react";
 import { FieldShell, FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
@@ -8,17 +9,30 @@ import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/action-result";
 import { isoToParisInput, parisInputToIso } from "@/lib/paris-time";
 import { createMeetingAction, updateMeetingAction } from "./actions";
+import { MEETING_KIND_LABELS } from "./labels";
 import type { Meeting } from "./types";
 
 type Props =
-  | { mode: "create"; poles: { id: string; name: string }[]; allowGeneral: boolean }
+  | { mode: "create"; poles: { id: string; name: string }[]; board: boolean }
   | { mode: "edit"; meeting: Meeting };
 
-/** Creation (pole + agenda) or edition (agenda, minutes…) of a meeting. */
+/** "pole:<id>" for a pole meeting, otherwise the kind of meeting (the board's). */
+type Audience = `pole:${string}` | Exclude<MeetingKind, "pole">;
+
+function toTarget(audience: Audience): { kind: MeetingKind; poleId: string | null } {
+  return audience.startsWith("pole:")
+    ? { kind: "pole", poleId: audience.slice("pole:".length) }
+    : { kind: audience as Exclude<MeetingKind, "pole">, poleId: null };
+}
+
+/** Creation (audience + agenda) or edition (agenda, minutes…) of a meeting. */
 export function MeetingForm(props: Props) {
   const initial = props.mode === "edit" ? props.meeting : null;
+  const firstPole = props.mode === "create" ? props.poles[0] : undefined;
+  const [audience, setAudience] = useState<Audience>(
+    firstPole ? `pole:${firstPole.id}` : "general",
+  );
   const [values, setValues] = useState({
-    poleId: props.mode === "create" ? (props.poles[0]?.id ?? "") : "",
     title: initial?.title ?? "",
     startsAt: initial ? isoToParisInput(initial.startsAt) : "",
     location: initial?.location ?? "",
@@ -41,7 +55,7 @@ export function MeetingForm(props: Props) {
       setResult(
         props.mode === "create"
           ? await createMeetingAction({
-              poleId: values.poleId || null,
+              ...toTarget(audience),
               title: values.title,
               startsAt,
               location: values.location,
@@ -63,15 +77,25 @@ export function MeetingForm(props: Props) {
       {result && !result.ok ? <FormAlert tone="error">{result.message}</FormAlert> : null}
       {result?.ok ? <FormAlert tone="success">Réunion enregistrée.</FormAlert> : null}
       {props.mode === "create" ? (
-        <FieldShell id="meeting-pole" label="Pôle" error={errors.poleId}>
+        <FieldShell id="meeting-audience" label="Pour qui" error={errors.poleId ?? errors.kind}>
           {(aria) => (
-            <NativeSelect {...aria} value={values.poleId} onChange={set("poleId")}>
+            <NativeSelect
+              {...aria}
+              value={audience}
+              onChange={(e) => setAudience(e.target.value as Audience)}
+            >
               {props.poles.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
+                <option key={p.id} value={`pole:${p.id}`}>
+                  Pôle {p.name}
                 </option>
               ))}
-              {props.allowGeneral ? <option value="">Réunion générale du BDE</option> : null}
+              {props.board
+                ? Object.entries(MEETING_KIND_LABELS).map(([kind, label]) => (
+                    <option key={kind} value={kind}>
+                      {label}
+                    </option>
+                  ))
+                : null}
             </NativeSelect>
           )}
         </FieldShell>

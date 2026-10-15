@@ -18,14 +18,26 @@ describe("noShows", () => {
 });
 
 describe("meetingsExpected", () => {
-  it("counts general meetings plus each pole's, once per pole", () => {
-    const held = new Map<string | null, number>([
-      [null, 2],
+  const held = {
+    general: 2,
+    board: 4,
+    leads: 1,
+    byPole: new Map([
       ["sport", 3],
       ["com", 1],
-    ]);
-    expect(meetingsExpected(["sport"], held)).toBe(5);
-    expect(meetingsExpected(["sport", "com", "sport"], held)).toBe(6);
-    expect(meetingsExpected([], held)).toBe(2);
+    ]),
+  };
+  const of = (poleIds: string[], role: { board?: boolean; lead?: boolean } = {}) =>
+    meetingsExpected({ poleIds, board: false, lead: false, ...role }, held);
+
+  it("counts general meetings plus each pole's, once per pole", () => {
+    expect(of(["sport"])).toBe(5);
+    expect(of(["sport", "com", "sport"])).toBe(6);
+    expect(of([])).toBe(2);
+  });
+
+  it("adds the bureau + leads meetings for leads, and the bureau meetings for the bureau", () => {
+    expect(of(["sport"], { lead: true })).toBe(6);
+    expect(of([], { board: true })).toBe(7);
   });
 });

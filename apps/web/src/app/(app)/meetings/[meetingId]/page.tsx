@@ -4,6 +4,7 @@ import { DisplayTitle } from "@/components/brand";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AttendanceList } from "@/features/meetings/attendance-list";
 import { DeleteMeetingButton } from "@/features/meetings/delete-meeting-button";
+import { meetingAudience } from "@/features/meetings/labels";
 import { MeetingForm } from "@/features/meetings/meeting-form";
 import { getMeetingOr404 } from "@/features/meetings/queries";
 import { HOME, MEETINGS } from "@/lib/breadcrumbs";
@@ -17,9 +18,7 @@ export default async function MeetingPage({ params }: { params: Promise<{ meetin
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Breadcrumbs items={[HOME, MEETINGS]} current={meeting.title} />
-        <p className="text-primary text-sm">
-          {meeting.pole ? `Pôle ${meeting.pole.name}` : "Réunion générale"}
-        </p>
+        <p className="text-primary text-sm">{meetingAudience(meeting)}</p>
         <DisplayTitle className="text-2xl normal-case leading-tight">{meeting.title}</DisplayTitle>
         <p className="flex items-center gap-2 text-muted-foreground text-sm">
           <CalendarDays aria-hidden className="size-4" />

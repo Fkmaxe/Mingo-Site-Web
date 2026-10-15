@@ -18,7 +18,7 @@ export default async function NewMeetingPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Nouvelle réunion" breadcrumb={[HOME, MEETINGS]} />
-      <MeetingForm mode="create" poles={poles} allowGeneral={isBoard} />
+      <MeetingForm mode="create" poles={poles} board={isBoard} />
     </div>
   );
 }

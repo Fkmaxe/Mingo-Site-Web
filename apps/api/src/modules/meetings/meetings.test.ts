@@ -24,20 +24,81 @@ beforeEach(async () => {
   member = await createPersona("member", { poleId: sport.id });
 });
 
-const create = (userId: string, poleId: string | null, startsAt = "2026-10-12T17:00:00.000Z") =>
-  call("POST", "/v1/meetings", userId, { poleId, title: "Réunion", startsAt, agenda: "1. Bilan" });
+/** `target`: a pole id, or "general", "board" or "leads". */
+const create = (userId: string, target: string, startsAt = "2026-10-12T17:00:00.000Z") => {
+  const withPole = target !== "general" && target !== "board" && target !== "leads";
+  return call("POST", "/v1/meetings", userId, {
+    kind: withPole ? "pole" : target,
+    poleId: withPole ? target : null,
+    title: "Réunion",
+    startsAt,
+    agenda: "1. Bilan",
+  });
+};
 
 describe("meetings", () => {
   it("general meetings are for the board, pole meetings for the pole's lead", async () => {
-    expect((await create(board.id, null)).status).toBe(201);
-    expect((await create(lead.id, null)).status).toBe(403);
+    expect((await create(board.id, "general")).status).toBe(201);
+    expect((await create(lead.id, "general")).status).toBe(403);
     expect((await create(lead.id, sport.id)).status).toBe(201);
     expect((await create(lead.id, com.id)).status).toBe(403);
     expect((await create(member.id, sport.id)).status).toBe(403);
+    expect((await create(board.id, "board")).status).toBe(201);
+    expect((await create(board.id, "leads")).status).toBe(201);
+    expect((await create(lead.id, "leads")).status).toBe(403);
+  });
+
+  it("reject a pole on a meeting without one, and a pole meeting without a pole", async () => {
+    const res = await call("POST", "/v1/meetings", board.id, {
+      kind: "leads",
+      poleId: sport.id,
+      title: "Réunion",
+      startsAt: "2026-10-12T17:00:00.000Z",
+    });
+    expect(res.status).toBe(400);
+    const noPole = await call("POST", "/v1/meetings", board.id, {
+      kind: "pole",
+      poleId: null,
+      title: "Réunion",
+      startsAt: "2026-10-12T17:00:00.000Z",
+    });
+    expect(noPole.status).toBe(400);
+  });
+
+  it("bureau meetings are for the bureau, bureau + leads meetings add the pole leads", async () => {
+    const bureau = await readJson(
+      await create(board.id, "board", "2099-01-01T17:00:00.000Z"),
+      MeetingDto,
+    );
+    const leads = await readJson(
+      await create(board.id, "leads", "2099-01-02T17:00:00.000Z"),
+      MeetingDto,
+    );
+    const kinds = async (userId: string) =>
+      (await readJson(await call("GET", "/v1/meetings", userId), z.array(MeetingDto))).map(
+        (m) => m.kind,
+      );
+    expect(await kinds(board.id)).toEqual(["board", "leads"]);
+    expect(await kinds(lead.id)).toEqual(["leads"]);
+    expect(await kinds(member.id)).toEqual([]);
+    expect((await call("GET", `/v1/meetings/${bureau.id}`, lead.id)).status).toBe(404);
+    expect((await call("GET", `/v1/meetings/${leads.id}`, member.id)).status).toBe(404);
+
+    const expected = async (id: string) =>
+      (await readJson(await call("GET", `/v1/meetings/${id}`, board.id), MeetingDto)).attendees.map(
+        (a) => a.user.id,
+      );
+    expect(await expected(bureau.id)).toEqual([board.id]);
+    expect((await expected(leads.id)).sort()).toEqual([board.id, lead.id].sort());
+    const refused = await call("PUT", `/v1/meetings/${leads.id}/attendance`, board.id, {
+      userId: member.id,
+      present: true,
+    });
+    expect((await readError(refused)).code).toBe("NOT_A_MEMBER");
   });
 
   it("are visible to members of the pole (pole meetings) or to every member (general)", async () => {
-    await create(board.id, null, "2099-01-01T17:00:00.000Z");
+    await create(board.id, "general", "2099-01-01T17:00:00.000Z");
     const poleMeeting = await readJson(
       await create(lead.id, sport.id, "2099-01-02T17:00:00.000Z"),
       MeetingDto,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
+import { meetingAudience } from "@/features/meetings/labels";
 import { listMeetings } from "@/features/meetings/queries";
 import { HOME } from "@/lib/breadcrumbs";
 import { formatDateTime } from "@/lib/paris-time";
@@ -84,7 +85,7 @@ export default async function MeetingsPage({
                   </span>
                 ) : null}
                 <span className="text-primary text-xs">
-                  {m.pole ? `Pôle ${m.pole.name}` : "Réunion générale"}
+                  {meetingAudience(m)}
                   {scope === "past" && m.present ? " · présent·e" : ""}
                 </span>
               </Link>

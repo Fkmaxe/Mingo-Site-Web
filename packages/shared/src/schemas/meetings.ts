@@ -1,9 +1,12 @@
 import { z } from "zod";
+import { MEETING_KINDS } from "../enums";
 
 const IsoDateTime = z.iso.datetime({ offset: true, message: "Date invalide" });
 
 const MeetingFields = z.object({
-  /** Null: general meeting of the whole BDE (board only). */
+  /** General, bureau and bureau + leads meetings are the board's; a pole meeting has its pole. */
+  kind: z.enum(MEETING_KINDS, "Type de réunion invalide"),
+  /** Set for a pole meeting only. */
   poleId: z.uuid("Pôle invalide").nullable(),
   title: z.string().trim().min(1, "Le titre est obligatoire").max(120, "Titre trop long"),
   startsAt: IsoDateTime,
@@ -17,12 +20,16 @@ export const CreateMeetingInput = MeetingFields.omit({ minutes: true })
     location: MeetingFields.shape.location.default(""),
     agenda: MeetingFields.shape.agenda.default(""),
   })
+  .refine((v) => (v.kind === "pole") === (v.poleId !== null), {
+    path: ["poleId"],
+    message: "Seule une réunion de pôle a un pôle",
+  })
   .meta({ id: "CreateMeetingInput" });
 export type CreateMeetingInput = z.input<typeof CreateMeetingInput>;
 export type CreateMeetingData = z.output<typeof CreateMeetingInput>;
 
-/** The pole of a meeting cannot change. */
-export const UpdateMeetingInput = MeetingFields.omit({ poleId: true })
+/** The kind and pole of a meeting cannot change. */
+export const UpdateMeetingInput = MeetingFields.omit({ kind: true, poleId: true })
   .partial()
   .meta({ id: "UpdateMeetingInput" });
 export type UpdateMeetingData = z.output<typeof UpdateMeetingInput>;
@@ -46,7 +53,8 @@ export const MeetingDto = z
     location: z.string(),
     agenda: z.string(),
     minutes: z.string(),
-    /** Null: general meeting. */
+    kind: z.enum(MEETING_KINDS),
+    /** The pole of a pole meeting; null otherwise. */
     pole: z.object({ id: z.uuid(), name: z.string() }).nullable(),
     canManage: z.boolean(),
     /** Whether the current user was marked present. */

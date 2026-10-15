@@ -3,7 +3,7 @@ import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
 import { findManageableEvent } from "../events";
 import { requireCurrentSchoolYear, schoolYearById } from "../school-years";
-import { meetingsExpected, noShows, rate } from "./rules";
+import { type MeetingsHeld, meetingsExpected, noShows, rate } from "./rules";
 import {
   eventAttendanceCounts,
   eventOpenPoints,
@@ -118,21 +118,31 @@ export async function getMemberInvolvement(
   ]);
   const shiftsOf = new Map(shifts.map((s) => [s.user_id, s.n]));
   const attendedOf = new Map(attended.map((a) => [a.user_id, a.n]));
-  const heldBy = new Map(held.map((h) => [h.pole_id, h.n]));
+  const heldBy: MeetingsHeld = { general: 0, board: 0, leads: 0, byPole: new Map() };
+  for (const h of held) {
+    if (h.kind !== "pole") heldBy[h.kind] += h.n;
+    else if (h.pole_id) heldBy.byPole.set(h.pole_id, h.n);
+  }
 
   const byUser = new Map<
     string,
-    { name: string; poles: { id: string; name: string }[]; board: boolean }
+    { name: string; poles: { id: string; name: string }[]; board: boolean; lead: boolean }
   >();
   for (const m of memberships) {
-    const entry = byUser.get(m.user_id) ?? { name: m.user_name, poles: [], board: false };
+    const entry = byUser.get(m.user_id) ?? {
+      name: m.user_name,
+      poles: [],
+      board: false,
+      lead: false,
+    };
     if (m.role === "board") entry.board = true;
+    if (m.role === "pole_lead") entry.lead = true;
     if (m.pole_id && m.pole_name) entry.poles.push({ id: m.pole_id, name: m.pole_name });
     byUser.set(m.user_id, entry);
   }
   const members = [...byUser].map(([userId, m]) => {
     const meetingsHeld = meetingsExpected(
-      m.poles.map((p) => p.id),
+      { poleIds: m.poles.map((p) => p.id), board: m.board, lead: m.lead },
       heldBy,
     );
     const meetingsAttended = attendedOf.get(userId) ?? 0;

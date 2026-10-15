@@ -15,6 +15,7 @@ const meeting: Meeting = {
   location: "",
   agenda: "",
   minutes: "",
+  kind: "pole",
   pole: { id: "p", name: "Sport" },
   canManage: true,
   present: false,
