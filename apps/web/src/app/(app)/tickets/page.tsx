@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader } from "@/components/brand";
+import { SegmentedNav } from "@/components/segmented-nav";
 import { listMyTickets } from "@/features/registrations/queries";
 import { TicketList } from "@/features/registrations/ticket-card";
 import { HOME } from "@/lib/breadcrumbs";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Mes billets" };
 
@@ -18,26 +17,15 @@ export default async function TicketsPage({
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Mes billets" breadcrumb={[HOME]} />
-      <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
-        {(
-          [
-            ["upcoming", "À venir", "/tickets"],
-            ["past", "Passés", "/tickets?scope=past"],
-          ] as const
-        ).map(([value, label, href]) => (
-          <Link
-            key={value}
-            href={href}
-            aria-current={scope === value ? "page" : undefined}
-            className={cn(
-              "flex min-h-10 items-center justify-center rounded-md font-medium",
-              scope === value ? "bg-background shadow-sm" : "text-muted-foreground",
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <SegmentedNav
+        label="Période"
+        fill
+        active={scope}
+        items={[
+          { key: "upcoming", label: "À venir", href: "/tickets" },
+          { key: "past", label: "Passés", href: "/tickets?scope=past" },
+        ]}
+      />
       <TicketList
         tickets={tickets}
         empty={

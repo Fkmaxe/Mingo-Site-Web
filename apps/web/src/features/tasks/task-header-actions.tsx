@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRight, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { deleteTaskAction, moveTaskAction } from "./actions";
@@ -56,10 +57,10 @@ export function TaskHeaderActions({ task, members }: { task: TaskDetail; members
               <Pencil aria-hidden />
               Modifier
             </Button>
-            <Button
-              variant="ghost"
+            <ConfirmButton
+              confirmLabel="Supprimer la tâche"
               disabled={pending}
-              onClick={() =>
+              onConfirm={() =>
                 run(
                   () => deleteTaskAction(task.id),
                   () => router.push("/tasks"),
@@ -68,7 +69,7 @@ export function TaskHeaderActions({ task, members }: { task: TaskDetail; members
             >
               <Trash2 aria-hidden />
               Supprimer
-            </Button>
+            </ConfirmButton>
           </>
         ) : null}
       </div>

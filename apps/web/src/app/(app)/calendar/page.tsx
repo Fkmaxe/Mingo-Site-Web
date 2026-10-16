@@ -1,22 +1,22 @@
-import { CalendarDays, CheckSquare, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
+import { CalendarItemRow } from "@/features/calendar/calendar-item";
 import { CalendarSync } from "@/features/calendar/calendar-sync";
 import { monthOf, monthWeeks, parseMonth, shiftMonth } from "@/features/calendar/month";
 import { getCalendar, getCalendarFeedUrl } from "@/features/calendar/queries";
 import type { CalendarItem } from "@/features/calendar/types";
 import { HOME } from "@/lib/breadcrumbs";
-import { formatTime, parisToday } from "@/lib/paris-time";
+import { parisToday } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Calendrier" };
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
-const KIND_ICONS = { event: CalendarDays, meeting: Users, task: CheckSquare } as const;
 const KIND_DOTS = {
   event: "bg-primary",
   meeting: "bg-warning",
@@ -170,37 +170,9 @@ export default async function CalendarPage({
                 {day === today ? " · aujourd'hui" : ""}
               </h3>
               <ul className="flex flex-col gap-2">
-                {(byDay.get(day) ?? []).map((item) => {
-                  const Icon = KIND_ICONS[item.kind];
-                  return (
-                    <li key={item.id}>
-                      <Link
-                        href={item.path}
-                        className="flex items-start gap-3 rounded-2xl border bg-card p-3 shadow-primary/5 shadow-sm transition-colors hover:bg-accent/40"
-                      >
-                        <Icon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
-                        <span className="flex min-w-0 flex-1 flex-col">
-                          <span
-                            className={cn(
-                              "font-medium leading-tight",
-                              item.cancelled && "text-muted-foreground line-through",
-                            )}
-                          >
-                            {item.title}
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            {item.allDay || !item.startsAt
-                              ? "Délai"
-                              : `${formatTime(item.startsAt)}${item.endsAt && item.kind === "event" ? ` – ${formatTime(item.endsAt)}` : ""}`}
-                            {item.location ? ` · ${item.location}` : ""}
-                            {` · ${item.label}`}
-                            {item.cancelled ? " · annulé" : ""}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
+                {(byDay.get(day) ?? []).map((item) => (
+                  <CalendarItemRow key={item.id} item={item} />
+                ))}
               </ul>
             </li>
           ))}

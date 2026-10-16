@@ -143,7 +143,7 @@ export function TournamentBoard({
               aria-selected={tab === value}
               onClick={() => setTab(value)}
               className={cn(
-                "min-h-10 rounded-full font-semibold",
+                "min-h-11 rounded-full font-semibold",
                 tab === value ? "bg-card shadow-sm" : "text-muted-foreground",
               )}
             >

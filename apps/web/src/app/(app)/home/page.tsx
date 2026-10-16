@@ -12,12 +12,16 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPanel, DisplayTitle, Logo } from "@/components/brand";
+import { addDays } from "@/features/calendar/month";
+import { getCalendar } from "@/features/calendar/queries";
+import { WeekAhead } from "@/features/calendar/week-ahead";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
 import { MyLeagueLink } from "@/features/league/my-league";
 import { getMyLeague } from "@/features/league/queries";
 import { formatPoints } from "@/features/open-points/labels";
 import { getMyOpenPoints } from "@/features/open-points/queries";
+import { parisToday } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Accueil" };
@@ -57,6 +61,9 @@ export default async function HomePage() {
     getMyLeague(),
   ]);
   const firstName = me.name.split(" ")[0];
+  const today = parisToday();
+  // Members see their week (events, meetings, task deadlines) first.
+  const week = points.isMember ? await getCalendar(today, addDays(today, 6)) : null;
   const shortcuts: Shortcut[] = points.isMember
     ? [
         { href: "/tickets", label: "Mes billets", hint: "QR code à l'entrée", icon: Ticket },
@@ -103,7 +110,7 @@ export default async function HomePage() {
         </div>
         {points.isMember ? (
           <p className="pr-20 text-sm text-white/90">
-            Merci de faire vivre le BDE. Tes tâches et réunions sont juste en dessous.
+            Merci de faire vivre le BDE. Ta semaine est juste en dessous.
           </p>
         ) : (
           <Link
@@ -125,6 +132,8 @@ export default async function HomePage() {
           </Link>
         )}
       </BrandPanel>
+
+      {week ? <WeekAhead items={week} today={today} /> : null}
 
       <Shortcuts items={shortcuts} />
 

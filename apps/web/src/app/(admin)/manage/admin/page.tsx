@@ -80,7 +80,7 @@ export default async function AdminPage({
             href={`/manage/admin?tab=${value}`}
             aria-current={tab === value ? "page" : undefined}
             className={cn(
-              "flex min-h-10 items-center justify-center rounded-full font-semibold",
+              "flex min-h-11 items-center justify-center rounded-full font-semibold",
               tab === value ? "bg-card shadow-sm" : "text-muted-foreground",
             )}
           >

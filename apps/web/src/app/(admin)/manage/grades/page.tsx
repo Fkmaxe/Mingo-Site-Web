@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/brand";
+import { SegmentedNav } from "@/components/segmented-nav";
 import { GradeRow } from "@/features/grades/grade-row";
 import { GenerateQuartersButton, GradesActionsBar } from "@/features/grades/grades-actions-bar";
 import { PeriodSettings } from "@/features/grades/period-settings";
 import { listGrades, listPeriods } from "@/features/grades/queries";
 import { manageTrail } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Notes des membres" };
 
@@ -43,24 +42,15 @@ export default async function ManageGradesPage({
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Notes des membres" breadcrumb={manageTrail()} />
-      <nav
-        aria-label="Période"
-        className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"
-      >
-        {periods.map((p) => (
-          <Link
-            key={p.id}
-            href={`/manage/grades?period=${p.id}`}
-            aria-current={p.id === period.id ? "page" : undefined}
-            className={cn(
-              "flex min-h-10 shrink-0 items-center rounded-md px-3 font-medium",
-              p.id === period.id ? "bg-background shadow-sm" : "text-muted-foreground",
-            )}
-          >
-            {p.label}
-          </Link>
-        ))}
-      </nav>
+      <SegmentedNav
+        label="Période"
+        active={period.id}
+        items={periods.map((p) => ({
+          key: p.id,
+          label: p.label,
+          href: `/manage/grades?period=${p.id}`,
+        }))}
+      />
       <p className="text-muted-foreground text-sm">
         Note = présence ({period.pointsPerPresence} pt par événement, sauf réglage de l'événement) +
         points du pôle, plafonnée à {period.scaleMax}.

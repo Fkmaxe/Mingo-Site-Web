@@ -36,6 +36,7 @@ pnpm api:types      # exporte l'OpenAPI de l'API (sans la lancer) puis régénè
 
 - **Mobile d'abord** : concevoir en 375 px. Navigation principale en barre en bas sur mobile, latérale sur desktop.
 - Zones tactiles d'au moins 44 px. Action principale en bas de l'écran, à portée de pouce.
+- Composants communs à réutiliser : `SegmentedNav` (onglets qui sont des liens), `ConfirmButton` (toute action destructrice : suppression, retrait, en deux temps), `PageSkeleton` / `PageError` (déjà branchés en `loading.tsx` / `error.tsx` des groupes `(app)`, `(admin)`, `(public)`), `CustomFieldsEditor` et `AnswersForm` (questions personnalisées), `relayFile` (fichiers privés relayés par le web).
 - **Fil d'Ariane** sur toute page sauf l'accueil (`/home`) : `PageHeader breadcrumb={…}` (ou `<Breadcrumbs>` au-dessus d'un titre dynamique), avec les parents de `lib/breadcrumbs.ts` (`SITE_HOME` pour un visiteur sur une page publique). Il suit la hiérarchie des pages, pas l'historique ; sur mobile, seul le lien vers le parent s'affiche.
 - Tailwind uniquement, pas de CSS custom sauf variables de thème dans `globals.css`. Classes ordonnées par Biome.
 - Couleurs via les tokens du thème (`bg-primary`, `text-muted-foreground`), jamais de hex en dur dans les composants.

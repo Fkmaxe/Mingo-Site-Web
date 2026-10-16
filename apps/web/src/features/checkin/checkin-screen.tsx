@@ -166,7 +166,7 @@ export function CheckinScreen({ eventId, initialStats }: Props) {
             aria-selected={mode === value}
             onClick={() => setMode(value)}
             className={cn(
-              "min-h-10 rounded-md font-medium",
+              "min-h-11 rounded-md font-medium",
               mode === value ? "bg-background shadow-sm" : "text-muted-foreground",
             )}
           >

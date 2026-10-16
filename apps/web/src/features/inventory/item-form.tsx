@@ -103,7 +103,7 @@ export function ItemForm({ locations, categories, poles }: Props) {
             aria-pressed={kind === value}
             onClick={() => setKind(value)}
             className={cn(
-              "min-h-10 rounded-full font-semibold",
+              "min-h-11 rounded-full font-semibold",
               kind === value ? "bg-card shadow-sm" : "text-muted-foreground",
             )}
           >

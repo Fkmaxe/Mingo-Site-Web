@@ -18,7 +18,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-11 px-4 py-2",
-        sm: "h-9 gap-1.5 px-4",
+        // Compact, yet a 44 px touch target like every other button (docs: zones tactiles).
+        sm: "h-11 gap-1.5 px-3 text-sm",
         lg: "h-12 px-6 text-base",
         icon: "size-11",
       },

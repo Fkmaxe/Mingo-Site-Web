@@ -3,6 +3,7 @@
 import { TASK_CHECKLIST_MAX } from "@bde/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,15 +50,15 @@ export function TaskChecklist({ task }: { task: TaskDetail }) {
                 </span>
               </label>
               {task.canEdit ? (
-                <Button
+                <ConfirmButton
                   size="icon"
-                  variant="ghost"
                   aria-label={`Retirer l'étape « ${item.label} »`}
                   disabled={pending}
-                  onClick={() => run(() => deleteChecklistItemAction(task.id, item.id))}
+                  confirmLabel="Retirer"
+                  onConfirm={() => run(() => deleteChecklistItemAction(task.id, item.id))}
                 >
                   <Trash2 aria-hidden />
-                </Button>
+                </ConfirmButton>
               ) : null}
             </li>
           ))}

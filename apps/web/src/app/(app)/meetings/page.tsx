@@ -2,6 +2,7 @@ import { CalendarDays, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/brand";
+import { SegmentedNav } from "@/components/segmented-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
 import { meetingAudience } from "@/features/meetings/labels";
@@ -9,7 +10,6 @@ import { listMeetings } from "@/features/meetings/queries";
 import { HOME } from "@/lib/breadcrumbs";
 import { formatDateTime } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Réunions" };
 
@@ -41,26 +41,15 @@ export default async function MeetingsPage({
           ) : null
         }
       />
-      <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
-        {(
-          [
-            ["upcoming", "À venir", "/meetings"],
-            ["past", "Passées", "/meetings?scope=past"],
-          ] as const
-        ).map(([value, label, href]) => (
-          <Link
-            key={value}
-            href={href}
-            aria-current={scope === value ? "page" : undefined}
-            className={cn(
-              "flex min-h-10 items-center justify-center rounded-md font-medium",
-              scope === value ? "bg-background shadow-sm" : "text-muted-foreground",
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <SegmentedNav
+        label="Période"
+        fill
+        active={scope}
+        items={[
+          { key: "upcoming", label: "À venir", href: "/meetings" },
+          { key: "past", label: "Passées", href: "/meetings?scope=past" },
+        ]}
+      />
       {meetings.length === 0 ? (
         <p className="rounded-xl border border-dashed p-6 text-center text-muted-foreground text-sm">
           Aucune réunion.

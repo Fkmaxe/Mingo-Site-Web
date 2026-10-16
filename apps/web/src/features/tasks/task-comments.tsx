@@ -2,6 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,16 +37,16 @@ export function TaskComments({ task }: { task: TaskDetail }) {
                   </span>
                 </p>
                 {c.canDelete ? (
-                  <Button
+                  <ConfirmButton
                     size="icon"
-                    variant="ghost"
                     className="-mt-2 -mr-2"
                     aria-label="Retirer ce message"
                     disabled={pending}
-                    onClick={() => run(() => deleteCommentAction(task.id, c.id))}
+                    confirmLabel="Retirer"
+                    onConfirm={() => run(() => deleteCommentAction(task.id, c.id))}
                   >
                     <Trash2 aria-hidden />
-                  </Button>
+                  </ConfirmButton>
                 ) : null}
               </div>
               <p className="whitespace-pre-line text-sm">{c.body}</p>

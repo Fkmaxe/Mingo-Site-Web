@@ -34,3 +34,10 @@ export function monthWeeks(month: string): string[][] {
 export function parseMonth(value: string | undefined, fallback: string): string {
   return value && /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? value : fallback;
 }
+
+/** The day `n` days after `day` ("2026-10-30" + 3 → "2026-11-02"). */
+export function addDays(day: string, n: number): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return iso(d);
+}

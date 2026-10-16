@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { PageHeader } from "@/components/brand";
+import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listDirectory } from "@/features/members/queries";
 import type { DirectoryEntry } from "@/features/members/types";
@@ -33,14 +34,17 @@ export default async function TeamPage() {
         title="L'équipe"
         breadcrumb={[HOME]}
         action={
-          <Link
-            href="/team/partners"
-            className="text-primary text-sm underline-offset-4 hover:underline"
-          >
-            Partenaires
-          </Link>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/team/partners">Partenaires</Link>
+          </Button>
         }
       />
+      {groups.size === 0 ? (
+        <p className="rounded-xl border border-dashed p-6 text-center text-muted-foreground text-sm">
+          Personne dans l'équipe cette année pour l'instant : le bureau ajoute les membres depuis
+          Gestion → Administration.
+        </p>
+      ) : null}
       {[...groups.entries()].map(([name, people]) => (
         <section key={name} className="flex flex-col gap-2">
           <h2 className="font-bold font-display text-lg">

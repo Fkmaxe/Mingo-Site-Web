@@ -32,7 +32,7 @@ export function ConditionPicker({
           <label
             key={c}
             className={cn(
-              "flex min-h-10 cursor-pointer items-center rounded-full border px-3 font-semibold text-sm",
+              "flex min-h-11 cursor-pointer items-center rounded-full border px-3 font-semibold text-sm",
               value === c ? "border-primary bg-primary text-primary-foreground" : "bg-card",
             )}
           >

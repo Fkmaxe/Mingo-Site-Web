@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader } from "@/components/brand";
+import { type SegmentedItem, SegmentedNav } from "@/components/segmented-nav";
 import { Card, CardDescription } from "@/components/ui/card";
 import { listPoles } from "@/features/events/queries";
 import {
@@ -15,11 +15,8 @@ import { NewTaskForm } from "@/features/tasks/task-form";
 import type { PoleMember, Task, TaskTarget } from "@/features/tasks/types";
 import { HOME } from "@/lib/breadcrumbs";
 import { requireMe } from "@/lib/session";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tâches" };
-
-type Tab = { key: string; label: string; href: string };
 
 export default async function TasksPage({
   searchParams,
@@ -66,7 +63,7 @@ export default async function TasksPage({
     tasks = await listMyTasks();
   }
 
-  const tabs: Tab[] = [
+  const tabs: SegmentedItem[] = [
     { key: "mine", label: "Mes tâches", href: "/tasks" },
     ...(isBoard ? [{ key: "board", label: "Bureau", href: "/tasks?scope=board" }] : []),
     ...poles.map((p) => ({ key: p.id, label: `Pôle ${p.name}`, href: `/tasks?pole=${p.id}` })),
@@ -76,24 +73,7 @@ export default async function TasksPage({
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Tâches" breadcrumb={[HOME]} />
-      <nav
-        aria-label="Tableau"
-        className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"
-      >
-        {tabs.map((tab) => (
-          <Link
-            key={tab.key}
-            href={tab.href}
-            aria-current={active === tab.key ? "page" : undefined}
-            className={cn(
-              "flex min-h-10 shrink-0 items-center rounded-md px-3 font-medium",
-              active === tab.key ? "bg-background shadow-sm" : "text-muted-foreground",
-            )}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
+      <SegmentedNav label="Tableau" active={active} items={tabs} />
       {active === "mine" ? (
         <p className="text-muted-foreground text-sm">
           Les tâches qui te sont assignées et tes tâches perso, visibles par toi seul·e.

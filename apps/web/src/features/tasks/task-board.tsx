@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,15 +42,15 @@ function TaskCard({
                 <Pencil aria-hidden />
               </Link>
             </Button>
-            <Button
+            <ConfirmButton
               size="icon"
-              variant="ghost"
               aria-label={`Supprimer « ${task.title} »`}
+              confirmLabel="Supprimer"
               disabled={pending}
-              onClick={onDelete}
+              onConfirm={onDelete}
             >
               <Trash2 aria-hidden />
-            </Button>
+            </ConfirmButton>
           </div>
         ) : null}
       </div>
@@ -112,7 +113,7 @@ export function TaskBoard({ tasks, showOrigin = false }: { tasks: Task[]; showOr
             aria-selected={tab === status}
             onClick={() => setTab(status)}
             className={cn(
-              "min-h-10 rounded-md font-medium",
+              "min-h-11 rounded-md font-medium",
               tab === status ? "bg-background shadow-sm" : "text-muted-foreground",
             )}
           >

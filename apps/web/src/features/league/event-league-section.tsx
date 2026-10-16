@@ -33,7 +33,7 @@ export function EventLeagueSection({ league, slug }: { league: EventLeague; slug
       {league.results ? (
         <ol className="flex flex-col gap-2 rounded-2xl border bg-card p-4">
           {league.results.placements.map((p) => (
-            <li key={p.place} className="flex min-h-10 items-center gap-3">
+            <li key={p.place} className="flex min-h-11 items-center gap-3">
               <span
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center rounded-full font-bold text-sm",

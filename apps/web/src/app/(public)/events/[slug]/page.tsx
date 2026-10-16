@@ -86,10 +86,6 @@ export default async function EventPage({ params }: Props) {
           </span>
         </li>
         <li className="flex gap-3">
-          <MapPin aria-hidden className="size-5 shrink-0 text-primary" />
-          {event.location}
-        </li>
-        <li className="flex gap-3">
           <Users aria-hidden className="size-5 shrink-0 text-primary" />
           {event.capacity === null
             ? "Places illimitées"
@@ -120,14 +116,14 @@ export default async function EventPage({ params }: Props) {
         ) : null}
       </ul>
 
+      {/* The main action right after the key facts, before a description that may be long. */}
+      {event.status !== "draft" ? (
+        <RegistrationPanel event={event} signedIn={me !== null} team={team} />
+      ) : null}
       {event.status === "published" ? <ShareButton slug={event.slug} title={event.title} /> : null}
 
       {event.description ? (
         <p className="whitespace-pre-line leading-relaxed">{event.description}</p>
-      ) : null}
-
-      {event.status !== "draft" ? (
-        <RegistrationPanel event={event} signedIn={me !== null} team={team} />
       ) : null}
 
       {league ? <EventLeagueSection league={league} slug={event.slug} /> : null}

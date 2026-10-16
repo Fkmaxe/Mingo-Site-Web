@@ -30,7 +30,7 @@ export function LoginMethods({ next }: { next?: string | undefined }) {
             aria-selected={method === value}
             onClick={() => setMethod(value)}
             className={cn(
-              "min-h-10 rounded-full font-semibold",
+              "min-h-11 rounded-full font-semibold",
               method === value ? "bg-card shadow-sm" : "text-muted-foreground",
             )}
           >

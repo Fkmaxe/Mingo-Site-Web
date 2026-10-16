@@ -43,7 +43,7 @@ export default async function StatsPage({
             href={value === "overview" ? "/manage/stats" : "/manage/stats?view=members"}
             aria-current={view === value ? "page" : undefined}
             className={cn(
-              "flex min-h-10 items-center justify-center rounded-full font-semibold",
+              "flex min-h-11 items-center justify-center rounded-full font-semibold",
               view === value ? "bg-card shadow-sm" : "text-muted-foreground",
             )}
           >

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/brand";
+import { SegmentedNav } from "@/components/segmented-nav";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/features/events/event-card";
 import { listEvents } from "@/features/events/queries";
 import { HOME, SITE_HOME } from "@/lib/breadcrumbs";
 import { getMe } from "@/lib/session";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Événements" };
 
@@ -22,26 +22,15 @@ export default async function EventsPage({
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Événements" breadcrumb={[me ? HOME : SITE_HOME]} />
-      <nav aria-label="Période" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
-        {(
-          [
-            ["upcoming", "À venir"],
-            ["past", "Passés"],
-          ] as const
-        ).map(([value, label]) => (
-          <Link
-            key={value}
-            href={value === "upcoming" ? "/events" : "/events?scope=past"}
-            aria-current={scope === value ? "page" : undefined}
-            className={cn(
-              "flex min-h-10 items-center justify-center rounded-md font-medium",
-              scope === value ? "bg-background shadow-sm" : "text-muted-foreground",
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <SegmentedNav
+        label="Période"
+        fill
+        active={scope}
+        items={[
+          { key: "upcoming", label: "À venir", href: "/events" },
+          { key: "past", label: "Passés", href: "/events?scope=past" },
+        ]}
+      />
       <EventList
         events={page.items}
         empty={

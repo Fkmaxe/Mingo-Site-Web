@@ -156,7 +156,7 @@ function LevelRules({ level, tracks }: { level: LevelEntry; tracks: Entry[] }) {
         <fieldset className="flex flex-col gap-1">
           <legend className="mb-1 font-medium text-sm">Filières proposées</legend>
           {tracks.map((t) => (
-            <label key={t.id} className="flex min-h-10 items-center gap-3 text-sm">
+            <label key={t.id} className="flex min-h-11 items-center gap-3 text-sm">
               <input
                 type="checkbox"
                 checked={trackIds.includes(t.id)}

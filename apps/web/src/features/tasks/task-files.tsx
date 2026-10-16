@@ -3,6 +3,7 @@
 import { DOCUMENT_FILE_MAX_BYTES, TASK_FILES_PER_TASK } from "@bde/shared";
 import { Download, FileText, Paperclip, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { fileSizeLabel } from "@/lib/file-size";
@@ -82,15 +83,15 @@ export function TaskFiles({ task }: { task: TaskDetail }) {
                 <Download aria-hidden className="size-4 text-muted-foreground" />
               )}
               {a.canDelete ? (
-                <Button
+                <ConfirmButton
                   size="icon"
-                  variant="ghost"
                   aria-label={`Retirer « ${a.name} »`}
                   disabled={pending}
-                  onClick={() => run(() => removeTaskFileAction(task.id, a.id))}
+                  confirmLabel="Retirer"
+                  onConfirm={() => run(() => removeTaskFileAction(task.id, a.id))}
                 >
                   <Trash2 aria-hidden />
-                </Button>
+                </ConfirmButton>
               ) : null}
             </li>
           ))}
