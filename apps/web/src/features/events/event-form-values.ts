@@ -1,12 +1,10 @@
-import {
-  CreateEventInput,
-  type CustomFieldType,
-  eventDateIssues,
-  fieldKey,
-  isChoiceField,
-  teamSizeIssues,
-} from "@bde/shared";
+import { CreateEventInput, eventDateIssues, teamSizeIssues } from "@bde/shared";
 import type { FieldErrors, ResolverResult } from "react-hook-form";
+import {
+  type CustomFieldFormValues,
+  fromCustomFields,
+  toCustomFields,
+} from "@/lib/custom-fields-form";
 import { isoToParisInput, parisInputToIso } from "@/lib/paris-time";
 import type { Event } from "./types";
 
@@ -29,57 +27,6 @@ export type EventFormValues = {
   teamMaxSize: string;
   customFields: CustomFieldFormValues[];
 };
-
-export type CustomFieldFormValues = {
-  /** Kept for existing fields (answers are stored under it); empty for new ones. */
-  key: string;
-  label: string;
-  /** Shown under the label, line breaks kept. */
-  description: string;
-  type: CustomFieldType;
-  required: boolean;
-  /** Choices of a choice field, one per line. */
-  options: string;
-  allowOther: boolean;
-};
-
-export const emptyCustomField = (): CustomFieldFormValues => ({
-  key: "",
-  label: "",
-  description: "",
-  type: "text",
-  required: false,
-  options: "",
-  allowOther: false,
-});
-
-/** Existing keys are kept; new fields get a key from their label, made unique. */
-function toCustomFields(rows: CustomFieldFormValues[]) {
-  const used = new Set(rows.map((r) => r.key).filter(Boolean));
-  return rows.map((row) => {
-    let key = row.key;
-    if (!key) {
-      const base = fieldKey(row.label || "champ");
-      key = base;
-      for (let n = 2; used.has(key); n++) key = `${base.slice(0, 36)}_${n}`;
-      used.add(key);
-    }
-    const options = row.options
-      .split("\n")
-      .map((o) => o.trim())
-      .filter(Boolean);
-    return {
-      key,
-      label: row.label,
-      ...(row.description.trim() ? { description: row.description } : {}),
-      type: row.type,
-      required: row.required,
-      ...(isChoiceField(row.type)
-        ? { options, ...(row.allowOther ? { allowOther: true } : {}) }
-        : {}),
-    };
-  });
-}
 
 export function emptyEventForm(poleId = ""): EventFormValues {
   return {
@@ -117,15 +64,7 @@ export function eventToForm(event: Event): EventFormValues {
     memberPoints: event.memberPoints === null ? "" : String(event.memberPoints),
     teamMinSize: event.teamMinSize === null ? "" : String(event.teamMinSize),
     teamMaxSize: event.teamMaxSize === null ? "" : String(event.teamMaxSize),
-    customFields: event.customFields.map((f) => ({
-      key: f.key,
-      label: f.label,
-      description: f.description ?? "",
-      type: f.type,
-      required: f.required,
-      options: (f.options ?? []).join("\n"),
-      allowOther: f.allowOther ?? false,
-    })),
+    customFields: fromCustomFields(event.customFields),
   };
 }
 

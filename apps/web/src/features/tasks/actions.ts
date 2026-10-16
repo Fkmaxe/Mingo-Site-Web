@@ -1,6 +1,6 @@
 "use server";
 
-import { type CreateTaskData, TASK_FILE_TYPES, type TaskStatus } from "@bde/shared";
+import { type CreateTaskData, DOCUMENT_FILE_TYPES, type TaskStatus } from "@bde/shared";
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
@@ -112,7 +112,7 @@ export async function deleteCommentAction(
 }
 
 /** Office types by extension, for browsers that give no type (or a generic one). */
-const TYPE_BY_EXTENSION: Record<string, (typeof TASK_FILE_TYPES)[number]> = {
+const TYPE_BY_EXTENSION: Record<string, (typeof DOCUMENT_FILE_TYPES)[number]> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -133,8 +133,8 @@ export async function uploadTaskFileAction(taskId: string, form: FormData): Prom
   }
   const name = typeof rawName === "string" && rawName.trim() ? rawName.trim() : "fichier";
   const declared = file.type.split(";")[0] ?? "";
-  const type = (TASK_FILE_TYPES as readonly string[]).includes(declared)
-    ? (declared as (typeof TASK_FILE_TYPES)[number])
+  const type = (DOCUMENT_FILE_TYPES as readonly string[]).includes(declared)
+    ? (declared as (typeof DOCUMENT_FILE_TYPES)[number])
     : (TYPE_BY_EXTENSION[name.split(".").pop()?.toLowerCase() ?? ""] ?? "application/pdf");
   const { error } = await (await api()).POST("/v1/tasks/{taskId}/attachments", {
     params: { path: { taskId }, query: { name: name.slice(0, 200) } },

@@ -1,4 +1,4 @@
-import { PHOTO_MAX_BYTES, RECEIPT_MAX_BYTES, TASK_FILE_MAX_BYTES } from "@bde/shared";
+import { DOCUMENT_FILE_MAX_BYTES, PHOTO_MAX_BYTES, RECEIPT_MAX_BYTES } from "@bde/shared";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import type { Context } from "hono";
@@ -9,7 +9,7 @@ import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
 import type { Pusher } from "./lib/push";
-import type { PhotoStore, ReceiptStore, TaskFileStore } from "./lib/storage";
+import type { DocumentStore, PhotoStore, ReceiptStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
 import { createApplicationsRouter } from "./modules/applications";
 import { createCalendarRouter } from "./modules/calendar";
@@ -38,7 +38,7 @@ export type AppDeps = AuthDeps & {
   pusher: Pusher;
   photos: PhotoStore;
   receipts: ReceiptStore;
-  taskFiles: TaskFileStore;
+  taskFiles: DocumentStore;
 };
 
 export const OPENAPI_CONFIG = {
@@ -66,12 +66,12 @@ export function createApp(deps: AppDeps) {
     maxSize: RECEIPT_MAX_BYTES + 64 * 1024,
     onError: (c) => tooLargeError(c),
   });
-  const taskFileLimit = bodyLimit({
-    maxSize: TASK_FILE_MAX_BYTES + 64 * 1024,
+  const documentLimit = bodyLimit({
+    maxSize: DOCUMENT_FILE_MAX_BYTES + 64 * 1024,
     onError: (c) => tooLargeError(c),
   });
   app.use("*", (c, next) => {
-    if (/^\/v1\/tasks\/[^/]+\/attachments$/.test(c.req.path)) return taskFileLimit(c, next);
+    if (/^\/v1\/tasks\/[^/]+\/attachments$/.test(c.req.path)) return documentLimit(c, next);
     if (/^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)) {
       return photoLimit(c, next);
     }

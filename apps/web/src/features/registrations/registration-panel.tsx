@@ -4,6 +4,7 @@ import { CheckCircle2, Ticket } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { AnswersForm } from "@/components/answers-form";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/action-result";
@@ -14,7 +15,6 @@ import {
   joinTeamAction,
   registerAction,
 } from "./actions";
-import { AnswersForm } from "./answers-form";
 import { placesLabel } from "./places";
 import { TeamCard } from "./team-card";
 import { TeamForm, type TeamMode } from "./team-form";

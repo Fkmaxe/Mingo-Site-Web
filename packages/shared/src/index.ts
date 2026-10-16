@@ -9,6 +9,7 @@ export * from "./schemas/calendar";
 export * from "./schemas/checkin";
 export * from "./schemas/classes";
 export * from "./schemas/custom-fields";
+export * from "./schemas/documents";
 export * from "./schemas/events";
 export * from "./schemas/grades";
 export * from "./schemas/inventory";

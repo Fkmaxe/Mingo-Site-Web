@@ -7,12 +7,21 @@ import {
   MAX_CUSTOM_FIELDS,
 } from "@bde/shared";
 import { Plus, Trash2 } from "lucide-react";
-import { type Control, type UseFormRegister, useFieldArray, useWatch } from "react-hook-form";
+import {
+  type ArrayPath,
+  type Control,
+  type FieldArray,
+  type FieldValues,
+  type Path,
+  type UseFormRegister,
+  useFieldArray,
+  useWatch,
+} from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import { type EventFormValues, emptyCustomField } from "./event-form-values";
+import { type CustomFieldFormValues, emptyCustomField } from "@/lib/custom-fields-form";
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
   text: "Texte court",
@@ -23,24 +32,39 @@ const TYPE_LABELS: Record<CustomFieldType, string> = {
   checkbox: "Case à cocher",
 };
 
-type Props = {
-  control: Control<EventFormValues>;
-  register: UseFormRegister<EventFormValues>;
+/** A form holding its questions under `customFields`. */
+type WithCustomFields = FieldValues & { customFields: CustomFieldFormValues[] };
+
+type Props<T extends WithCustomFields> = {
+  control: Control<T>;
+  register: UseFormRegister<T>;
+  legend: string;
+  hint: string;
+  max?: number;
   error?: string | undefined;
 };
 
-/** Questions asked at registration (t-shirt size, diet, in-game name…). */
-export function CustomFieldsEditor({ control, register, error }: Props) {
-  const { fields, append, remove } = useFieldArray({ control, name: "customFields" });
-  const types = useWatch({ control, name: "customFields" });
+/** Questions of a form (event registration, application): label, explanation, type, choices. */
+export function CustomFieldsEditor<T extends WithCustomFields>({
+  control,
+  register,
+  legend,
+  hint,
+  max = MAX_CUSTOM_FIELDS,
+  error,
+}: Props<T>) {
+  // The paths below exist in every form holding `customFields`: react-hook-form cannot infer
+  // them through the generic.
+  const name = "customFields" as ArrayPath<T>;
+  const path = (index: number, key: keyof CustomFieldFormValues) =>
+    `customFields.${index}.${key}` as Path<T>;
+  const { fields, append, remove } = useFieldArray({ control, name });
+  const types = useWatch({ control, name: name as Path<T> }) as CustomFieldFormValues[] | undefined;
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="font-medium text-sm">Questions à l'inscription</legend>
-      <p className="text-muted-foreground text-xs">
-        Taille de t-shirt, régime alimentaire, pseudo… Les réponses apparaissent dans la liste des
-        inscrits et l'export CSV.
-      </p>
+      <legend className="font-medium text-sm">{legend}</legend>
+      <p className="text-muted-foreground text-xs">{hint}</p>
       {fields.map((field, index) => {
         const id = `customFields-${index}`;
         return (
@@ -52,7 +76,7 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                   id={`${id}-label`}
                   rows={1}
                   className="min-h-11"
-                  {...register(`customFields.${index}.label`)}
+                  {...register(path(index, "label"))}
                 />
               </div>
               <Button
@@ -72,13 +96,13 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                 rows={2}
                 className="min-h-16"
                 placeholder={"Merci d'utiliser ce format :\n- Discord : @pseudo"}
-                {...register(`customFields.${index}.description`)}
+                {...register(path(index, "description"))}
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label htmlFor={`${id}-type`}>Type de réponse</Label>
-                <NativeSelect id={`${id}-type`} {...register(`customFields.${index}.type`)}>
+                <NativeSelect id={`${id}-type`} {...register(path(index, "type"))}>
                   {CUSTOM_FIELD_TYPES.map((type) => (
                     <option key={type} value={type}>
                       {TYPE_LABELS[type]}
@@ -90,7 +114,7 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                 <input
                   type="checkbox"
                   className="size-5 accent-primary"
-                  {...register(`customFields.${index}.required`)}
+                  {...register(path(index, "required"))}
                 />
                 Obligatoire
               </label>
@@ -102,13 +126,13 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
                   id={`${id}-options`}
                   rows={3}
                   className="min-h-20"
-                  {...register(`customFields.${index}.options`)}
+                  {...register(path(index, "options"))}
                 />
                 <label className="flex min-h-11 items-center gap-3 text-sm">
                   <input
                     type="checkbox"
                     className="size-5 accent-primary"
-                    {...register(`customFields.${index}.allowOther`)}
+                    {...register(path(index, "allowOther"))}
                   />
                   Proposer « Autre » avec une réponse libre
                 </label>
@@ -118,8 +142,12 @@ export function CustomFieldsEditor({ control, register, error }: Props) {
         );
       })}
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
-      {fields.length < MAX_CUSTOM_FIELDS ? (
-        <Button type="button" variant="outline" onClick={() => append(emptyCustomField())}>
+      {fields.length < max ? (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => append(emptyCustomField() as FieldArray<T, ArrayPath<T>>)}
+        >
           <Plus aria-hidden />
           Ajouter une question
         </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { TASK_FILE_MAX_BYTES, TASK_FILES_PER_TASK } from "@bde/shared";
+import { DOCUMENT_FILE_MAX_BYTES, TASK_FILES_PER_TASK } from "@bde/shared";
 import { Download, FileText, Paperclip, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { FormAlert } from "@/components/form-field";
@@ -25,7 +25,7 @@ export function TaskFiles({ task }: { task: TaskDetail }) {
   const send = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const chosen = [...files].slice(0, room);
-    const tooBig = chosen.filter((f) => f.size > TASK_FILE_MAX_BYTES);
+    const tooBig = chosen.filter((f) => f.size > DOCUMENT_FILE_MAX_BYTES);
     if (tooBig.length > 0) {
       setUploadError(`Trop lourd (10 Mo au plus) : ${tooBig.map((f) => f.name).join(", ")}`);
       return;

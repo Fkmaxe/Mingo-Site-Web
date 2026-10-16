@@ -1,14 +1,14 @@
 import {
   type CreatePersonalTaskData,
   type CreateTaskData,
+  DOCUMENT_FILE_MAX_BYTES,
+  type DocumentFileType,
   type ListTasksQuery,
   type PoleMemberDto,
   TASK_CHECKLIST_MAX,
-  TASK_FILE_MAX_BYTES,
   TASK_FILES_PER_TASK,
   type TaskDetailDto,
   type TaskDto,
-  type TaskFileType,
   type TaskScope,
   type UpdateChecklistItemData,
   type UpdateTaskData,
@@ -19,7 +19,7 @@ import { AppError } from "../../core/errors";
 import { nextParisDay, parisDate, parisHour } from "../../core/time";
 import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
-import { sniffTaskFileType, type TaskFileStore } from "../../lib/storage";
+import { type DocumentStore, sniffDocumentType } from "../../lib/storage";
 import { getPole } from "../poles";
 import {
   taskAssignedEmail,
@@ -336,7 +336,7 @@ export async function getTask(ctx: AuthedCtx, taskId: string): Promise<TaskDetai
     attachments: attachments.map(({ attachment: a, uploaderName }) => ({
       id: a.id,
       name: a.originalName,
-      contentType: a.contentType as TaskFileType,
+      contentType: a.contentType as DocumentFileType,
       sizeBytes: a.sizeBytes,
       url: taskFilePath(a.fileName),
       uploadedBy: a.uploadedBy && uploaderName ? { id: a.uploadedBy, name: uploaderName } : null,
@@ -546,14 +546,14 @@ export async function deleteComment(ctx: AuthedCtx, commentId: string, now: Date
  */
 export async function addAttachment(
   ctx: AuthedCtx,
-  files: TaskFileStore,
+  files: DocumentStore,
   taskId: string,
   file: { name: string; declaredType: string; bytes: Uint8Array },
 ) {
-  if (file.bytes.byteLength === 0 || file.bytes.byteLength > TASK_FILE_MAX_BYTES) {
+  if (file.bytes.byteLength === 0 || file.bytes.byteLength > DOCUMENT_FILE_MAX_BYTES) {
     throw new AppError("VALIDATION_ERROR", 400, "Un fichier doit faire moins de 10 Mo.");
   }
-  const type = sniffTaskFileType(file.bytes, file.declaredType);
+  const type = sniffDocumentType(file.bytes, file.declaredType);
   if (!type) {
     throw new AppError(
       "VALIDATION_ERROR",
@@ -595,7 +595,7 @@ export async function addAttachment(
 }
 
 /** Organisers remove any file; an assignee removes the files they joined. */
-export async function removeAttachment(ctx: AuthedCtx, files: TaskFileStore, attachmentId: string) {
+export async function removeAttachment(ctx: AuthedCtx, files: DocumentStore, attachmentId: string) {
   const attachment = await findAttachment(ctx.db, attachmentId);
   if (!attachment) throw new AppError("NOT_FOUND", 404, "Ce fichier n'existe pas.");
   const { rights } = await visibleTask(ctx, attachment.taskId);
@@ -613,7 +613,7 @@ export async function removeAttachment(ctx: AuthedCtx, files: TaskFileStore, att
 }
 
 /** The bytes of a task file, for whoever sees the task. */
-export async function readAttachment(ctx: AuthedCtx, files: TaskFileStore, fileName: string) {
+export async function readAttachment(ctx: AuthedCtx, files: DocumentStore, fileName: string) {
   const attachment = await findAttachmentByFileName(ctx.db, fileName);
   if (!attachment) throw new AppError("NOT_FOUND", 404, "Ce fichier n'existe pas.");
   await visibleTask(ctx, attachment.taskId);

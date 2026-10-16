@@ -43,22 +43,26 @@ export const CustomFieldDef = z
   .meta({ id: "CustomField" });
 export type CustomFieldDef = z.infer<typeof CustomFieldDef>;
 
-export const CustomFieldsSchema = z
-  .array(CustomFieldDef)
-  .max(MAX_CUSTOM_FIELDS, `${MAX_CUSTOM_FIELDS} champs maximum`)
-  .superRefine((fields, ctx) => {
-    const seen = new Set<string>();
-    fields.forEach((field, index) => {
-      if (seen.has(field.key)) {
-        ctx.addIssue({
-          code: "custom",
-          path: [index, "label"],
-          message: "Deux champs portent le même nom",
-        });
-      }
-      seen.add(field.key);
+/** Up to `max` fields with distinct keys: 10 for an event, more for the application form. */
+export const customFieldsSchema = (max: number) =>
+  z
+    .array(CustomFieldDef)
+    .max(max, `${max} champs maximum`)
+    .superRefine((fields, ctx) => {
+      const seen = new Set<string>();
+      fields.forEach((field, index) => {
+        if (seen.has(field.key)) {
+          ctx.addIssue({
+            code: "custom",
+            path: [index, "label"],
+            message: "Deux champs portent le même nom",
+          });
+        }
+        seen.add(field.key);
+      });
     });
-  });
+
+export const CustomFieldsSchema = customFieldsSchema(MAX_CUSTOM_FIELDS);
 
 export type AnswerValue = string | number | boolean | string[];
 export type Answers = Record<string, AnswerValue>;

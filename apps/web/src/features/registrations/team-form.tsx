@@ -2,8 +2,8 @@
 
 import { type AnswerValue, CreateTeamInput, type CustomFieldDef, JoinTeamInput } from "@bde/shared";
 import { useState } from "react";
+import { AnswersForm } from "@/components/answers-form";
 import { FormField } from "@/components/form-field";
-import { AnswersForm } from "./answers-form";
 
 export type TeamMode = "create" | "join";
 

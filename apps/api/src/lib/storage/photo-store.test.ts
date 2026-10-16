@@ -6,9 +6,9 @@ import {
   createDiskPhotoStore,
   createDiskReceiptStore,
   createMemoryReceiptStore,
+  sniffDocumentType,
   sniffPhotoType,
   sniffReceiptType,
-  sniffTaskFileType,
 } from "./photo-store";
 
 const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
@@ -68,26 +68,26 @@ describe("receipts", () => {
   });
 });
 
-describe("sniffTaskFileType", () => {
+describe("sniffDocumentType", () => {
   const XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   const zipWith = (folder: string) =>
     new Uint8Array([0x50, 0x4b, 0x03, 0x04, ...new TextEncoder().encode(`${folder}workbook.xml`)]);
 
   it("recognises photos and PDF by their bytes, whatever the declared type", () => {
-    expect(sniffTaskFileType(PDF, "text/plain")).toBe("application/pdf");
-    expect(sniffTaskFileType(JPEG, XLSX)).toBe("image/jpeg");
+    expect(sniffDocumentType(PDF, "text/plain")).toBe("application/pdf");
+    expect(sniffDocumentType(JPEG, XLSX)).toBe("image/jpeg");
   });
 
   it("keeps a declared office or text type only if the bytes match", () => {
-    expect(sniffTaskFileType(zipWith("xl/"), XLSX)).toBe(XLSX);
-    expect(sniffTaskFileType(zipWith("word/"), XLSX)).toBeNull();
+    expect(sniffDocumentType(zipWith("xl/"), XLSX)).toBe(XLSX);
+    expect(sniffDocumentType(zipWith("word/"), XLSX)).toBeNull();
     const ole = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0]);
-    expect(sniffTaskFileType(ole, "application/msword")).toBe("application/msword");
-    expect(sniffTaskFileType(new TextEncoder().encode("nom;prénom\n"), "text/csv")).toBe(
+    expect(sniffDocumentType(ole, "application/msword")).toBe("application/msword");
+    expect(sniffDocumentType(new TextEncoder().encode("nom;prénom\n"), "text/csv")).toBe(
       "text/csv",
     );
-    expect(sniffTaskFileType(new Uint8Array([0x61, 0, 0x62]), "text/plain")).toBeNull();
-    expect(sniffTaskFileType(new Uint8Array([0xff, 0xfe, 0x41]), "text/plain")).toBeNull();
-    expect(sniffTaskFileType(new TextEncoder().encode("<html>"), "text/html")).toBeNull();
+    expect(sniffDocumentType(new Uint8Array([0x61, 0, 0x62]), "text/plain")).toBeNull();
+    expect(sniffDocumentType(new Uint8Array([0xff, 0xfe, 0x41]), "text/plain")).toBeNull();
+    expect(sniffDocumentType(new TextEncoder().encode("<html>"), "text/html")).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TASK_FILE_TYPES, type TaskFileType } from "@bde/shared";
+import { DOCUMENT_FILE_TYPES, type DocumentFileType } from "@bde/shared";
 
 export type PhotoType = "image/jpeg" | "image/png" | "image/webp";
 export type ReceiptType = PhotoType | "application/pdf";
@@ -19,7 +19,7 @@ export interface FileStore<T extends string> {
 
 export type PhotoStore = FileStore<PhotoType>;
 export type ReceiptStore = FileStore<ReceiptType>;
-export type TaskFileStore = FileStore<TaskFileType>;
+export type DocumentStore = FileStore<DocumentFileType>;
 
 const PHOTO_EXTENSIONS: Record<PhotoType, string> = {
   "image/jpeg": "jpg",
@@ -31,7 +31,7 @@ const RECEIPT_EXTENSIONS: Record<ReceiptType, string> = {
   "application/pdf": "pdf",
 };
 
-const TASK_FILE_EXTENSIONS: Record<TaskFileType, string> = {
+const DOCUMENT_EXTENSIONS: Record<DocumentFileType, string> = {
   ...RECEIPT_EXTENSIONS,
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
@@ -67,12 +67,12 @@ export function sniffReceiptType(bytes: Uint8Array): ReceiptType | null {
 }
 
 /** Folder of each Office Open XML type inside its ZIP archive. */
-const OOXML_FOLDERS: Partial<Record<TaskFileType, string>> = {
+const OOXML_FOLDERS: Partial<Record<DocumentFileType, string>> = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "word/",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xl/",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation": "ppt/",
 };
-const LEGACY_OFFICE: readonly TaskFileType[] = [
+const LEGACY_OFFICE: readonly DocumentFileType[] = [
   "application/msword",
   "application/vnd.ms-excel",
   "application/vnd.ms-powerpoint",
@@ -80,15 +80,15 @@ const LEGACY_OFFICE: readonly TaskFileType[] = [
 const OLE_MAGIC = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1];
 
 /**
- * The type of a task file. Photos and PDF are recognised by their bytes; for the other types the
+ * The type of a sent document. Photos and PDF are recognised by their bytes; for the other types the
  * declared one is kept only if the bytes match it: an Office document is a ZIP holding its folder
  * (or an OLE file for the old formats), a text is valid UTF-8 without NUL bytes.
  */
-export function sniffTaskFileType(bytes: Uint8Array, declared: string): TaskFileType | null {
+export function sniffDocumentType(bytes: Uint8Array, declared: string): DocumentFileType | null {
   const receipt = sniffReceiptType(bytes);
   if (receipt) return receipt;
-  const type = (TASK_FILE_TYPES as readonly string[]).includes(declared)
-    ? (declared as TaskFileType)
+  const type = (DOCUMENT_FILE_TYPES as readonly string[]).includes(declared)
+    ? (declared as DocumentFileType)
     : null;
   if (!type) return null;
   const folder = OOXML_FOLDERS[type];
@@ -139,7 +139,7 @@ function createDiskFileStore<T extends string>(
 export type MemoryFileStore<T extends string> = FileStore<T> & { files: Map<string, Uint8Array> };
 export type MemoryPhotoStore = MemoryFileStore<PhotoType>;
 export type MemoryReceiptStore = MemoryFileStore<ReceiptType>;
-export type MemoryTaskFileStore = MemoryFileStore<TaskFileType>;
+export type MemoryDocumentStore = MemoryFileStore<DocumentFileType>;
 
 function createMemoryFileStore<T extends string>(
   extensions: Record<T, string>,
@@ -171,7 +171,7 @@ export const createDiskReceiptStore = (directory: string): ReceiptStore =>
   createDiskFileStore(directory, RECEIPT_EXTENSIONS);
 export const createMemoryReceiptStore = (): MemoryReceiptStore =>
   createMemoryFileStore(RECEIPT_EXTENSIONS);
-export const createDiskTaskFileStore = (directory: string): TaskFileStore =>
-  createDiskFileStore(directory, TASK_FILE_EXTENSIONS);
-export const createMemoryTaskFileStore = (): MemoryTaskFileStore =>
-  createMemoryFileStore(TASK_FILE_EXTENSIONS);
+export const createDiskDocumentStore = (directory: string): DocumentStore =>
+  createDiskFileStore(directory, DOCUMENT_EXTENSIONS);
+export const createMemoryDocumentStore = (): MemoryDocumentStore =>
+  createMemoryFileStore(DOCUMENT_EXTENSIONS);

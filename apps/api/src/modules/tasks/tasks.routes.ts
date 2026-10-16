@@ -2,9 +2,9 @@ import {
   ChecklistItemInput,
   CreatePersonalTaskInput,
   CreateTaskInput,
+  DOCUMENT_FILE_TYPES,
   ListTasksQuery,
   PoleMemberDto,
-  TASK_FILE_TYPES,
   TaskCommentInput,
   TaskDetailDto,
   TaskDto,
@@ -17,7 +17,7 @@ import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
 import { errorResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
-import type { TaskFileStore } from "../../lib/storage";
+import type { DocumentStore } from "../../lib/storage";
 import {
   addAttachment,
   addChecklistItem,
@@ -207,7 +207,7 @@ const attachmentUploadRoute = createRoute({
     params: TaskParams,
     query: TaskFileUploadQuery,
     body: {
-      content: Object.fromEntries(TASK_FILE_TYPES.map((t) => [t, { schema: Binary }])),
+      content: Object.fromEntries(DOCUMENT_FILE_TYPES.map((t) => [t, { schema: Binary }])),
       required: true,
       description: "Le fichier lui-même, 10 Mo au plus",
     },
@@ -230,7 +230,7 @@ const attachmentFileRoute = createRoute({
   request: { params: z.object({ name: z.string().max(64) }) },
   responses: {
     200: {
-      content: Object.fromEntries(TASK_FILE_TYPES.map((t) => [t, { schema: Binary }])),
+      content: Object.fromEntries(DOCUMENT_FILE_TYPES.map((t) => [t, { schema: Binary }])),
       description: "Fichier de la tâche",
     },
     ...errors,
@@ -245,7 +245,7 @@ const INLINE_TYPES: readonly string[] = [
   "application/pdf",
 ];
 
-export function createTasksRouter(files: TaskFileStore) {
+export function createTasksRouter(files: DocumentStore) {
   return new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError })
     .openapi(listRoute, async (c) =>
       c.json(await listPoleTasks(authedCtx(c.get("ctx")), c.req.valid("param").poleId), 200),

@@ -3,6 +3,7 @@
 import { CreateEventInput, EVENT_VISIBILITIES } from "@bde/shared";
 import { useState } from "react";
 import { type FieldPath, useForm } from "react-hook-form";
+import { CustomFieldsEditor } from "@/components/custom-fields-editor";
 import { FieldShell, FormAlert, FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -10,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/action-result";
 import { EVENT_VISIBILITY_LABELS } from "@/lib/labels";
 import { createEventAction, updateEventAction } from "./actions";
-import { CustomFieldsEditor } from "./custom-fields-editor";
 import { type EventFormValues, eventFormResolver, formToInput } from "./event-form-values";
 import type { Pole } from "./types";
 
@@ -180,6 +180,8 @@ export function EventForm({ poles, defaultValues, eventId }: Props) {
       <CustomFieldsEditor
         control={control}
         register={register}
+        legend="Questions à l'inscription"
+        hint="Taille de t-shirt, régime alimentaire, pseudo… Les réponses apparaissent dans la liste des inscrits et l'export CSV."
         error={errors.customFields?.message ?? errors.customFields?.root?.message}
       />
 

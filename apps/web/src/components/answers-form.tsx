@@ -1,7 +1,7 @@
 "use client";
 
 import { type AnswerValue, answersSchema, type CustomFieldDef } from "@bde/shared";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,10 @@ type Props = {
   pending: boolean;
   serverErrors?: Record<string, string> | undefined;
   onSubmit: (answers: Record<string, AnswerValue>) => void;
-  onCancel: () => void;
+  /** Shows a « Retour » button. */
+  onCancel?: () => void;
+  /** Shown before the questions (other inputs of the same form). */
+  children?: ReactNode;
 };
 
 /** Value of the "Autre" choice while its free text is typed in a separate input. */
@@ -42,7 +45,7 @@ function toAnswers(
   return answers;
 }
 
-/** The event's questions, validated with the same schema as the API. */
+/** Questions of an event or of the application form, validated with the API's schema. */
 export function AnswersForm({
   fields,
   submitLabel,
@@ -50,6 +53,7 @@ export function AnswersForm({
   serverErrors,
   onSubmit,
   onCancel,
+  children,
 }: Props) {
   const [values, setValues] = useState<Record<string, Value>>({});
   const [other, setOther] = useState<Record<string, string>>({});
@@ -71,6 +75,7 @@ export function AnswersForm({
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      {children}
       {fields.map((field) => (
         <Question
           key={field.key}
@@ -86,9 +91,11 @@ export function AnswersForm({
         <Button type="submit" size="lg" className="flex-1" disabled={pending}>
           {pending ? "Un instant…" : submitLabel}
         </Button>
-        <Button type="button" variant="outline" size="lg" onClick={onCancel}>
-          Retour
-        </Button>
+        {onCancel ? (
+          <Button type="button" variant="outline" size="lg" onClick={onCancel}>
+            Retour
+          </Button>
+        ) : null}
       </div>
     </form>
   );

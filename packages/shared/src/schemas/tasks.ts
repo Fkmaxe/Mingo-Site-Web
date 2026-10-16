@@ -1,23 +1,7 @@
 import { z } from "zod";
 import { MEMBERSHIP_ROLES, TASK_PRIORITIES, TASK_SCOPES, TASK_STATUSES } from "../enums";
+import { DOCUMENT_FILE_TYPES } from "./documents";
 
-/** Files joined to a task: photos, PDF, office documents, text and CSV. */
-export const TASK_FILE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/msword",
-  "application/vnd.ms-excel",
-  "application/vnd.ms-powerpoint",
-  "text/plain",
-  "text/csv",
-] as const;
-export type TaskFileType = (typeof TASK_FILE_TYPES)[number];
-export const TASK_FILE_MAX_BYTES = 10 * 1024 * 1024;
 export const TASK_FILES_PER_TASK = 10;
 export const TASK_ASSIGNEES_MAX = 20;
 export const TASK_CHECKLIST_MAX = 50;
@@ -144,7 +128,7 @@ export const TaskAttachmentDto = z
   .object({
     id: z.uuid(),
     name: z.string(),
-    contentType: z.enum(TASK_FILE_TYPES),
+    contentType: z.enum(DOCUMENT_FILE_TYPES),
     sizeBytes: z.int(),
     /** Path on the web origin (the web relays the file). */
     url: z.string(),
