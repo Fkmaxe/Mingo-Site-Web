@@ -47,6 +47,8 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 
 ## Classes et profil
 
+- **À l'inscription**, juste après la confirmation de l'adresse, l'étudiant choisit sa classe (page « Bienvenue ») avant d'entrer dans l'appli ; il peut passer (« Plus tard »). Sans classe créée par le BDE, l'étape est sautée.
+- **Ceux qui n'ont pas encore de classe** (comptes plus anciens, ou passés à l'inscription) la voient demandée dans une fenêtre à leur arrivée sur le site, **une fois par connexion** : « Plus tard » la masque jusqu'à la connexion suivante. Jamais sur la page Bienvenue ni sur le profil, où la classe est déjà demandée.
 - Chaque étudiant indique sa **classe** dans son profil : une **année**, une **filière**, son **rythme** (initial ou alternance), son **numéro de classe** (1 à 9, obligatoire dès qu'une année est choisie) et s'il a fait la **rentrée de janvier** (non par défaut). Années et filières sont gérées par les admins (Gestion → Administration → Classes : créer, renommer, ordonner, donner un **code**, et pour chaque année : filières proposées, alternance obligatoire).
 - **Code de classe ESGI** : code de l'année + numéro de classe, avec entre les deux :
   - en **1re et 2e année** (années où l'on choisit son rythme) : la **lettre du rythme** (A = alternance, I = initial), en tronc commun comme en MCSI ;

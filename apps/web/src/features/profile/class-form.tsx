@@ -25,6 +25,8 @@ export function ClassForm({
   rhythm,
   classNumber,
   januaryIntake,
+  onSaved,
+  submitLabel = "Enregistrer ma classe",
 }: {
   levels: Level[];
   tracks: Ref[];
@@ -33,6 +35,9 @@ export function ClassForm({
   rhythm: StudyRhythm | null;
   classNumber: number | null;
   januaryIntake: boolean;
+  /** Called once the class is saved (onboarding, prompt); otherwise the page refreshes. */
+  onSaved?: () => void;
+  submitLabel?: string;
 }) {
   const router = useRouter();
   const [level, setLevel] = useState(levelId ?? "");
@@ -91,6 +96,7 @@ export function ClassForm({
             classNumber: level && number ? Number(number) : null,
             januaryIntake: Boolean(level) && january,
           });
+          if (result.ok && onSaved) return onSaved();
           setMessage(
             result.ok
               ? { tone: "success", text: "Classe enregistrée." }
@@ -203,7 +209,7 @@ export function ClassForm({
         </p>
       ) : null}
       <Button type="submit" disabled={pending || !changed} className="self-start">
-        Enregistrer ma classe
+        {submitLabel}
       </Button>
     </form>
   );

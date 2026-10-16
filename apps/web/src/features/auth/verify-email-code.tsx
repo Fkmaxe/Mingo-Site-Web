@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { authErrorMessage } from "./auth-errors";
 import { CodeField } from "./code-field";
 import { ResendVerificationButton } from "./resend-verification-button";
-import { safeNextPath } from "./safe-next";
+import { authHref } from "./safe-next";
 
 /**
  * Confirms the address with the 6-digit code of the sign-up mail; the account is then signed in
@@ -33,7 +33,8 @@ export function VerifyEmailCode({
       setError(null);
       const response = await authClient.emailOtp.verifyEmail({ email: email.trim(), otp });
       if (response.error) return setError(authErrorMessage(response.error));
-      router.push(safeNextPath(next));
+      // A new account goes through the onboarding (its class) on the way to `next`.
+      router.push(authHref("/welcome", next));
       router.refresh();
     });
 

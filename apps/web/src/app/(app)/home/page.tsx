@@ -21,6 +21,7 @@ import { MyLeagueLink } from "@/features/league/my-league";
 import { getMyLeague } from "@/features/league/queries";
 import { formatPoints } from "@/features/open-points/labels";
 import { getMyOpenPoints } from "@/features/open-points/queries";
+import { hasClass } from "@/features/profile/class-status";
 import { parisToday } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
@@ -85,7 +86,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {me.promo && (me.level === null || me.classNumber !== null) ? null : (
+      {hasClass(me) ? null : (
         <Link
           href="/profile#classe"
           className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm"

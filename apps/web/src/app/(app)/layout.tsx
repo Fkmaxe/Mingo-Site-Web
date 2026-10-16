@@ -1,8 +1,14 @@
 import type * as React from "react";
 import { AppShell } from "@/components/app-shell";
+import { ClassPromptGate } from "@/features/profile/class-prompt-gate";
 import { requireMe } from "@/lib/session";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const me = await requireMe();
-  return <AppShell me={me}>{children}</AppShell>;
+  return (
+    <AppShell me={me}>
+      {children}
+      <ClassPromptGate me={me} />
+    </AppShell>
+  );
 }

@@ -18,7 +18,7 @@ describe("VerifyEmailCode", () => {
     push.mockReset();
   });
 
-  it("confirms the address with the code, then opens the requested page", async () => {
+  it("confirms the address with the code, then the onboarding leads to the requested page", async () => {
     verifyEmail.mockResolvedValueOnce({ data: { status: true } });
     const user = userEvent.setup();
     render(<VerifyEmailCode email="jeanne@myskolae.fr" next="/events/gala" />);
@@ -26,7 +26,7 @@ describe("VerifyEmailCode", () => {
     await user.type(screen.getByLabelText("Code reçu par mail"), "654321");
     await user.click(screen.getByRole("button", { name: "Confirmer mon adresse" }));
     expect(verifyEmail).toHaveBeenCalledWith({ email: "jeanne@myskolae.fr", otp: "654321" });
-    expect(push).toHaveBeenCalledWith("/events/gala");
+    expect(push).toHaveBeenCalledWith("/welcome?next=%2Fevents%2Fgala");
   });
 
   it("asks for the address when the page has none, and sends a new code", async () => {
