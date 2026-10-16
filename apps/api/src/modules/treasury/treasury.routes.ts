@@ -13,7 +13,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx } from "../../core/context";
 import { AppError, throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, fileResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import type { ReceiptStore } from "../../lib/storage";
 import {
@@ -29,13 +29,6 @@ import {
   updateTransaction,
 } from "./treasury.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 const Binary = z.string().meta({ format: "binary" });
 const errors = {
   400: errorResponse("Données invalides"),
@@ -52,7 +45,10 @@ const summaryRoute = createRoute({
   path: "/treasury/summary",
   tags: ["treasury"],
   middleware: [requirePermission("budget:read")] as const,
-  responses: { 200: json(TreasurySummaryDto, "Recettes, dépenses et solde de l'année"), ...errors },
+  responses: {
+    200: jsonResponse(TreasurySummaryDto, "Recettes, dépenses et solde de l'année"),
+    ...errors,
+  },
 });
 const listRoute = createRoute({
   method: "get",
@@ -60,7 +56,7 @@ const listRoute = createRoute({
   tags: ["treasury"],
   middleware: [requirePermission("budget:read")] as const,
   request: { query: ListTransactionsQuery },
-  responses: { 200: json(z.array(TransactionDto), "Écritures de l'année"), ...errors },
+  responses: { 200: jsonResponse(z.array(TransactionDto), "Écritures de l'année"), ...errors },
 });
 const getRoute = createRoute({
   method: "get",
@@ -68,23 +64,29 @@ const getRoute = createRoute({
   tags: ["treasury"],
   middleware: [requirePermission("budget:read")] as const,
   request: { params: TxParams },
-  responses: { 200: json(TransactionDetailDto, "Écriture et ses justificatifs"), ...errors },
+  responses: {
+    200: jsonResponse(TransactionDetailDto, "Écriture et ses justificatifs"),
+    ...errors,
+  },
 });
 const createTxRoute = createRoute({
   method: "post",
   path: "/treasury/transactions",
   tags: ["treasury"],
   middleware: [requirePermission("budget:manage")] as const,
-  request: body(CreateTransactionInput),
-  responses: { 201: json(TransactionDetailDto, "Écriture enregistrée"), ...errors },
+  request: jsonBody(CreateTransactionInput),
+  responses: { 201: jsonResponse(TransactionDetailDto, "Écriture enregistrée"), ...errors },
 });
 const updateRoute = createRoute({
   method: "patch",
   path: "/treasury/transactions/{transactionId}",
   tags: ["treasury"],
   middleware: [requirePermission("budget:manage")] as const,
-  request: { params: TxParams, ...body(UpdateTransactionInput) },
-  responses: { 200: json(TransactionDetailDto, "Écriture corrigée (hors montant)"), ...errors },
+  request: { params: TxParams, ...jsonBody(UpdateTransactionInput) },
+  responses: {
+    200: jsonResponse(TransactionDetailDto, "Écriture corrigée (hors montant)"),
+    ...errors,
+  },
 });
 const reverseRoute = createRoute({
   method: "post",
@@ -92,7 +94,7 @@ const reverseRoute = createRoute({
   tags: ["treasury"],
   middleware: [requirePermission("budget:manage")] as const,
   request: { params: TxParams },
-  responses: { 201: json(TransactionDetailDto, "Écriture d'annulation"), ...errors },
+  responses: { 201: jsonResponse(TransactionDetailDto, "Écriture d'annulation"), ...errors },
 });
 const attachmentUploadRoute = createRoute({
   method: "post",
@@ -108,7 +110,7 @@ const attachmentUploadRoute = createRoute({
       description: "Le fichier lui-même : photo ou PDF, 8 Mo au plus",
     },
   },
-  responses: { 201: json(TransactionDetailDto, "Justificatif ajouté"), ...errors },
+  responses: { 201: jsonResponse(TransactionDetailDto, "Justificatif ajouté"), ...errors },
 });
 const attachmentDeleteRoute = createRoute({
   method: "delete",
@@ -116,7 +118,7 @@ const attachmentDeleteRoute = createRoute({
   tags: ["treasury"],
   middleware: [requirePermission("budget:manage")] as const,
   request: { params: z.object({ attachmentId: z.uuid() }) },
-  responses: { 200: json(TransactionDetailDto, "Justificatif retiré"), ...errors },
+  responses: { 200: jsonResponse(TransactionDetailDto, "Justificatif retiré"), ...errors },
 });
 const attachmentFileRoute = createRoute({
   method: "get",
@@ -138,15 +140,15 @@ const eventBudgetRoute = createRoute({
   tags: ["treasury"],
   middleware: [requirePermission("budget:read")] as const,
   request: { params: z.object({ eventId: z.uuid() }) },
-  responses: { 200: json(EventBudgetDto, "Budget prévu et réalisé"), ...errors },
+  responses: { 200: jsonResponse(EventBudgetDto, "Budget prévu et réalisé"), ...errors },
 });
 const budgetRoute = createRoute({
   method: "put",
   path: "/events/{eventId}/budget",
   tags: ["treasury"],
   middleware: [requirePermission("budget:manage")] as const,
-  request: { params: z.object({ eventId: z.uuid() }), ...body(SetEventBudgetInput) },
-  responses: { 200: json(SetEventBudgetInput, "Budget enregistré"), ...errors },
+  request: { params: z.object({ eventId: z.uuid() }), ...jsonBody(SetEventBudgetInput) },
+  responses: { 200: jsonResponse(SetEventBudgetInput, "Budget enregistré"), ...errors },
 });
 
 export function createTreasuryRouter(receipts: ReceiptStore) {
@@ -204,17 +206,11 @@ export function createTreasuryRouter(receipts: ReceiptStore) {
       ),
     )
     .openapi(attachmentFileRoute, async (c) => {
-      const file = await receipts.read(c.req.valid("param").name);
+      const { name } = c.req.valid("param");
+      const file = await receipts.read(name);
       if (!file) throw new AppError("NOT_FOUND", 404, "Ce justificatif n'existe pas.");
-      // Names are random and never reused: the file can be cached for good. Shown in the page.
-      return new Response(file.bytes, {
-        headers: {
-          "content-type": file.type,
-          "content-disposition": "inline",
-          "cache-control": "private, max-age=31536000, immutable",
-          "x-content-type-options": "nosniff",
-        },
-      });
+      // A receipt is a photo or a PDF: shown in the page.
+      return fileResponse({ ...file, name });
     })
     .openapi(eventBudgetRoute, async (c) =>
       c.json(await getEventBudget(authedCtx(c.get("ctx")), c.req.valid("param").eventId), 200),

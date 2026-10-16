@@ -14,7 +14,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse, paginated } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse, paginated } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   createPole,
@@ -29,13 +29,6 @@ import {
   setMembership,
 } from "./admin.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } }, required: true },
-});
 const Id = z.object({ id: z.uuid() });
 const common = {
   401: errorResponse("Pas de session"),
@@ -49,7 +42,7 @@ const yearsRoute = createRoute({
   path: "/admin/school-years",
   tags: ["admin"],
   middleware: [requirePermission("settings:manage")] as const,
-  responses: { 200: json(z.array(SchoolYearDto), "Années scolaires"), ...common },
+  responses: { 200: jsonResponse(z.array(SchoolYearDto), "Années scolaires"), ...common },
 });
 
 const createYearRoute = createRoute({
@@ -57,9 +50,9 @@ const createYearRoute = createRoute({
   path: "/admin/school-years",
   tags: ["admin"],
   middleware: [requirePermission("settings:manage")] as const,
-  request: body(CreateSchoolYearInput),
+  request: jsonBody(CreateSchoolYearInput),
   responses: {
-    201: json(z.array(SchoolYearDto), "Année créée (la première devient l'année en cours)"),
+    201: jsonResponse(z.array(SchoolYearDto), "Année créée (la première devient l'année en cours)"),
     400: errorResponse("Données invalides"),
     409: errorResponse("ALREADY_EXISTS"),
     ...common,
@@ -73,7 +66,7 @@ const currentYearRoute = createRoute({
   middleware: [requirePermission("settings:manage")] as const,
   request: { params: Id },
   responses: {
-    200: json(z.array(SchoolYearDto), "Année en cours changée"),
+    200: jsonResponse(z.array(SchoolYearDto), "Année en cours changée"),
     404: errorResponse("Année introuvable"),
     ...common,
   },
@@ -86,9 +79,9 @@ const createPoleRoute = createRoute({
   path: "/admin/poles",
   tags: ["admin"],
   middleware: [requirePermission("settings:manage")] as const,
-  request: body(PoleInput),
+  request: jsonBody(PoleInput),
   responses: {
-    201: json(PoleDto, "Pôle créé"),
+    201: jsonResponse(PoleDto, "Pôle créé"),
     400: errorResponse("Données invalides"),
     409: errorResponse("ALREADY_EXISTS"),
     ...common,
@@ -100,9 +93,9 @@ const editPoleRoute = createRoute({
   path: "/admin/poles/{id}",
   tags: ["admin"],
   middleware: [requirePermission("settings:manage")] as const,
-  request: { params: Id, ...body(PoleInput) },
+  request: { params: Id, ...jsonBody(PoleInput) },
   responses: {
-    200: json(PoleDto, "Pôle modifié"),
+    200: jsonResponse(PoleDto, "Pôle modifié"),
     400: errorResponse("Données invalides"),
     404: errorResponse("Pôle introuvable"),
     409: errorResponse("ALREADY_EXISTS"),
@@ -118,7 +111,10 @@ const usersRoute = createRoute({
   tags: ["admin"],
   middleware: [requirePermission("roles:manage")] as const,
   request: { query: AdminUsersQuery },
-  responses: { 200: json(AdminUsersDto, "Comptes (100 au plus) et rôles de l'année"), ...common },
+  responses: {
+    200: jsonResponse(AdminUsersDto, "Comptes (100 au plus) et rôles de l'année"),
+    ...common,
+  },
 });
 
 const setMembershipRoute = createRoute({
@@ -126,9 +122,9 @@ const setMembershipRoute = createRoute({
   path: "/admin/memberships",
   tags: ["admin"],
   middleware: [requirePermission("roles:manage")] as const,
-  request: body(SetMembershipInput),
+  request: jsonBody(SetMembershipInput),
   responses: {
-    200: json(AdminUserDto, "Rôle donné pour l'année en cours"),
+    200: jsonResponse(AdminUserDto, "Rôle donné pour l'année en cours"),
     400: errorResponse("Données invalides"),
     404: errorResponse("Compte ou pôle introuvable"),
     422: errorResponse("NO_CURRENT_SCHOOL_YEAR"),
@@ -143,7 +139,7 @@ const removeMembershipRoute = createRoute({
   middleware: [requirePermission("roles:manage")] as const,
   request: { params: Id },
   responses: {
-    200: json(AdminUserDto, "Rôle retiré"),
+    200: jsonResponse(AdminUserDto, "Rôle retiré"),
     404: errorResponse("Rôle introuvable"),
     ...common,
   },
@@ -154,9 +150,9 @@ const setAdminRoute = createRoute({
   path: "/admin/users/{id}/admin",
   tags: ["admin"],
   middleware: [requirePermission("roles:manage")] as const,
-  request: { params: Id, ...body(SetAdminInput) },
+  request: { params: Id, ...jsonBody(SetAdminInput) },
   responses: {
-    200: json(AdminUserDto, "Droits d'administrateur changés"),
+    200: jsonResponse(AdminUserDto, "Droits d'administrateur changés"),
     404: errorResponse("Compte introuvable"),
     ...common,
   },
@@ -170,7 +166,10 @@ const auditRoute = createRoute({
   tags: ["admin"],
   middleware: [requirePermission("audit:read")] as const,
   request: { query: AuditQuery },
-  responses: { 200: json(paginated(AuditEntryDto), "Journal des actions sensibles"), ...common },
+  responses: {
+    200: jsonResponse(paginated(AuditEntryDto), "Journal des actions sensibles"),
+    ...common,
+  },
 });
 
 export function createAdminRouter() {

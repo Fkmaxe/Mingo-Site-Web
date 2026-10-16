@@ -8,7 +8,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse, paginated } from "../../core/http";
+import { errorResponse, jsonResponse, paginated } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   cancelRegistration,
@@ -17,11 +17,6 @@ import {
   listRegistrants,
   register,
 } from "./registrations.service";
-
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
 
 const EventIdParams = z.object({ eventId: z.uuid() });
 const RegistrationIdParams = z.object({ registrationId: z.uuid() });
@@ -39,7 +34,7 @@ const registerRoute = createRoute({
     },
   },
   responses: {
-    201: json(TicketDto, "Inscription confirmée, billet créé"),
+    201: jsonResponse(TicketDto, "Inscription confirmée, billet créé"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Événement introuvable"),
     409: errorResponse("ALREADY_REGISTERED, EVENT_FULL, DEADLINE_PASSED ou REGISTRATION_CLOSED"),
@@ -53,7 +48,7 @@ const registrantsRoute = createRoute({
   middleware: [requirePermission("registrations:read")] as const,
   request: { params: EventIdParams, query: ListRegistrantsQuery },
   responses: {
-    200: json(paginated(RegistrantDto), "Inscrits de l'événement"),
+    200: jsonResponse(paginated(RegistrantDto), "Inscrits de l'événement"),
     403: errorResponse("Pas le droit de voir les inscrits de cet événement"),
     404: errorResponse("Événement introuvable"),
   },
@@ -66,7 +61,7 @@ const myTicketsRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { query: ListTicketsQuery },
   responses: {
-    200: json(z.array(TicketDto), "Mes billets (hors inscriptions annulées)"),
+    200: jsonResponse(z.array(TicketDto), "Mes billets (hors inscriptions annulées)"),
     401: errorResponse("Pas de session"),
   },
 });
@@ -78,7 +73,7 @@ const ticketRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { params: RegistrationIdParams },
   responses: {
-    200: json(TicketDto, "Mon billet"),
+    200: jsonResponse(TicketDto, "Mon billet"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Billet introuvable"),
   },
@@ -91,7 +86,7 @@ const cancelRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { params: RegistrationIdParams },
   responses: {
-    200: json(TicketDto, "Inscription annulée"),
+    200: jsonResponse(TicketDto, "Inscription annulée"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Inscription introuvable"),
     409: errorResponse("L'événement a commencé"),

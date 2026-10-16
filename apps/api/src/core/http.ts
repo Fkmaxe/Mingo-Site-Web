@@ -8,6 +8,42 @@ export function paginated<T extends z.ZodType>(item: T) {
 
 export type Page<T> = { items: T[]; nextCursor: string | null };
 
+/** OpenAPI response entry with a JSON body. */
+export function jsonResponse<T extends z.ZodType>(schema: T, description: string) {
+  return { content: { "application/json": { schema } }, description };
+}
+
+/** OpenAPI request entry with a (required) JSON body. */
+export function jsonBody<T extends z.ZodType>(schema: T) {
+  return { body: { content: { "application/json": { schema } }, required: true } };
+}
+
+/** Photos and PDF are shown in the page; other files are downloaded under their name. */
+const INLINE_TYPES: readonly string[] = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+];
+
+/**
+ * A stored file (task file, application document, receipt) sent back as is. Names are random
+ * and never reused: it can be cached for good.
+ */
+export function fileResponse(file: { bytes: Uint8Array; type: string; name: string }): Response {
+  const disposition = INLINE_TYPES.includes(file.type)
+    ? "inline"
+    : `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`;
+  return new Response(file.bytes, {
+    headers: {
+      "content-type": file.type,
+      "content-disposition": disposition,
+      "cache-control": "private, max-age=31536000, immutable",
+      "x-content-type-options": "nosniff",
+    },
+  });
+}
+
 /** Reusable OpenAPI response entry for error statuses. */
 export function errorResponse(description: string) {
   return { content: { "application/json": { schema: ApiErrorBody } }, description };

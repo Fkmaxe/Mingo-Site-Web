@@ -5,8 +5,8 @@ import { Download, FileText, Paperclip, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
+import { fileSizeLabel } from "@/lib/file-size";
 import { removeTaskFileAction, uploadTaskFileAction } from "./actions";
-import { fileSizeLabel } from "./labels";
 import type { TaskAttachment, TaskDetail } from "./types";
 import { useTaskAction } from "./use-task-action";
 

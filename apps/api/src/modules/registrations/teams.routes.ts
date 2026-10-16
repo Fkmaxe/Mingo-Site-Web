@@ -2,14 +2,9 @@ import { CreateTeamInput, JoinTeamInput, TeamDto } from "@bde/shared";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import { createTeam, getMyTeam, joinTeam, listTeams } from "./teams.service";
-
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
 
 const EventIdParams = z.object({ eventId: z.uuid() });
 
@@ -23,7 +18,7 @@ const createTeamRoute = createRoute({
     body: { content: { "application/json": { schema: CreateTeamInput } }, required: true },
   },
   responses: {
-    201: json(TeamDto, "Équipe créée, capitaine inscrit·e"),
+    201: jsonResponse(TeamDto, "Équipe créée, capitaine inscrit·e"),
     400: errorResponse("Nom ou réponses invalides"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Événement introuvable"),
@@ -43,7 +38,7 @@ const joinTeamRoute = createRoute({
     body: { content: { "application/json": { schema: JoinTeamInput } }, required: true },
   },
   responses: {
-    201: json(TeamDto, "Équipe rejointe, inscription créée"),
+    201: jsonResponse(TeamDto, "Équipe rejointe, inscription créée"),
     400: errorResponse("Code ou réponses invalides"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Événement ou équipe introuvable"),
@@ -60,7 +55,7 @@ const myTeamRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { params: EventIdParams },
   responses: {
-    200: json(TeamDto, "Mon équipe pour cet événement"),
+    200: jsonResponse(TeamDto, "Mon équipe pour cet événement"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Événement introuvable ou pas d'équipe"),
     409: errorResponse("NOT_TEAM_EVENT"),
@@ -74,7 +69,7 @@ const teamsRoute = createRoute({
   middleware: [requirePermission("registrations:read")] as const,
   request: { params: EventIdParams },
   responses: {
-    200: json(z.array(TeamDto), "Équipes de l'événement"),
+    200: jsonResponse(z.array(TeamDto), "Équipes de l'événement"),
     403: errorResponse("Pas le droit de voir les équipes de cet événement"),
     404: errorResponse("Événement introuvable"),
   },

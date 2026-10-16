@@ -2,17 +2,10 @@ import { ClassesDto, ClassLevelInput, TrackInput } from "@bde/shared";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import { createLevel, createTrack, editLevel, editTrack, listClasses } from "./classes.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } }, required: true },
-});
 const Id = z.object({ id: z.uuid() });
 const writeErrors = {
   400: errorResponse("Nom invalide"),
@@ -27,7 +20,10 @@ const listRoute = createRoute({
   path: "/classes",
   tags: ["classes"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(ClassesDto, "Niveaux et filières"), 401: errorResponse("Pas de session") },
+  responses: {
+    200: jsonResponse(ClassesDto, "Niveaux et filières"),
+    401: errorResponse("Pas de session"),
+  },
 });
 
 const route = <M extends "post" | "put">(
@@ -41,8 +37,8 @@ const route = <M extends "post" | "put">(
     path,
     tags: ["classes"],
     middleware: [requirePermission("settings:manage")] as const,
-    request: withId ? { params: Id, ...body(schema) } : body(schema),
-    responses: { 200: json(ClassesDto, "Niveaux et filières"), ...writeErrors },
+    request: withId ? { params: Id, ...jsonBody(schema) } : jsonBody(schema),
+    responses: { 200: jsonResponse(ClassesDto, "Niveaux et filières"), ...writeErrors },
   });
 
 const createLevelRoute = route("post", "/admin/levels", ClassLevelInput, false);

@@ -4,6 +4,7 @@ import type { UpdateClassData, UpdateProfileInput } from "@bde/shared";
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
+import { rawBody } from "@/lib/upload";
 
 export async function updateProfileAction(input: UpdateProfileInput): Promise<ActionResult> {
   const { error } = await (await api()).PATCH("/v1/me", { body: input });
@@ -26,11 +27,7 @@ export async function uploadAvatarAction(form: FormData): Promise<ActionResult> 
   if (!(file instanceof Blob)) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Aucune photo.", fieldErrors: {} };
   }
-  const { error } = await (await api()).PUT("/v1/me/avatar", {
-    body: new Uint8Array(await file.arrayBuffer()) as unknown as string,
-    bodySerializer: (body) => body as unknown as BodyInit,
-    headers: { "content-type": "image/jpeg" },
-  });
+  const { error } = await (await api()).PUT("/v1/me/avatar", await rawBody(file, "image/jpeg"));
   if (error) return fromApiError(error);
   revalidatePath("/", "layout");
   return { ok: true };

@@ -14,7 +14,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   createSport,
@@ -32,13 +32,6 @@ import {
   validateResults,
 } from "./league.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } }, required: true },
-});
 const Id = z.object({ id: z.uuid() });
 const EventRef = z.object({ eventRef: z.string().min(1) });
 const EventId = z.object({ eventId: z.uuid() });
@@ -69,7 +62,7 @@ const leagueRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { query: LeagueQuery },
   responses: {
-    200: json(LeagueDto, "Saison, classement général et résultats"),
+    200: jsonResponse(LeagueDto, "Saison, classement général et résultats"),
     401: errorResponse("Pas de session"),
     422: errorResponse("NO_CURRENT_SCHOOL_YEAR"),
   },
@@ -81,7 +74,7 @@ const myLeagueRoute = createRoute({
   tags: ["league"],
   middleware: [requireAuth] as const,
   responses: {
-    200: json(MyLeagueDto, "Rang, points et événements de la personne connectée"),
+    200: jsonResponse(MyLeagueDto, "Rang, points et événements de la personne connectée"),
     401: errorResponse("Pas de session"),
   },
 });
@@ -91,8 +84,8 @@ const saveSeasonRoute = createRoute({
   path: "/league",
   tags: ["league"],
   middleware: [requirePermission("league:manage")] as const,
-  request: body(LeagueSeasonInput),
-  responses: { 200: json(LeagueDto, "Réglages enregistrés"), ...seasonErrors },
+  request: jsonBody(LeagueSeasonInput),
+  responses: { 200: jsonResponse(LeagueDto, "Réglages enregistrés"), ...seasonErrors },
 });
 
 const createSportRoute = createRoute({
@@ -100,8 +93,8 @@ const createSportRoute = createRoute({
   path: "/league/sports",
   tags: ["league"],
   middleware: [requirePermission("league:manage")] as const,
-  request: body(SportInput),
-  responses: { 200: json(LeagueDto, "Sport ajouté"), ...seasonErrors },
+  request: jsonBody(SportInput),
+  responses: { 200: jsonResponse(LeagueDto, "Sport ajouté"), ...seasonErrors },
 });
 
 const editSportRoute = createRoute({
@@ -109,8 +102,8 @@ const editSportRoute = createRoute({
   path: "/league/sports/{id}",
   tags: ["league"],
   middleware: [requirePermission("league:manage")] as const,
-  request: { params: Id, ...body(SportInput) },
-  responses: { 200: json(LeagueDto, "Sport renommé"), ...seasonErrors },
+  request: { params: Id, ...jsonBody(SportInput) },
+  responses: { 200: jsonResponse(LeagueDto, "Sport renommé"), ...seasonErrors },
 });
 
 const eventLeagueRoute = createRoute({
@@ -120,7 +113,7 @@ const eventLeagueRoute = createRoute({
   middleware: [requireAuth] as const,
   request: { params: EventRef },
   responses: {
-    200: json(EventLeagueDto, "Ligue, tournoi et résultats de l'événement"),
+    200: jsonResponse(EventLeagueDto, "Ligue, tournoi et résultats de l'événement"),
     401: errorResponse("Pas de session"),
     404: errorResponse("Événement introuvable"),
     422: errorResponse("NO_CURRENT_SCHOOL_YEAR"),
@@ -138,8 +131,8 @@ const eventWrite = <M extends "post" | "put" | "delete">(
     path,
     tags: ["league"],
     middleware: [requirePermission("events:update")] as const,
-    request: schema ? { params: EventId, ...body(schema) } : { params: EventId },
-    responses: { 200: json(EventLeagueDto, description), ...eventErrors },
+    request: schema ? { params: EventId, ...jsonBody(schema) } : { params: EventId },
+    responses: { 200: jsonResponse(EventLeagueDto, description), ...eventErrors },
   });
 
 const setSportRoute = eventWrite(
@@ -176,8 +169,8 @@ const recordMatchRoute = createRoute({
   path: "/tournament-matches/{id}",
   tags: ["league"],
   middleware: [requirePermission("events:update")] as const,
-  request: { params: Id, ...body(RecordMatchInput) },
-  responses: { 200: json(EventLeagueDto, "Résultat enregistré"), ...eventErrors },
+  request: { params: Id, ...jsonBody(RecordMatchInput) },
+  responses: { 200: jsonResponse(EventLeagueDto, "Résultat enregistré"), ...eventErrors },
 });
 
 const matchLiveRoute = createRoute({
@@ -185,8 +178,8 @@ const matchLiveRoute = createRoute({
   path: "/tournament-matches/{id}/live",
   tags: ["league"],
   middleware: [requirePermission("events:update")] as const,
-  request: { params: Id, ...body(MatchLiveInput) },
-  responses: { 200: json(EventLeagueDto, "Match lancé ou arrêté"), ...eventErrors },
+  request: { params: Id, ...jsonBody(MatchLiveInput) },
+  responses: { 200: jsonResponse(EventLeagueDto, "Match lancé ou arrêté"), ...eventErrors },
 });
 
 export function createLeagueRouter() {

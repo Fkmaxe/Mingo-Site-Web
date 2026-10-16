@@ -8,7 +8,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   createMeeting,
@@ -19,13 +19,6 @@ import {
   updateMeeting,
 } from "./meetings.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 const errors = {
   400: errorResponse("Données invalides"),
   401: errorResponse("Pas de session"),
@@ -40,7 +33,7 @@ const listRoute = createRoute({
   tags: ["meetings"],
   middleware: [requirePermission("members:read")] as const,
   request: { query: ListMeetingsQuery },
-  responses: { 200: json(z.array(MeetingDto), "Réunions visibles"), ...errors },
+  responses: { 200: jsonResponse(z.array(MeetingDto), "Réunions visibles"), ...errors },
 });
 const getRoute = createRoute({
   method: "get",
@@ -48,23 +41,26 @@ const getRoute = createRoute({
   tags: ["meetings"],
   middleware: [requirePermission("members:read")] as const,
   request: { params: Params },
-  responses: { 200: json(MeetingDto, "Réunion (présences pour l'organisateur)"), ...errors },
+  responses: {
+    200: jsonResponse(MeetingDto, "Réunion (présences pour l'organisateur)"),
+    ...errors,
+  },
 });
 const createMeetingRoute = createRoute({
   method: "post",
   path: "/meetings",
   tags: ["meetings"],
   middleware: [requirePermission("meetings:manage")] as const,
-  request: body(CreateMeetingInput),
-  responses: { 201: json(MeetingDto, "Réunion créée"), ...errors },
+  request: jsonBody(CreateMeetingInput),
+  responses: { 201: jsonResponse(MeetingDto, "Réunion créée"), ...errors },
 });
 const updateRoute = createRoute({
   method: "patch",
   path: "/meetings/{meetingId}",
   tags: ["meetings"],
   middleware: [requirePermission("meetings:manage")] as const,
-  request: { params: Params, ...body(UpdateMeetingInput) },
-  responses: { 200: json(MeetingDto, "Réunion modifiée"), ...errors },
+  request: { params: Params, ...jsonBody(UpdateMeetingInput) },
+  responses: { 200: jsonResponse(MeetingDto, "Réunion modifiée"), ...errors },
 });
 const deleteRoute = createRoute({
   method: "delete",
@@ -79,9 +75,9 @@ const attendanceRoute = createRoute({
   path: "/meetings/{meetingId}/attendance",
   tags: ["meetings"],
   middleware: [requirePermission("meetings:manage")] as const,
-  request: { params: Params, ...body(SetAttendanceInput) },
+  request: { params: Params, ...jsonBody(SetAttendanceInput) },
   responses: {
-    200: json(MeetingDto, "Présence enregistrée"),
+    200: jsonResponse(MeetingDto, "Présence enregistrée"),
     422: errorResponse("Personne non attendue"),
     ...errors,
   },

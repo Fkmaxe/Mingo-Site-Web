@@ -2,7 +2,7 @@ import { CreatePartnerInput, PartnerDto, PublicPartnerDto, UpdatePartnerInput } 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   createPartner,
@@ -13,13 +13,6 @@ import {
   updatePartner,
 } from "./partners.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 const errors = {
   400: errorResponse("Données invalides"),
   401: errorResponse("Pas de session"),
@@ -32,14 +25,14 @@ const publicRoute = createRoute({
   method: "get",
   path: "/partners/public",
   tags: ["partners"],
-  responses: { 200: json(z.array(PublicPartnerDto), "Partenaires actifs (page publique)") },
+  responses: { 200: jsonResponse(z.array(PublicPartnerDto), "Partenaires actifs (page publique)") },
 });
 const listRoute = createRoute({
   method: "get",
   path: "/partners",
   tags: ["partners"],
   middleware: [requirePermission("members:read")] as const,
-  responses: { 200: json(z.array(PartnerDto), "Fiches partenaires"), ...errors },
+  responses: { 200: jsonResponse(z.array(PartnerDto), "Fiches partenaires"), ...errors },
 });
 const getRoute = createRoute({
   method: "get",
@@ -47,15 +40,15 @@ const getRoute = createRoute({
   tags: ["partners"],
   middleware: [requirePermission("members:read")] as const,
   request: { params: Params },
-  responses: { 200: json(PartnerDto, "Fiche partenaire"), ...errors },
+  responses: { 200: jsonResponse(PartnerDto, "Fiche partenaire"), ...errors },
 });
 const createPartnerRoute = createRoute({
   method: "post",
   path: "/partners",
   tags: ["partners"],
   middleware: [requirePermission("partners:manage")] as const,
-  request: body(CreatePartnerInput),
-  responses: { 201: json(PartnerDto, "Partenaire créé"), ...errors },
+  request: jsonBody(CreatePartnerInput),
+  responses: { 201: jsonResponse(PartnerDto, "Partenaire créé"), ...errors },
 });
 // The board or the partner's referent: checked in the service.
 const updateRoute = createRoute({
@@ -63,8 +56,8 @@ const updateRoute = createRoute({
   path: "/partners/{partnerId}",
   tags: ["partners"],
   middleware: [requireAuth] as const,
-  request: { params: Params, ...body(UpdatePartnerInput) },
-  responses: { 200: json(PartnerDto, "Fiche modifiée"), ...errors },
+  request: { params: Params, ...jsonBody(UpdatePartnerInput) },
+  responses: { 200: jsonResponse(PartnerDto, "Fiche modifiée"), ...errors },
 });
 const deleteRoute = createRoute({
   method: "delete",

@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, ilike, inArray, isNull, or, type SQL, sql } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
+import { containsPattern } from "../../db/like";
 import { auditLog, membership, pole, schoolYear, user } from "../../db/schema";
 
 // --- School years ---
@@ -99,9 +100,6 @@ const userSelection = {
 };
 
 /** Wildcards of the search are escaped. */
-function contains(text: string) {
-  return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-}
 
 export type UserScope = "all" | "roles" | "unverified";
 
@@ -111,7 +109,7 @@ function usersWhere(params: {
   schoolYearId: string | null;
 }) {
   const search = params.q
-    ? or(ilike(user.name, contains(params.q)), ilike(user.email, contains(params.q)))
+    ? or(ilike(user.name, containsPattern(params.q)), ilike(user.email, containsPattern(params.q)))
     : undefined;
   let scope: SQL | undefined;
   if (params.scope === "roles") {

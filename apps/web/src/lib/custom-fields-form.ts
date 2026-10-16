@@ -25,16 +25,26 @@ export const emptyCustomField = (): CustomFieldFormValues => ({
 });
 
 /** Existing keys are kept; new fields get a key from their label, made unique. */
-export function toCustomFields(rows: CustomFieldFormValues[]) {
+/**
+ * Keys of the rows: an existing one is kept (answers are stored under it), a new row gets one
+ * from its label, made unique (« taille », « taille_2 »…).
+ */
+export function uniqueKeys(rows: { key: string; label: string }[], fallback: string): string[] {
   const used = new Set(rows.map((r) => r.key).filter(Boolean));
   return rows.map((row) => {
-    let key = row.key;
-    if (!key) {
-      const base = fieldKey(row.label || "champ");
-      key = base;
-      for (let n = 2; used.has(key); n++) key = `${base.slice(0, 36)}_${n}`;
-      used.add(key);
-    }
+    if (row.key) return row.key;
+    const base = fieldKey(row.label || fallback);
+    let key = base;
+    for (let n = 2; used.has(key); n++) key = `${base.slice(0, 36)}_${n}`;
+    used.add(key);
+    return key;
+  });
+}
+
+export function toCustomFields(rows: CustomFieldFormValues[]) {
+  const keys = uniqueKeys(rows, "champ");
+  return rows.map((row, index) => {
+    const key = keys[index] ?? row.key;
     const options = row.options
       .split("\n")
       .map((o) => o.trim())

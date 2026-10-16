@@ -5,14 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FormAlert } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
+import { fileSizeLabel } from "@/lib/file-size";
 import { removeAttachmentAction } from "./actions";
 import { type PendingReceipt, ReceiptPicker, uploadReceipts } from "./receipt-picker";
 import type { Attachment } from "./types";
-
-const sizeLabel = (bytes: number) =>
-  bytes < 1024 * 1024
-    ? `${Math.max(1, Math.round(bytes / 1024))} Ko`
-    : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
 
 /**
  * Receipts of an entry, shown in the page: photos as thumbnails (full size in a new tab), PDF
@@ -122,7 +118,9 @@ export function Attachments({
               <span className="truncate">{a.name}</span>
               <ExternalLink aria-hidden className="size-3.5 shrink-0" />
             </a>
-            <span className="shrink-0 text-muted-foreground text-xs">{sizeLabel(a.sizeBytes)}</span>
+            <span className="shrink-0 text-muted-foreground text-xs">
+              {fileSizeLabel(a.sizeBytes)}
+            </span>
             {removeButton(a)}
           </div>
           {/* Phones open the PDF in their own viewer; larger screens show it here. */}

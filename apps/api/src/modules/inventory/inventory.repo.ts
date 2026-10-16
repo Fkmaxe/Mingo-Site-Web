@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "../../db/client";
+import { containsPattern } from "../../db/like";
 import {
   event,
   inventoryCategory,
@@ -95,10 +96,6 @@ const itemSelection = (now: Date) => ({
 
 export type ItemRow = Awaited<ReturnType<typeof findItem>> & {};
 
-function contains(text: string) {
-  return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-}
-
 export function findItems(
   db: DbOrTx,
   filters: {
@@ -117,9 +114,9 @@ export function findItems(
     filters.q
       ? or(
           filters.number !== null ? eq(inventoryItem.number, filters.number) : undefined,
-          ilike(inventoryItem.name, contains(filters.q)),
-          ilike(inventoryItem.description, contains(filters.q)),
-          ilike(inventoryCategory.name, contains(filters.q)),
+          ilike(inventoryItem.name, containsPattern(filters.q)),
+          ilike(inventoryItem.description, containsPattern(filters.q)),
+          ilike(inventoryCategory.name, containsPattern(filters.q)),
         )
       : undefined,
     filters.locationId ? eq(inventoryItem.locationId, filters.locationId) : undefined,

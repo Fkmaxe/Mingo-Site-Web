@@ -18,7 +18,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx } from "../../core/context";
 import { AppError, throwOnValidationError } from "../../core/errors";
-import { errorResponse, paginated } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse, paginated } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import type { PhotoStore } from "../../lib/storage";
 import {
@@ -40,13 +40,6 @@ import {
   setPhoto,
 } from "./inventory.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } }, required: true },
-});
 const Id = z.object({ id: z.uuid() });
 const common = { 401: errorResponse("Pas de session"), 403: errorResponse("Réservé aux membres") };
 const itemErrors = {
@@ -63,7 +56,7 @@ const listRoute = createRoute({
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
   request: { query: ListItemsQuery },
-  responses: { 200: json(z.array(ItemDto), "Matériel (500 au plus)"), ...common },
+  responses: { 200: jsonResponse(z.array(ItemDto), "Matériel (500 au plus)"), ...common },
 });
 
 const createItemRoute = createRoute({
@@ -71,8 +64,8 @@ const createItemRoute = createRoute({
   path: "/inventory/items",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: body(CreateItemInput),
-  responses: { 201: json(ItemDto, "Objet ajouté"), ...itemErrors },
+  request: jsonBody(CreateItemInput),
+  responses: { 201: jsonResponse(ItemDto, "Objet ajouté"), ...itemErrors },
 });
 
 const getItemRoute = createRoute({
@@ -81,7 +74,7 @@ const getItemRoute = createRoute({
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
   request: { params: Id },
-  responses: { 200: json(ItemDto, "Objet"), ...itemErrors },
+  responses: { 200: jsonResponse(ItemDto, "Objet"), ...itemErrors },
 });
 
 const editItemRoute = createRoute({
@@ -89,8 +82,8 @@ const editItemRoute = createRoute({
   path: "/inventory/items/{id}",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: { params: Id, ...body(UpdateItemInput) },
-  responses: { 200: json(ItemDto, "Objet modifié (historisé)"), ...itemErrors },
+  request: { params: Id, ...jsonBody(UpdateItemInput) },
+  responses: { 200: jsonResponse(ItemDto, "Objet modifié (historisé)"), ...itemErrors },
 });
 
 const adjustRoute = createRoute({
@@ -98,8 +91,8 @@ const adjustRoute = createRoute({
   path: "/inventory/items/{id}/adjust",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: { params: Id, ...body(AdjustQuantityInput) },
-  responses: { 200: json(ItemDto, "Stock ajusté"), ...itemErrors },
+  request: { params: Id, ...jsonBody(AdjustQuantityInput) },
+  responses: { 200: jsonResponse(ItemDto, "Stock ajusté"), ...itemErrors },
 });
 
 const checkoutRoute = createRoute({
@@ -107,8 +100,8 @@ const checkoutRoute = createRoute({
   path: "/inventory/items/{id}/checkouts",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: { params: Id, ...body(CheckoutInput) },
-  responses: { 200: json(ItemDto, "Sorti"), ...itemErrors },
+  request: { params: Id, ...jsonBody(CheckoutInput) },
+  responses: { 200: jsonResponse(ItemDto, "Sorti"), ...itemErrors },
 });
 
 const returnRoute = createRoute({
@@ -116,8 +109,8 @@ const returnRoute = createRoute({
   path: "/inventory/checkouts/{id}/return",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: { params: Id, ...body(ReturnInput) },
-  responses: { 200: json(ItemDto, "Rendu"), ...itemErrors },
+  request: { params: Id, ...jsonBody(ReturnInput) },
+  responses: { 200: jsonResponse(ItemDto, "Rendu"), ...itemErrors },
 });
 
 const archiveRoute = createRoute({
@@ -125,8 +118,8 @@ const archiveRoute = createRoute({
   path: "/inventory/items/{id}/archive",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:archive")] as const,
-  request: { params: Id, ...body(NoteInput) },
-  responses: { 200: json(ItemDto, "Archivé"), ...itemErrors },
+  request: { params: Id, ...jsonBody(NoteInput) },
+  responses: { 200: jsonResponse(ItemDto, "Archivé"), ...itemErrors },
 });
 
 const restoreRoute = createRoute({
@@ -135,7 +128,7 @@ const restoreRoute = createRoute({
   tags: ["inventory"],
   middleware: [requirePermission("inventory:archive")] as const,
   request: { params: Id },
-  responses: { 200: json(ItemDto, "Restauré"), ...itemErrors },
+  responses: { 200: jsonResponse(ItemDto, "Restauré"), ...itemErrors },
 });
 
 const photoUploadRoute = createRoute({
@@ -151,7 +144,7 @@ const photoUploadRoute = createRoute({
       description: "L'image elle-même (3 Mo au plus), réduite par le navigateur",
     },
   },
-  responses: { 200: json(ItemDto, "Photo enregistrée"), ...itemErrors },
+  responses: { 200: jsonResponse(ItemDto, "Photo enregistrée"), ...itemErrors },
 });
 
 const photoDeleteRoute = createRoute({
@@ -160,7 +153,7 @@ const photoDeleteRoute = createRoute({
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
   request: { params: Id },
-  responses: { 200: json(ItemDto, "Photo retirée"), ...itemErrors },
+  responses: { 200: jsonResponse(ItemDto, "Photo retirée"), ...itemErrors },
 });
 
 const photoRoute = createRoute({
@@ -185,7 +178,10 @@ const historyRoute = createRoute({
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
   request: { query: HistoryQuery.extend({ itemId: z.uuid().optional() }) },
-  responses: { 200: json(paginated(MovementDto), "Historique, le plus récent d'abord"), ...common },
+  responses: {
+    200: jsonResponse(paginated(MovementDto), "Historique, le plus récent d'abord"),
+    ...common,
+  },
 });
 
 const locationsRoute = createRoute({
@@ -193,7 +189,7 @@ const locationsRoute = createRoute({
   path: "/inventory/locations",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  responses: { 200: json(z.array(LocationDto), "Lieux de rangement"), ...common },
+  responses: { 200: jsonResponse(z.array(LocationDto), "Lieux de rangement"), ...common },
 });
 
 const createLocationRoute = createRoute({
@@ -201,9 +197,9 @@ const createLocationRoute = createRoute({
   path: "/inventory/locations",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: body(CreateLocationInput),
+  request: jsonBody(CreateLocationInput),
   responses: {
-    201: json(z.array(LocationDto), "Lieu ajouté"),
+    201: jsonResponse(z.array(LocationDto), "Lieu ajouté"),
     ...common,
     400: errorResponse("Nom invalide"),
     409: errorResponse("ALREADY_EXISTS"),
@@ -215,7 +211,7 @@ const categoriesRoute = createRoute({
   path: "/inventory/categories",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  responses: { 200: json(z.array(CategoryDto), "Catégories"), ...common },
+  responses: { 200: jsonResponse(z.array(CategoryDto), "Catégories"), ...common },
 });
 
 const createCategoryRoute = createRoute({
@@ -223,9 +219,9 @@ const createCategoryRoute = createRoute({
   path: "/inventory/categories",
   tags: ["inventory"],
   middleware: [requirePermission("inventory:manage")] as const,
-  request: body(CreateCategoryInput),
+  request: jsonBody(CreateCategoryInput),
   responses: {
-    201: json(z.array(CategoryDto), "Catégorie ajoutée"),
+    201: jsonResponse(z.array(CategoryDto), "Catégorie ajoutée"),
     ...common,
     400: errorResponse("Nom invalide"),
     409: errorResponse("ALREADY_EXISTS"),

@@ -1,4 +1,4 @@
-import { EVENT_STATUS_LABELS, EVENT_VISIBILITY_LABELS } from "@/lib/labels";
+import { EVENT_STATUS_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import type { Event } from "./types";
 
@@ -18,14 +18,6 @@ export function StatusBadge({ status }: { status: Event["status"] }) {
       )}
     >
       {EVENT_STATUS_LABELS[status]}
-    </span>
-  );
-}
-
-export function VisibilityBadge({ visibility }: { visibility: Event["visibility"] }) {
-  return (
-    <span className="w-fit rounded-full bg-secondary px-2.5 py-0.5 font-semibold text-secondary-foreground text-xs">
-      {EVENT_VISIBILITY_LABELS[visibility]}
     </span>
   );
 }

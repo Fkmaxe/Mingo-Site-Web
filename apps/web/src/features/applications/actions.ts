@@ -1,13 +1,10 @@
 "use server";
 
-import {
-  type CreateApplicationData,
-  DOCUMENT_FILE_TYPES,
-  type DocumentFileType,
-} from "@bde/shared";
+import type { CreateApplicationData } from "@bde/shared";
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
+import { documentType, rawBody, readUpload } from "@/lib/upload";
 import type { ApplicationFormInput } from "./types";
 
 function revalidate() {
@@ -56,37 +53,15 @@ export async function updateApplicationFormAction(
   return error ? fromApiError(error) : done();
 }
 
-/** Office types by extension, for browsers that give no type (or a generic one). */
-const TYPE_BY_EXTENSION: Record<string, DocumentFileType> = {
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  doc: "application/msword",
-  xls: "application/vnd.ms-excel",
-  ppt: "application/vnd.ms-powerpoint",
-  txt: "text/plain",
-  csv: "text/csv",
-  pdf: "application/pdf",
-};
-
 /** Hands in a file (form fields `file` and `name`); the API checks the type from the bytes. */
 export async function handInFileAction(key: string, form: FormData): Promise<ActionResult> {
-  const file = form.get("file");
-  const rawName = form.get("name");
-  if (!(file instanceof Blob)) {
+  const upload = readUpload(form, "document");
+  if (!upload) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Aucun fichier.", fieldErrors: {} };
   }
-  const name = typeof rawName === "string" && rawName.trim() ? rawName.trim() : "document";
-  const declared = file.type.split(";")[0] ?? "";
-  const type = (DOCUMENT_FILE_TYPES as readonly string[]).includes(declared)
-    ? (declared as DocumentFileType)
-    : (TYPE_BY_EXTENSION[name.split(".").pop()?.toLowerCase() ?? ""] ?? "application/pdf");
   const { error } = await (await api()).POST("/v1/me/application/documents/{key}", {
-    params: { path: { key }, query: { name: name.slice(0, 200) } },
-    // Raw file bytes, not JSON.
-    body: new Uint8Array(await file.arrayBuffer()) as unknown as string,
-    bodySerializer: (body) => body as unknown as BodyInit,
-    headers: { "content-type": type },
+    params: { path: { key }, query: { name: upload.name } },
+    ...(await rawBody(upload.file, documentType(upload.file, upload.name))),
   });
   return error ? fromApiError(error) : done();
 }

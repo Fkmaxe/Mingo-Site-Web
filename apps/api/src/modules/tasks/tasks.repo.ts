@@ -16,6 +16,7 @@ import {
   sql,
 } from "drizzle-orm";
 import type { DbOrTx } from "../../db/client";
+import { containsPattern } from "../../db/like";
 import { compact, type Patch } from "../../db/patch";
 import {
   auditLog,
@@ -76,10 +77,6 @@ export function findTasksOfUser(db: DbOrTx, userId: string) {
     .orderBy(...order);
 }
 
-function contains(text: string) {
-  return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-}
-
 /** Gestion → Tâches: the bureau board (if `withBoard`) and the given poles, filtered. */
 export function findManagedTasks(
   db: DbOrTx,
@@ -111,7 +108,10 @@ export function findManagedTasks(
         params.assigneeUserId ? assignedTo(params.assigneeUserId) : undefined,
         params.lateOn ? and(ne(task.status, "done"), lt(task.dueOn, params.lateOn)) : undefined,
         params.q
-          ? or(ilike(task.title, contains(params.q)), ilike(task.description, contains(params.q)))
+          ? or(
+              ilike(task.title, containsPattern(params.q)),
+              ilike(task.description, containsPattern(params.q)),
+            )
           : undefined,
       ),
     )

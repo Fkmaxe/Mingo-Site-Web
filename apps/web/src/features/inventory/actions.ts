@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
+import { rawBody } from "@/lib/upload";
 import type { ItemCondition } from "./types";
 
 type WithId = ActionResult & { id?: string };
@@ -136,13 +137,9 @@ export async function uploadPhotoAction(id: string, form: FormData): Promise<Act
   if (!(file instanceof Blob))
     return { ok: false, code: "VALIDATION_ERROR", message: "Aucune photo.", fieldErrors: {} };
   const type = file.type === "image/png" || file.type === "image/webp" ? file.type : "image/jpeg";
-  const bytes = new Uint8Array(await file.arrayBuffer());
   const { error } = await (await api()).PUT("/v1/inventory/items/{id}/photo", {
     params: { path: { id } },
-    // Raw image bytes, not JSON.
-    body: bytes as unknown as string,
-    bodySerializer: (body) => body as unknown as BodyInit,
-    headers: { "content-type": type },
+    ...(await rawBody(file, type)),
   });
   if (error) return fromApiError(error);
   refresh(id);

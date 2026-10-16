@@ -14,7 +14,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, fileResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import type { DocumentStore } from "../../lib/storage";
 import {
@@ -32,13 +32,6 @@ import {
   withdraw,
 } from "./applications.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 const errors = {
   400: errorResponse("Données invalides"),
   401: errorResponse("Pas de session"),
@@ -49,20 +42,16 @@ const errors = {
 const Params = z.object({ applicationId: z.uuid() });
 const KeyParams = z.object({ key: z.string().regex(/^[a-z][a-z0-9_]{0,39}$/) });
 const Binary = z.string().meta({ format: "binary" });
-/** Photos and PDF are shown in the page; other files are downloaded under their name. */
-const INLINE_TYPES: readonly string[] = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
 
 const formRoute = createRoute({
   method: "get",
   path: "/applications/form",
   tags: ["applications"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(ApplicationFormDto, "Formulaire de candidature de l'année"), ...errors },
+  responses: {
+    200: jsonResponse(ApplicationFormDto, "Formulaire de candidature de l'année"),
+    ...errors,
+  },
 });
 const updateFormRoute = createRoute({
   method: "put",
@@ -70,8 +59,8 @@ const updateFormRoute = createRoute({
   tags: ["applications"],
   // The bureau only: checked in the service.
   middleware: [requirePermission("members:manage")] as const,
-  request: body(UpdateApplicationFormInput),
-  responses: { 200: json(ApplicationFormDto, "Formulaire enregistré"), ...errors },
+  request: jsonBody(UpdateApplicationFormInput),
+  responses: { 200: jsonResponse(ApplicationFormDto, "Formulaire enregistré"), ...errors },
 });
 const fileRoute = createRoute({
   method: "post",
@@ -87,15 +76,15 @@ const fileRoute = createRoute({
       description: "Le fichier lui-même, 10 Mo au plus",
     },
   },
-  responses: { 200: json(ApplicationDto, "Document remis"), ...errors },
+  responses: { 200: jsonResponse(ApplicationDto, "Document remis"), ...errors },
 });
 const linkRoute = createRoute({
   method: "put",
   path: "/me/application/documents/{key}/link",
   tags: ["applications"],
   middleware: [requireAuth] as const,
-  request: { params: KeyParams, ...body(ApplicationLinkInput) },
-  responses: { 200: json(ApplicationDto, "Lien remis"), ...errors },
+  request: { params: KeyParams, ...jsonBody(ApplicationLinkInput) },
+  responses: { 200: jsonResponse(ApplicationDto, "Lien remis"), ...errors },
 });
 const removeDocumentRoute = createRoute({
   method: "delete",
@@ -103,7 +92,7 @@ const removeDocumentRoute = createRoute({
   tags: ["applications"],
   middleware: [requireAuth] as const,
   request: { params: KeyParams },
-  responses: { 200: json(ApplicationDto, "Document retiré"), ...errors },
+  responses: { 200: jsonResponse(ApplicationDto, "Document retiré"), ...errors },
 });
 // The candidate or a reviewer: checked in the service.
 const readFileRoute = createRoute({
@@ -126,8 +115,8 @@ const applyRoute = createRoute({
   path: "/applications",
   tags: ["applications"],
   middleware: [requireAuth] as const,
-  request: body(CreateApplicationInput),
-  responses: { 201: json(ApplicationDto, "Candidature envoyée"), ...errors },
+  request: jsonBody(CreateApplicationInput),
+  responses: { 201: jsonResponse(ApplicationDto, "Candidature envoyée"), ...errors },
 });
 const mineRoute = createRoute({
   method: "get",
@@ -135,7 +124,7 @@ const mineRoute = createRoute({
   tags: ["applications"],
   middleware: [requireAuth] as const,
   responses: {
-    200: json(MyApplicationDto, "Ma candidature de l'année, ou null"),
+    200: jsonResponse(MyApplicationDto, "Ma candidature de l'année, ou null"),
     ...errors,
   },
 });
@@ -152,23 +141,23 @@ const listRoute = createRoute({
   tags: ["applications"],
   middleware: [requirePermission("members:manage")] as const,
   request: { query: ListApplicationsQuery },
-  responses: { 200: json(z.array(ApplicationDto), "Candidatures de l'année"), ...errors },
+  responses: { 200: jsonResponse(z.array(ApplicationDto), "Candidatures de l'année"), ...errors },
 });
 const decideRoute = createRoute({
   method: "post",
   path: "/applications/{applicationId}/decide",
   tags: ["applications"],
   middleware: [requirePermission("members:manage")] as const,
-  request: { params: Params, ...body(DecideApplicationInput) },
-  responses: { 200: json(ApplicationDto, "Statut changé"), ...errors },
+  request: { params: Params, ...jsonBody(DecideApplicationInput) },
+  responses: { 200: jsonResponse(ApplicationDto, "Statut changé"), ...errors },
 });
 const acceptRoute = createRoute({
   method: "post",
   path: "/applications/{applicationId}/accept",
   tags: ["applications"],
   middleware: [requirePermission("members:manage")] as const,
-  request: { params: Params, ...body(AcceptApplicationInput) },
-  responses: { 200: json(ApplicationDto, "Acceptée : adhésion créée"), ...errors },
+  request: { params: Params, ...jsonBody(AcceptApplicationInput) },
+  responses: { 200: jsonResponse(ApplicationDto, "Acceptée : adhésion créée"), ...errors },
 });
 
 export function createApplicationsRouter(files: DocumentStore) {
@@ -202,18 +191,9 @@ export function createApplicationsRouter(files: DocumentStore) {
       c.json(await removeDocument(authedCtx(c.get("ctx")), files, c.req.valid("param").key), 200),
     )
     .openapi(readFileRoute, async (c) => {
-      const file = await readDocument(authedCtx(c.get("ctx")), files, c.req.valid("param").name);
-      const disposition = INLINE_TYPES.includes(file.type)
-        ? "inline"
-        : `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`;
-      return new Response(file.bytes, {
-        headers: {
-          "content-type": file.type,
-          "content-disposition": disposition,
-          "cache-control": "private, max-age=31536000, immutable",
-          "x-content-type-options": "nosniff",
-        },
-      });
+      return fileResponse(
+        await readDocument(authedCtx(c.get("ctx")), files, c.req.valid("param").name),
+      );
     })
     .openapi(applyRoute, async (c) =>
       c.json(await apply(authedCtx(c.get("ctx")), c.req.valid("json")), 201),

@@ -15,7 +15,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, fileResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import type { DocumentStore } from "../../lib/storage";
 import {
@@ -40,10 +40,6 @@ import {
   updateTask,
 } from "./tasks.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
 const errors = {
   400: errorResponse("Données invalides"),
   401: errorResponse("Pas de session"),
@@ -56,9 +52,6 @@ const ItemParams = z.object({ itemId: z.uuid() });
 const CommentParams = z.object({ commentId: z.uuid() });
 const AttachmentParams = z.object({ attachmentId: z.uuid() });
 const Binary = z.string().meta({ format: "binary" });
-const jsonBody = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 
 // Pole-level rights (member of the pole, lead of the pole, assignee, author of a personal task)
 // are checked in the service.
@@ -68,14 +61,14 @@ const listRoute = createRoute({
   tags: ["tasks"],
   middleware: [requirePermission("members:read")] as const,
   request: { params: PoleParams },
-  responses: { 200: json(z.array(TaskDto), "Tâches du pôle"), ...errors },
+  responses: { 200: jsonResponse(z.array(TaskDto), "Tâches du pôle"), ...errors },
 });
 const mineRoute = createRoute({
   method: "get",
   path: "/me/tasks",
   tags: ["tasks"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(z.array(TaskDto), "Mes tâches : assignées et perso"), ...errors },
+  responses: { 200: jsonResponse(z.array(TaskDto), "Mes tâches : assignées et perso"), ...errors },
 });
 const createPersonalRoute = createRoute({
   method: "post",
@@ -84,14 +77,14 @@ const createPersonalRoute = createRoute({
   // Members of the year only: checked in the service.
   middleware: [requireAuth] as const,
   request: { body: { content: { "application/json": { schema: CreatePersonalTaskInput } } } },
-  responses: { 201: json(TaskDetailDto, "Tâche perso créée"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Tâche perso créée"), ...errors },
 });
 const boardListRoute = createRoute({
   method: "get",
   path: "/board/tasks",
   tags: ["tasks"],
   middleware: [requirePermission("poles:all")] as const,
-  responses: { 200: json(z.array(TaskDto), "Tâches du bureau"), ...errors },
+  responses: { 200: jsonResponse(z.array(TaskDto), "Tâches du bureau"), ...errors },
 });
 const boardCreateRoute = createRoute({
   method: "post",
@@ -99,14 +92,17 @@ const boardCreateRoute = createRoute({
   tags: ["tasks"],
   middleware: [requirePermission("poles:all")] as const,
   request: { body: { content: { "application/json": { schema: CreateTaskInput } } } },
-  responses: { 201: json(TaskDetailDto, "Tâche du bureau créée"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Tâche du bureau créée"), ...errors },
 });
 const boardMembersRoute = createRoute({
   method: "get",
   path: "/board/members",
   tags: ["tasks"],
   middleware: [requirePermission("poles:all")] as const,
-  responses: { 200: json(z.array(PoleMemberDto), "Membres du bureau de l'année"), ...errors },
+  responses: {
+    200: jsonResponse(z.array(PoleMemberDto), "Membres du bureau de l'année"),
+    ...errors,
+  },
 });
 const createTaskRoute = createRoute({
   method: "post",
@@ -117,7 +113,7 @@ const createTaskRoute = createRoute({
     params: PoleParams,
     body: { content: { "application/json": { schema: CreateTaskInput } } },
   },
-  responses: { 201: json(TaskDetailDto, "Tâche créée"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Tâche créée"), ...errors },
 });
 const managedRoute = createRoute({
   method: "get",
@@ -126,7 +122,7 @@ const managedRoute = createRoute({
   // Bureau or pole lead: checked in the service.
   middleware: [requirePermission("tasks:manage")] as const,
   request: { query: ListTasksQuery },
-  responses: { 200: json(z.array(TaskDto), "Tâches du bureau et des pôles"), ...errors },
+  responses: { 200: jsonResponse(z.array(TaskDto), "Tâches du bureau et des pôles"), ...errors },
 });
 const getRoute = createRoute({
   method: "get",
@@ -134,7 +130,7 @@ const getRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: TaskParams },
-  responses: { 200: json(TaskDetailDto, "Tâche détaillée"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Tâche détaillée"), ...errors },
 });
 const updateRoute = createRoute({
   method: "patch",
@@ -145,7 +141,7 @@ const updateRoute = createRoute({
     params: TaskParams,
     body: { content: { "application/json": { schema: UpdateTaskInput } } },
   },
-  responses: { 200: json(TaskDetailDto, "Tâche modifiée"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Tâche modifiée"), ...errors },
 });
 const deleteRoute = createRoute({
   method: "delete",
@@ -164,7 +160,7 @@ const checklistAddRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: TaskParams, ...jsonBody(ChecklistItemInput) },
-  responses: { 201: json(TaskDetailDto, "Étape ajoutée"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Étape ajoutée"), ...errors },
 });
 const checklistUpdateRoute = createRoute({
   method: "patch",
@@ -172,7 +168,7 @@ const checklistUpdateRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: ItemParams, ...jsonBody(UpdateChecklistItemInput) },
-  responses: { 200: json(TaskDetailDto, "Étape modifiée"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Étape modifiée"), ...errors },
 });
 const checklistDeleteRoute = createRoute({
   method: "delete",
@@ -180,7 +176,7 @@ const checklistDeleteRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: ItemParams },
-  responses: { 200: json(TaskDetailDto, "Étape retirée"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Étape retirée"), ...errors },
 });
 const commentAddRoute = createRoute({
   method: "post",
@@ -188,7 +184,7 @@ const commentAddRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: TaskParams, ...jsonBody(TaskCommentInput) },
-  responses: { 201: json(TaskDetailDto, "Message ajouté"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Message ajouté"), ...errors },
 });
 const commentDeleteRoute = createRoute({
   method: "delete",
@@ -196,7 +192,7 @@ const commentDeleteRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: CommentParams },
-  responses: { 200: json(TaskDetailDto, "Message retiré"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Message retiré"), ...errors },
 });
 const attachmentUploadRoute = createRoute({
   method: "post",
@@ -212,7 +208,7 @@ const attachmentUploadRoute = createRoute({
       description: "Le fichier lui-même, 10 Mo au plus",
     },
   },
-  responses: { 201: json(TaskDetailDto, "Fichier joint"), ...errors },
+  responses: { 201: jsonResponse(TaskDetailDto, "Fichier joint"), ...errors },
 });
 const attachmentDeleteRoute = createRoute({
   method: "delete",
@@ -220,7 +216,7 @@ const attachmentDeleteRoute = createRoute({
   tags: ["tasks"],
   middleware: [requireAuth] as const,
   request: { params: AttachmentParams },
-  responses: { 200: json(TaskDetailDto, "Fichier retiré"), ...errors },
+  responses: { 200: jsonResponse(TaskDetailDto, "Fichier retiré"), ...errors },
 });
 const attachmentFileRoute = createRoute({
   method: "get",
@@ -236,14 +232,6 @@ const attachmentFileRoute = createRoute({
     ...errors,
   },
 });
-
-/** Photos and PDF are shown in the page; other files are downloaded under their name. */
-const INLINE_TYPES: readonly string[] = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
 
 export function createTasksRouter(files: DocumentStore) {
   return new OpenAPIHono<AppEnv>({ defaultHook: throwOnValidationError })
@@ -338,18 +326,8 @@ export function createTasksRouter(files: DocumentStore) {
       ),
     )
     .openapi(attachmentFileRoute, async (c) => {
-      const file = await readAttachment(authedCtx(c.get("ctx")), files, c.req.valid("param").name);
-      const disposition = INLINE_TYPES.includes(file.type)
-        ? "inline"
-        : `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`;
-      // Names are random and never reused: the file can be cached for good.
-      return new Response(file.bytes, {
-        headers: {
-          "content-type": file.type,
-          "content-disposition": disposition,
-          "cache-control": "private, max-age=31536000, immutable",
-          "x-content-type-options": "nosniff",
-        },
-      });
+      return fileResponse(
+        await readAttachment(authedCtx(c.get("ctx")), files, c.req.valid("param").name),
+      );
     });
 }

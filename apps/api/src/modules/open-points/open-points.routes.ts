@@ -12,7 +12,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse, paginated } from "../../core/http";
+import { errorResponse, jsonResponse, paginated } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   adjustOpenPoints,
@@ -22,18 +22,13 @@ import {
   searchAccounts,
 } from "./open-points.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-
 const myRoute = createRoute({
   method: "get",
   path: "/me/open-points",
   tags: ["open-points"],
   middleware: [requireAuth] as const,
   responses: {
-    200: json(MyOpenPointsDto, "Mon solde et mes mouvements de l'année en cours"),
+    200: jsonResponse(MyOpenPointsDto, "Mon solde et mes mouvements de l'année en cours"),
     401: errorResponse("Pas de session"),
   },
 });
@@ -45,7 +40,7 @@ const ledgerRoute = createRoute({
   middleware: [requirePermission("open-points:validate")] as const,
   request: { query: ListLedgerQuery },
   responses: {
-    200: json(paginated(LedgerEntryDto), "Mouvements de l'année en cours"),
+    200: jsonResponse(paginated(LedgerEntryDto), "Mouvements de l'année en cours"),
     403: errorResponse("Réservé au bureau"),
   },
 });
@@ -58,7 +53,7 @@ const decideRoute = (action: "validate" | "reject") =>
     middleware: [requirePermission("open-points:validate")] as const,
     request: { body: { content: { "application/json": { schema: DecideOpenPointsInput } } } },
     responses: {
-      200: json(
+      200: jsonResponse(
         DecideOpenPointsResultDto,
         action === "validate" ? "Mouvements validés" : "Mouvements rejetés",
       ),
@@ -74,7 +69,7 @@ const adjustRoute = createRoute({
   middleware: [requirePermission("open-points:adjust")] as const,
   request: { body: { content: { "application/json": { schema: AdjustOpenPointsInput } } } },
   responses: {
-    201: json(OpenPointsMovementDto, "Ajustement enregistré (validé)"),
+    201: jsonResponse(OpenPointsMovementDto, "Ajustement enregistré (validé)"),
     400: errorResponse("Données invalides"),
     403: errorResponse("Réservé au bureau"),
     404: errorResponse("Étudiant introuvable"),
@@ -89,7 +84,7 @@ const accountsRoute = createRoute({
   middleware: [requirePermission("open-points:adjust")] as const,
   request: { query: SearchAccountsQuery },
   responses: {
-    200: json(z.array(OpenPointsAccountDto), "Étudiants et soldes"),
+    200: jsonResponse(z.array(OpenPointsAccountDto), "Étudiants et soldes"),
     403: errorResponse("Réservé au bureau"),
   },
 });

@@ -8,15 +8,11 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import { rateLimitPerUser } from "../../core/rate-limit";
 import { checkinStats, recordCheckin, searchCheckinCandidates } from "./checkin.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
 const EventIdParams = z.object({ eventId: z.uuid() });
 
 const checkinRoute = createRoute({
@@ -33,7 +29,7 @@ const checkinRoute = createRoute({
     body: { content: { "application/json": { schema: CheckinInput } } },
   },
   responses: {
-    201: json(CheckinDto, "Entrée enregistrée"),
+    201: jsonResponse(CheckinDto, "Entrée enregistrée"),
     403: errorResponse("Pas le droit de pointer cet événement"),
     404: errorResponse("Événement introuvable"),
     409: errorResponse("ALREADY_CHECKED_IN (détails : heure du premier pointage)"),
@@ -49,7 +45,7 @@ const searchRoute = createRoute({
   middleware: [requirePermission("checkin:scan")] as const,
   request: { params: EventIdParams, query: CheckinSearchQuery },
   responses: {
-    200: json(z.array(CheckinCandidateDto), "Inscrits correspondant à la recherche"),
+    200: jsonResponse(z.array(CheckinCandidateDto), "Inscrits correspondant à la recherche"),
     403: errorResponse("Pas le droit de pointer cet événement"),
   },
 });
@@ -61,7 +57,7 @@ const statsRoute = createRoute({
   middleware: [requirePermission("checkin:scan")] as const,
   request: { params: EventIdParams },
   responses: {
-    200: json(CheckinStatsDto, "Inscrits et entrées"),
+    200: jsonResponse(CheckinStatsDto, "Inscrits et entrées"),
     403: errorResponse("Pas le droit de pointer cet événement"),
   },
 });

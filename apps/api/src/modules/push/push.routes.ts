@@ -5,10 +5,10 @@ import {
   SubscribePushInput,
   UnsubscribePushInput,
 } from "@bde/shared";
-import { createRoute, OpenAPIHono, type z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import {
   getPushConfig,
   getPushStatus,
@@ -17,21 +17,13 @@ import {
   unsubscribePush,
 } from "./push.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } }, required: true },
-});
-
 const configRoute = createRoute({
   method: "get",
   path: "/push/config",
   tags: ["push"],
   middleware: [requireAuth] as const,
   responses: {
-    200: json(PushConfigDto, "Clé publique VAPID (null si le push est désactivé)"),
+    200: jsonResponse(PushConfigDto, "Clé publique VAPID (null si le push est désactivé)"),
     401: errorResponse("Pas de session"),
   },
 });
@@ -42,7 +34,7 @@ const statusRoute = createRoute({
   tags: ["push"],
   middleware: [requireAuth] as const,
   responses: {
-    200: json(PushStatusDto, "Mes appareils abonnés et mes préférences"),
+    200: jsonResponse(PushStatusDto, "Mes appareils abonnés et mes préférences"),
     401: errorResponse("Pas de session"),
   },
 });
@@ -52,9 +44,9 @@ const subscribeRoute = createRoute({
   path: "/me/push/subscriptions",
   tags: ["push"],
   middleware: [requireAuth] as const,
-  request: body(SubscribePushInput),
+  request: jsonBody(SubscribePushInput),
   responses: {
-    200: json(PushStatusDto, "Appareil abonné"),
+    200: jsonResponse(PushStatusDto, "Appareil abonné"),
     400: errorResponse("Abonnement invalide"),
     401: errorResponse("Pas de session"),
   },
@@ -65,9 +57,9 @@ const unsubscribeRoute = createRoute({
   path: "/me/push/unsubscribe",
   tags: ["push"],
   middleware: [requireAuth] as const,
-  request: body(UnsubscribePushInput),
+  request: jsonBody(UnsubscribePushInput),
   responses: {
-    200: json(PushStatusDto, "Appareil désabonné"),
+    200: jsonResponse(PushStatusDto, "Appareil désabonné"),
     400: errorResponse("Requête invalide"),
     401: errorResponse("Pas de session"),
   },
@@ -78,9 +70,9 @@ const preferencesRoute = createRoute({
   path: "/me/push",
   tags: ["push"],
   middleware: [requireAuth] as const,
-  request: body(PushPreferencesInput),
+  request: jsonBody(PushPreferencesInput),
   responses: {
-    200: json(PushStatusDto, "Préférences enregistrées"),
+    200: jsonResponse(PushStatusDto, "Préférences enregistrées"),
     400: errorResponse("Requête invalide"),
     401: errorResponse("Pas de session"),
   },

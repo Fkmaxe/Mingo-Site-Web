@@ -8,7 +8,7 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonBody, jsonResponse } from "../../core/http";
 import { requirePermission } from "../../core/permissions";
 import {
   assign,
@@ -22,13 +22,6 @@ import {
   withdraw,
 } from "./staff.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
-const body = <T extends z.ZodType>(schema: T) => ({
-  body: { content: { "application/json": { schema } } },
-});
 const Slots = z.array(StaffSlotDto);
 const EventIdParams = z.object({ eventId: z.uuid() });
 const SlotIdParams = z.object({ slotId: z.uuid() });
@@ -45,7 +38,7 @@ const listRoute = createRoute({
   tags: ["staff"],
   middleware: [requireAuth] as const,
   request: { params: EventIdParams },
-  responses: { 200: json(Slots, "Créneaux staff (vide pour un étudiant)"), ...errors },
+  responses: { 200: jsonResponse(Slots, "Créneaux staff (vide pour un étudiant)"), ...errors },
 });
 
 const createSlotRoute = createRoute({
@@ -53,9 +46,9 @@ const createSlotRoute = createRoute({
   path: "/events/{eventId}/staff-slots",
   tags: ["staff"],
   middleware: [requirePermission("events:update")] as const,
-  request: { params: EventIdParams, ...body(CreateStaffSlotInput) },
+  request: { params: EventIdParams, ...jsonBody(CreateStaffSlotInput) },
   responses: {
-    201: json(Slots, "Créneau créé"),
+    201: jsonResponse(Slots, "Créneau créé"),
     400: errorResponse("Données invalides"),
     ...errors,
   },
@@ -66,9 +59,9 @@ const updateSlotRoute = createRoute({
   path: "/staff-slots/{slotId}",
   tags: ["staff"],
   middleware: [requirePermission("events:update")] as const,
-  request: { params: SlotIdParams, ...body(UpdateStaffSlotInput) },
+  request: { params: SlotIdParams, ...jsonBody(UpdateStaffSlotInput) },
   responses: {
-    200: json(Slots, "Créneau modifié"),
+    200: jsonResponse(Slots, "Créneau modifié"),
     400: errorResponse("Données invalides"),
     ...errors,
   },
@@ -90,7 +83,11 @@ const memberAction = (action: "volunteer" | "withdraw", description: string) =>
     tags: ["staff"],
     middleware: [requirePermission("staff:register")] as const,
     request: { params: SlotIdParams },
-    responses: { 200: json(Slots, description), 422: errorResponse("Pas membre"), ...errors },
+    responses: {
+      200: jsonResponse(Slots, description),
+      422: errorResponse("Pas membre"),
+      ...errors,
+    },
   });
 
 const assignRoute = createRoute({
@@ -98,9 +95,9 @@ const assignRoute = createRoute({
   path: "/staff-slots/{slotId}/assign",
   tags: ["staff"],
   middleware: [requirePermission("events:update")] as const,
-  request: { params: SlotIdParams, ...body(AssignStaffInput) },
+  request: { params: SlotIdParams, ...jsonBody(AssignStaffInput) },
   responses: {
-    200: json(Slots, "Membre affecté (validé)"),
+    200: jsonResponse(Slots, "Membre affecté (validé)"),
     422: errorResponse("Pas membre"),
     ...errors,
   },
@@ -113,7 +110,7 @@ const decideRoute = (action: "validate" | "decline", description: string) =>
     tags: ["staff"],
     middleware: [requirePermission("events:update")] as const,
     request: { params: AssignmentIdParams },
-    responses: { 200: json(Slots, description), ...errors },
+    responses: { 200: jsonResponse(Slots, description), ...errors },
   });
 
 const checkinRoute = createRoute({
@@ -122,7 +119,7 @@ const checkinRoute = createRoute({
   tags: ["staff"],
   middleware: [requirePermission("checkin:scan")] as const,
   request: { params: AssignmentIdParams },
-  responses: { 201: json(CheckinDto, "Présence staff enregistrée"), ...errors },
+  responses: { 201: jsonResponse(CheckinDto, "Présence staff enregistrée"), ...errors },
 });
 
 export function createStaffRouter() {

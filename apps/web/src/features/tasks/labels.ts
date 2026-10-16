@@ -35,8 +35,3 @@ export function taskOrigin(task: Pick<Task, "scope" | "pole">): string {
 /** "Sport, Léa" · "Personne". */
 export const assigneeNames = (task: Pick<Task, "assignees">) =>
   task.assignees.length > 0 ? task.assignees.map((a) => a.user.name).join(", ") : "Non assignée";
-
-export const fileSizeLabel = (bytes: number) =>
-  bytes < 1024 * 1024
-    ? `${Math.max(1, Math.round(bytes / 1024))} Ko`
-    : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;

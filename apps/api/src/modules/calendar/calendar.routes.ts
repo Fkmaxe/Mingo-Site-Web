@@ -2,13 +2,9 @@ import { CalendarFeedDto, CalendarItemDto, CalendarQuery } from "@bde/shared";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { type AppEnv, authedCtx, requireAuth } from "../../core/context";
 import { throwOnValidationError } from "../../core/errors";
-import { errorResponse } from "../../core/http";
+import { errorResponse, jsonResponse } from "../../core/http";
 import { getCalendar, getFeed, renderFeed, renewFeed, revokeFeed } from "./calendar.service";
 
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { "application/json": { schema } },
-  description,
-});
 const errors = {
   400: errorResponse("Données invalides"),
   401: errorResponse("Pas de session"),
@@ -23,28 +19,28 @@ const calendarRoute = createRoute({
   tags: ["calendar"],
   middleware: [requireAuth] as const,
   request: { query: CalendarQuery },
-  responses: { 200: json(z.array(CalendarItemDto), "Mon calendrier"), ...errors },
+  responses: { 200: jsonResponse(z.array(CalendarItemDto), "Mon calendrier"), ...errors },
 });
 const feedRoute = createRoute({
   method: "get",
   path: "/me/calendar/feed",
   tags: ["calendar"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(CalendarFeedDto, "Mon lien d'abonnement"), ...errors },
+  responses: { 200: jsonResponse(CalendarFeedDto, "Mon lien d'abonnement"), ...errors },
 });
 const renewRoute = createRoute({
   method: "post",
   path: "/me/calendar/feed",
   tags: ["calendar"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(CalendarFeedDto, "Nouveau lien d'abonnement"), ...errors },
+  responses: { 200: jsonResponse(CalendarFeedDto, "Nouveau lien d'abonnement"), ...errors },
 });
 const revokeRoute = createRoute({
   method: "delete",
   path: "/me/calendar/feed",
   tags: ["calendar"],
   middleware: [requireAuth] as const,
-  responses: { 200: json(CalendarFeedDto, "Lien supprimé"), ...errors },
+  responses: { 200: jsonResponse(CalendarFeedDto, "Lien supprimé"), ...errors },
 });
 // No session: calendar apps fetch it with the secret token only.
 const icsRoute = createRoute({

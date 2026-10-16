@@ -4,7 +4,6 @@ import {
   APPLICATION_MAX_DOCUMENTS,
   APPLICATION_MAX_QUESTIONS,
   APPLICATION_MAX_WISHES,
-  fieldKey,
   UpdateApplicationFormInput,
 } from "@bde/shared";
 import { Plus, Trash2 } from "lucide-react";
@@ -21,6 +20,7 @@ import {
   type CustomFieldFormValues,
   fromCustomFields,
   toCustomFields,
+  uniqueKeys,
 } from "@/lib/custom-fields-form";
 import { isoToParisInput, parisInputToIso } from "@/lib/paris-time";
 import { updateApplicationFormAction } from "./actions";
@@ -58,17 +58,10 @@ const emptyDocument = (): DocumentFormValues => ({
 
 /** Existing keys are kept; new documents get a key from their label, made unique. */
 function toDocuments(rows: DocumentFormValues[]) {
-  const used = new Set(rows.map((r) => r.key).filter(Boolean));
-  return rows.map((row) => {
-    let key = row.key;
-    if (!key) {
-      const base = fieldKey(row.label || "document");
-      key = base;
-      for (let n = 2; used.has(key); n++) key = `${base.slice(0, 36)}_${n}`;
-      used.add(key);
-    }
+  const keys = uniqueKeys(rows, "document");
+  return rows.map((row, index) => {
     return {
-      key,
+      key: keys[index] ?? row.key,
       label: row.label,
       ...(row.description.trim() ? { description: row.description } : {}),
       required: row.required,

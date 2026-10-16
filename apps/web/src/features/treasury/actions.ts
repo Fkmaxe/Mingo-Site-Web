@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { type ActionResult, fromApiError } from "@/lib/action-result";
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-schema";
+import { rawBody } from "@/lib/upload";
 
 type UpdateTransactionBody = components["schemas"]["UpdateTransactionInput"];
 
@@ -69,10 +70,7 @@ export async function uploadAttachmentAction(
         path: { transactionId },
         query: { name: typeof name === "string" && name.trim() ? name.trim() : "justificatif" },
       },
-      // Raw file bytes, not JSON.
-      body: new Uint8Array(await file.arrayBuffer()) as unknown as string,
-      bodySerializer: (body) => body as unknown as BodyInit,
-      headers: { "content-type": type },
+      ...(await rawBody(file, type)),
     },
   );
   if (error) return fromApiError(error);
