@@ -16,6 +16,7 @@ import {
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx, Services } from "../../core/context";
 import { AppError } from "../../core/errors";
+import { emit, type TaskRef } from "../../core/events";
 import { nextParisDay, parisDate, parisHour } from "../../core/time";
 import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import type { DbOrTx } from "../../db/client";
@@ -47,10 +48,12 @@ import {
   findCurrentPoleMemberships,
   findDueTasksOfUser,
   findHistory,
+  findLateTasks,
   findManagedTasks,
   findPoleTasks,
   findReminderRecipients,
   findTask,
+  findTasksByIds,
   findTasksOfUser,
   insertAttachment,
   insertChecklistItem,
@@ -130,7 +133,7 @@ async function toDtos(ctx: AuthedCtx, rows: TaskRow[]): Promise<TaskDto[]> {
       priority: row.task.priority,
       dueOn: row.task.dueOn,
       scope: row.task.scope,
-      pole: row.pole,
+      pole: row.pole ? { id: row.pole.id, name: row.pole.name } : null,
       assignees: people,
       checklist: { done: c.done, total: c.total },
       attachmentCount: c.attachments,
@@ -355,12 +358,26 @@ export async function getTask(ctx: AuthedCtx, taskId: string): Promise<TaskDetai
 
 // --- Creation ---
 
+/** What the announcements (Discord) need of a task. */
+function taskRef(row: TaskRow, assignees: string[]): TaskRef {
+  return {
+    id: row.task.id,
+    title: row.task.title,
+    priority: row.task.priority,
+    dueOn: row.task.dueOn,
+    scope: row.task.scope,
+    pole: row.pole,
+    assignees,
+  };
+}
+
 async function create(
   ctx: AuthedCtx,
   owned: Owned,
   input: CreatePersonalTaskData & {
     assigneeMembershipIds?: string[];
   },
+  pole: { id: string; slug: string; name: string } | null = null,
 ) {
   const { assigneeMembershipIds = [], ...fields } = input;
   const { ids, people } = await checkAssignees(ctx.db, assigneeMembershipIds, owned);
@@ -374,16 +391,33 @@ async function create(
       ...(ids.length > 0 ? { assigned: [...people.values()].map((p) => p.name) } : {}),
     });
     notifyAssigned(ctx, defer, { id: taskId, ...fields }, [...people.values()]);
+    if (owned.scope !== "personal") {
+      await emit("task.created", {
+        db: tx,
+        defer,
+        services: ctx.services,
+        by: ctx.user.name,
+        task: {
+          id: taskId,
+          title: fields.title,
+          priority: fields.priority,
+          dueOn: fields.dueOn,
+          scope: owned.scope,
+          pole: pole ? { id: pole.id, slug: pole.slug, name: pole.name } : null,
+          assignees: [...people.values()].map((p) => p.name),
+        },
+      });
+    }
     return taskId;
   });
   return getTask(ctx, id);
 }
 
 export async function createTask(ctx: AuthedCtx, poleId: string, input: CreateTaskData) {
-  await getPole(ctx, poleId);
+  const pole = await getPole(ctx, poleId);
   const owned: Owned = { scope: "pole", poleId, ownerUserId: null };
   if (!canManage(ctx, owned)) throw forbidden();
-  return create(ctx, owned, input);
+  return create(ctx, owned, input, pole);
 }
 
 export async function createBoardTask(ctx: AuthedCtx, input: CreateTaskData) {
@@ -436,6 +470,22 @@ export async function updateTask(ctx: AuthedCtx, taskId: string, input: UpdateTa
       },
       added,
     );
+    if (changed.includes("status") && fields.status === "done" && row.task.scope !== "personal") {
+      const names = checked
+        ? [...checked.people.values()].map((p) => p.name)
+        : assignees.map((a) => a.user.name);
+      await emit("task.completed", {
+        db: tx,
+        defer,
+        services: ctx.services,
+        by: ctx.user.name,
+        task: {
+          ...taskRef(row, names),
+          title: fields.title ?? row.task.title,
+          priority: fields.priority ?? row.task.priority,
+        },
+      });
+    }
     if (changed.length === 0 && assigned.length === 0 && unassigned.length === 0) return;
     await audit(tx, ctx, row.task.id, "task.updated", {
       fields: changed,
@@ -639,6 +689,12 @@ export async function sendTaskReminders(
   const tomorrow = nextParisDay(parisDate(now));
   return inTransactionWithEffects(deps.db, async (tx, defer) => {
     const due = await claimDueTaskReminders(tx, tomorrow);
+    await announceDueTomorrow(
+      tx,
+      defer,
+      deps.services,
+      due.map((t) => t.id),
+    );
     const recipients = await findReminderRecipients(
       tx,
       due.map((t) => t.id),
@@ -660,6 +716,37 @@ export async function sendTaskReminders(
     }
     return recipients.length;
   });
+}
+
+/** Pole and bureau tasks as the announcements need them, with their assignees' names. */
+async function taskRefs(db: DbOrTx, rows: TaskRow[]): Promise<TaskRef[]> {
+  const assignees = await findAssignees(
+    db,
+    rows.map((r) => r.task.id),
+  );
+  return rows
+    .filter((r) => r.task.scope !== "personal")
+    .map((r) =>
+      taskRef(
+        r,
+        (assignees.get(r.task.id) ?? []).map((a) => a.user.name),
+      ),
+    );
+}
+
+async function announceDueTomorrow(
+  db: DbOrTx,
+  defer: (effect: () => Promise<void>) => void,
+  services: Services,
+  taskIds: string[],
+) {
+  const tasks = await taskRefs(db, await findTasksByIds(db, taskIds));
+  if (tasks.length > 0) await emit("tasks.due_tomorrow", { db, defer, services, tasks });
+}
+
+/** Open pole and bureau tasks past their deadline (before `today`), for the daily recap. */
+export async function listLateTasks(db: DbOrTx, today: string) {
+  return taskRefs(db, await findLateTasks(db, today));
 }
 
 /** My open tasks with a deadline between the two days (inclusive), for the calendar. */

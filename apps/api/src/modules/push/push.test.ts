@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { pushSubscription } from "../../db/schema";
 import { runReminders } from "../../jobs/reminders";
 import { getTestDb } from "../../test/db";
-import { testMailer, testNotifier, testPusher } from "../../test/env";
+import { testPusher, testServices } from "../../test/env";
 import {
   createEvent,
   createPersona,
@@ -150,15 +150,7 @@ describe("personal notifications", () => {
     const student = await createUser();
     await call("POST", `/v1/events/${event.id}/registrations`, student.id);
     const phone = await subscribe(student.id);
-    await runReminders({
-      db: getTestDb(),
-      services: {
-        mailer: testMailer,
-        pusher: testPusher,
-        notifier: testNotifier,
-        webOrigin: "http://localhost:3000",
-      },
-    });
+    await runReminders({ db: getTestDb(), services: testServices() });
     expect(sentTo(phone)[0]?.message.title).toBe("C'est demain : Gala");
   });
 });

@@ -2,7 +2,7 @@ import { PoleMemberDto, TaskDetailDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { getTestDb } from "../../test/db";
-import { testMailer, testNotifier, testPusher } from "../../test/env";
+import { testMailer, testPusher, testServices } from "../../test/env";
 import { createPersona, createPole, createSchoolYear } from "../../test/factories";
 import { readJson } from "../../test/http";
 import { call } from "../../test/request";
@@ -13,15 +13,7 @@ let lead: { id: string; email: string };
 let member: { id: string; email: string };
 let membershipOf: (userId: string) => string;
 
-const deps = () => ({
-  db: getTestDb(),
-  services: {
-    mailer: testMailer,
-    pusher: testPusher,
-    notifier: testNotifier,
-    webOrigin: "http://localhost:3000",
-  },
-});
+const deps = () => ({ db: getTestDb(), services: testServices() });
 
 async function subscribe(userId: string) {
   const endpoint = `https://fcm.googleapis.com/fcm/send/${userId}`;

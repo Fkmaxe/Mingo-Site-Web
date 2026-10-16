@@ -4,6 +4,7 @@ export * from "./audit";
 export * from "./auth";
 export * from "./calendar";
 export * from "./classes";
+export * from "./discord";
 export * from "./events";
 export * from "./grades";
 export * from "./inventory";

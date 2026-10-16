@@ -13,6 +13,7 @@ import {
 import { writeAudit } from "../../core/audit";
 import type { AuthedCtx } from "../../core/context";
 import { AppError } from "../../core/errors";
+import { emit } from "../../core/events";
 import { assertPoleAccess } from "../../core/permissions";
 import { inTransaction, inTransactionWithEffects } from "../../core/tx";
 import { type DocumentStore, sniffDocumentType } from "../../lib/storage";
@@ -211,7 +212,10 @@ export async function apply(ctx: AuthedCtx, input: CreateApplicationData, now: D
     throw invalid("wishedPoleIds", "Un de ces pôles ne recrute pas.");
   }
   const answers = parseAnswers(form, input.answers);
-  const id = await inTransaction(ctx.db, async (tx) => {
+  const wishes = input.wishedPoleIds.map(
+    (id) => form.recruitingPoles.find((p) => p.id === id)?.name ?? "",
+  );
+  const id = await inTransactionWithEffects(ctx.db, async (tx, defer) => {
     const applicationId = await insertApplication(tx, {
       userId: ctx.user.id,
       schoolYearId: year.id,
@@ -220,6 +224,17 @@ export async function apply(ctx: AuthedCtx, input: CreateApplicationData, now: D
       documentRequirements: form.documents,
     });
     await insertWishes(tx, applicationId, input.wishedPoleIds);
+    await emit("application.submitted", {
+      db: tx,
+      defer,
+      services: ctx.services,
+      application: {
+        id: applicationId,
+        candidate: ctx.user.name,
+        promo: (await findApplication(tx, applicationId))?.user.promo ?? null,
+        wishes,
+      },
+    });
     return applicationId;
   });
   const row = await findApplication(ctx.db, id);

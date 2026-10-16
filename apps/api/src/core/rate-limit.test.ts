@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { describe, expect, it, vi } from "vitest";
+import { createDisabledDiscord } from "../lib/discord";
 import { createMemoryMailer } from "../lib/mailer";
 import { createMemoryPusher } from "../lib/push";
 import { getTestDb } from "../test/db";
@@ -20,6 +21,7 @@ function appFor(userId: string | null) {
         mailer: createMemoryMailer(),
         pusher: createMemoryPusher(),
         notifier: { notifyUsers: async () => 0, announceEvent: async () => 0 },
+        discord: createDisabledDiscord(),
         webOrigin: "http://localhost:3000",
       },
       ...NO_AUTHORIZATION,

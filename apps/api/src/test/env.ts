@@ -1,4 +1,6 @@
 import { type AppDeps, createApp } from "../app";
+import type { Services } from "../core/context";
+import { createMemoryDiscord } from "../lib/discord";
 import { createMemoryMailer, type MemoryMailer } from "../lib/mailer";
 import { createMemoryPusher, type MemoryPusher } from "../lib/push";
 import {
@@ -25,6 +27,22 @@ export const testPhotos = createMemoryPhotoStore();
 export const testReceipts = createMemoryReceiptStore();
 export const testTaskFiles = createMemoryDocumentStore();
 export const testApplicationFiles = createMemoryDocumentStore();
+/** Discord with every channel set: the pole of slug `sport` has its own. */
+export const testDiscord = createMemoryDiscord({
+  events: { channelId: "100000000000000001", roleId: "900000000000000001" },
+  applications: "100000000000000002",
+  boardTasks: "100000000000000003",
+  poleTasks: { sport: "100000000000000004" },
+});
+
+/** The services of the test apps, for jobs and services called directly. */
+export const testServices = (): Services => ({
+  mailer: testMailer,
+  pusher: testPusher,
+  notifier: testNotifier,
+  discord: testDiscord,
+  webOrigin: "http://localhost:3000",
+});
 
 export function createTestApp(
   overrides: Partial<Omit<AppDeps, "mailer" | "pusher">> & {
@@ -41,6 +59,7 @@ export function createTestApp(
     receipts: testReceipts,
     taskFiles: testTaskFiles,
     applicationFiles: testApplicationFiles,
+    discord: testDiscord,
     ...overrides,
     mailer,
     pusher,

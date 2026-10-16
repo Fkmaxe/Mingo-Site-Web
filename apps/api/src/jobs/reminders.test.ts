@@ -2,7 +2,7 @@ import { StaffSlotDto, TicketDto } from "@bde/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { getTestDb } from "../test/db";
-import { testMailer, testNotifier, testPusher } from "../test/env";
+import { testMailer, testServices } from "../test/env";
 import {
   createEvent,
   createPersona,
@@ -14,15 +14,7 @@ import { readJson } from "../test/http";
 import { call } from "../test/request";
 import { runReminders } from "./reminders";
 
-const deps = () => ({
-  db: getTestDb(),
-  services: {
-    mailer: testMailer,
-    pusher: testPusher,
-    notifier: testNotifier,
-    webOrigin: "http://localhost:3000",
-  },
-});
+const deps = () => ({ db: getTestDb(), services: testServices() });
 const hours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
 
 let poleId: string;
@@ -56,12 +48,22 @@ describe("day-before reminders", () => {
     await call("POST", `/v1/registrations/${leaving.ticket.id}/cancel`, leaving.student.id);
     testMailer.sent.length = 0;
 
-    expect(await runReminders(deps())).toEqual({ participants: 1, staff: 0, tasks: 0 });
+    expect(await runReminders(deps())).toEqual({
+      participants: 1,
+      staff: 0,
+      tasks: 0,
+      lateRecaps: 0,
+    });
     expect(testMailer.sent.map((m) => m.to)).toEqual(["a@myskolae.fr"]);
     expect(testMailer.lastTo("a@myskolae.fr")?.text).toContain(`/tickets/${ticket.id}`);
 
     testMailer.sent.length = 0;
-    expect(await runReminders(deps())).toEqual({ participants: 0, staff: 0, tasks: 0 });
+    expect(await runReminders(deps())).toEqual({
+      participants: 0,
+      staff: 0,
+      tasks: 0,
+      lateRecaps: 0,
+    });
     expect(testMailer.sent).toHaveLength(0);
   });
 

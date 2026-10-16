@@ -16,6 +16,12 @@ function isMailbox(value: string): boolean {
 const optionalText = (schema: z.ZodString) =>
   z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
 
+/** Id of a Discord channel or role (right click → « Copier l'identifiant »). */
+const Snowflake = z.string().regex(/^\d{17,20}$/, "identifiant Discord : 17 à 20 chiffres");
+
+/** `DISCORD_TASKS_CHANNEL_SPORT` → task channel of the pole whose slug is `sport`. */
+const POLE_TASKS_CHANNEL = /^DISCORD_TASKS_CHANNEL_([A-Z0-9_]+)$/;
+
 const EnvSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -47,6 +53,13 @@ const EnvSchema = z
     VAPID_SUBJECT: optionalText(
       z.string().regex(/^(mailto:|https:\/\/)/, "doit commencer par mailto: ou https://"),
     ),
+    /** Discord bot: without its token, nothing is posted. Every channel is optional. */
+    DISCORD_BOT_TOKEN: optionalText(z.string().min(20, "jeton de bot Discord invalide")),
+    DISCORD_EVENTS_CHANNEL_ID: optionalText(Snowflake),
+    /** Role pinged with each published event (e.g. @Membres). */
+    DISCORD_EVENTS_ROLE_ID: optionalText(Snowflake),
+    DISCORD_APPLICATIONS_CHANNEL_ID: optionalText(Snowflake),
+    DISCORD_BOARD_TASKS_CHANNEL_ID: optionalText(Snowflake),
   })
   .superRefine((env, ctx) => {
     const vapid = [env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT];
@@ -74,8 +87,24 @@ const EnvSchema = z
     }
   });
 
-export type Env = z.infer<typeof EnvSchema>;
+export type Env = z.infer<typeof EnvSchema> & {
+  /** Task channel of each pole, by pole slug (`DISCORD_TASKS_CHANNEL_<SLUG>`). */
+  DISCORD_TASKS_CHANNELS: Record<string, string>;
+};
 
 export function loadEnv(source: Record<string, string | undefined> = process.env): Env {
-  return parseEnv(EnvSchema, source);
+  const env = parseEnv(EnvSchema, source);
+  const poleKeys = Object.fromEntries(
+    Object.entries(source).filter(([key, value]) => POLE_TASKS_CHANNEL.test(key) && value),
+  );
+  const channels = parseEnv(z.record(z.string(), Snowflake), poleKeys);
+  return {
+    ...env,
+    DISCORD_TASKS_CHANNELS: Object.fromEntries(
+      Object.entries(channels).map(([key, id]) => [
+        (POLE_TASKS_CHANNEL.exec(key)?.[1] ?? "").toLowerCase().replaceAll("_", "-"),
+        id,
+      ]),
+    ),
+  };
 }

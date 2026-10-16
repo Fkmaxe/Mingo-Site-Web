@@ -30,7 +30,7 @@ import {
   user,
 } from "../../db/schema";
 
-const selection = { task, pole: { id: pole.id, name: pole.name } };
+const selection = { task, pole: { id: pole.id, slug: pole.slug, name: pole.name } };
 
 function baseQuery(db: DbOrTx) {
   return db.select(selection).from(task).leftJoin(pole, eq(pole.id, task.poleId));
@@ -117,6 +117,21 @@ export function findManagedTasks(
     )
     .orderBy(...order)
     .limit(300);
+}
+
+export function findTasksByIds(db: DbOrTx, taskIds: string[]) {
+  if (taskIds.length === 0) return Promise.resolve([]);
+  return baseQuery(db)
+    .where(and(inArray(task.id, taskIds), live))
+    .orderBy(...order);
+}
+
+/** Open pole and bureau tasks whose deadline is before `day`, oldest deadline first. */
+export function findLateTasks(db: DbOrTx, day: string) {
+  return baseQuery(db)
+    .where(and(live, ne(task.scope, "personal"), ne(task.status, "done"), lt(task.dueOn, day)))
+    .orderBy(asc(task.dueOn), asc(task.createdAt))
+    .limit(500);
 }
 
 export async function findTask(db: DbOrTx, taskId: string) {

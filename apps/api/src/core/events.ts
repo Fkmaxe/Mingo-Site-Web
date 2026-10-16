@@ -1,9 +1,23 @@
-import type { AttendanceKind } from "@bde/shared";
+import type { AttendanceKind, TaskPriority, TaskScope } from "@bde/shared";
 import type { DbOrTx } from "../db/client";
 import type { Services } from "./context";
 import type { Defer } from "./tx";
 
 type EventRef = { id: string; slug: string; title: string; startsAt: Date; location: string };
+
+/** A task as the announcements need it (Discord). */
+export type TaskRef = {
+  id: string;
+  title: string;
+  priority: TaskPriority;
+  dueOn: string | null;
+  scope: TaskScope;
+  /** The pole of a pole task. */
+  pole: { id: string; slug: string; name: string } | null;
+  assignees: string[];
+};
+
+type Effects = { db: DbOrTx; defer: Defer; services: Services };
 
 /**
  * Internal domain events. Handlers run synchronously, in the emitter's transaction (`db`):
@@ -29,8 +43,21 @@ export type DomainEvents = {
     db: DbOrTx;
     defer: Defer;
     services: Services;
-    event: EventRef & { visibility: string };
+    event: EventRef & {
+      visibility: string;
+      endsAt: Date;
+      description: string;
+      posterUrl: string | null;
+      pole: { name: string };
+    };
     publishedBy: string;
+  };
+  "task.created": Effects & { task: TaskRef; by: string };
+  "task.completed": Effects & { task: TaskRef; by: string };
+  /** Open tasks due tomorrow, once per deadline (the day-before reminders job). */
+  "tasks.due_tomorrow": Effects & { tasks: TaskRef[] };
+  "application.submitted": Effects & {
+    application: { id: string; candidate: string; promo: string | null; wishes: string[] };
   };
   "checkin.recorded": {
     db: DbOrTx;
@@ -49,6 +76,10 @@ const handlers: { [K in EventName]: Handler<K>[] } = {
   "event.updated": [],
   "event.cancelled": [],
   "event.published": [],
+  "task.created": [],
+  "task.completed": [],
+  "tasks.due_tomorrow": [],
+  "application.submitted": [],
   "checkin.recorded": [],
 };
 

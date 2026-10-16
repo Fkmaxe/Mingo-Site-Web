@@ -1,5 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { DbOrTx } from "../db/client";
+import type { Discord } from "../lib/discord";
 import type { Mailer } from "../lib/mailer";
 import type { Notifier, Pusher } from "../lib/push";
 import type { Auth } from "./auth/auth";
@@ -13,6 +14,8 @@ export type Services = {
   mailer: Mailer;
   pusher: Pusher;
   notifier: Notifier;
+  /** The BDE's Discord server (disabled without a bot token). */
+  discord: Discord;
   /** Public web origin, for links in mails. */
   webOrigin: string;
 };

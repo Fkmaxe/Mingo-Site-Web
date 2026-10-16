@@ -163,6 +163,18 @@ Les rôles sont cumulables et basés sur des permissions (RBAC), pas codés en d
 - Page **Calendrier** (`/calendar`) pour les membres de l'année : vue du mois (pastilles par jour), puis la liste jour par jour. On y trouve **tous les événements** visibles (publiés, terminés ou annulés, pas les brouillons), les **réunions** où le membre est attendu et ses **tâches non faites avec un délai** (assignées ou perso, le jour du délai).
 - **Abonnement** : chaque membre crée un lien iCal privé (`/calendar/feed/<jeton>.ics`), à ajouter en un clic dans **Apple Calendar** (`webcal://`) ou dans **Google Agenda** (« Ajouter par URL » ; Google rafraîchit à son rythme, quelques heures). Lecture seule, de deux mois en arrière à un an devant. Le membre peut créer un **nouveau lien** (l'ancien cesse de marcher) ou le supprimer. Quelqu'un qui quitte le BDE reçoit un calendrier vide.
 
+## Discord
+
+- Un **bot Discord** relaie les nouvelles du site sur le serveur du BDE, chaque type dans le salon choisi dans le `.env` (facultatif : un salon vide, ce type n'est pas posté ; sans jeton, rien n'est posté). Messages en « carte » (couleurs du BDE, dates affichées dans le fuseau de chacun), toujours avec un bouton vers la page du site.
+- **Événement publié** (salon des événements) : titre, pôle, début (et « dans 3 jours »), fin, lieu, affiche, bouton « Voir l'événement et s'inscrire ». Mentionne le rôle choisi (ex. @Membres), s'il est configuré. Les autres mentions (@everyone, @pseudo tapés dans un titre) ne notifient jamais personne.
+- **Candidature reçue** (un seul salon pour toutes) : nom, promo et vœux du candidat, bouton vers Gestion → Candidatures. Ni adresse, ni réponses, ni documents : on les lit sur le site.
+- **Tâches**, dans le salon du pôle (ou du bureau pour son tableau) ; jamais les tâches perso :
+  - **nouvelle tâche** : titre, priorité, délai, assignés, auteur ;
+  - **tâche terminée** (passée en « Fait ») ;
+  - **délai demain** : un message par tableau listant ses tâches non faites à rendre demain, la veille à partir de 9 h, une fois par délai ;
+  - **en retard** : récap quotidien à partir de 9 h des tâches non faites dont le délai est passé, une fois par jour et par salon.
+- Si Discord ne répond pas, l'action sur le site se fait quand même (l'erreur est notée dans les logs de l'API).
+
 ## Notifications push
 
 - Chacun active les notifications sur ses appareils, depuis son profil (sur iPhone : une fois l'appli ajoutée à l'écran d'accueil). Elles complètent les mails, ne les remplacent pas.

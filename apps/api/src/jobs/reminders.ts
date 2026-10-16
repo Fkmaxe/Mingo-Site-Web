@@ -1,5 +1,6 @@
 import type { Services } from "../core/context";
 import type { DbOrTx } from "../db/client";
+import { postLateTaskRecaps } from "../modules/discord";
 import { sendRegistrationReminders } from "../modules/registrations";
 import { sendStaffReminders } from "../modules/staff";
 import { sendTaskReminders } from "../modules/tasks";
@@ -14,5 +15,6 @@ export async function runReminders(deps: JobDeps, now: Date = new Date()) {
   const participants = await sendRegistrationReminders(deps, now);
   const staff = await sendStaffReminders(deps, now);
   const tasks = await sendTaskReminders(deps, now);
-  return { participants, staff, tasks };
+  const lateRecaps = await postLateTaskRecaps(deps, now);
+  return { participants, staff, tasks, lateRecaps };
 }

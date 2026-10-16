@@ -13,6 +13,7 @@ export function startScheduler(deps: JobDeps): () => void {
     running = true;
     try {
       const sent = await runReminders(deps);
+      if (sent.lateRecaps > 0) console.log(`Récaps Discord des retards : ${sent.lateRecaps}`);
       if (sent.participants + sent.staff + sent.tasks > 0) {
         console.log(
           `Rappels envoyés : ${sent.participants} participant(s), ${sent.staff} staff, ${sent.tasks} tâche(s)`,

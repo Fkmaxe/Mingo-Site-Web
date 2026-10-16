@@ -88,4 +88,26 @@ describe("loadEnv", () => {
       "contact@fkcloud.fr",
     );
   });
+
+  it("reads the Discord channels, one per pole by its slug, and checks the ids", () => {
+    const env = loadEnv({
+      ...validEnv,
+      DISCORD_BOT_TOKEN: "x".repeat(70),
+      DISCORD_EVENTS_CHANNEL_ID: "123456789012345678",
+      DISCORD_TASKS_CHANNEL_SPORT: "223456789012345678",
+      DISCORD_TASKS_CHANNEL_E_SPORT: "323456789012345678",
+      DISCORD_TASKS_CHANNEL_COM: "",
+    });
+    expect(env.DISCORD_EVENTS_CHANNEL_ID).toBe("123456789012345678");
+    expect(env.DISCORD_TASKS_CHANNELS).toEqual({
+      sport: "223456789012345678",
+      "e-sport": "323456789012345678",
+    });
+    expect(() => loadEnv({ ...validEnv, DISCORD_TASKS_CHANNEL_SPORT: "#sport" })).toThrow(
+      /DISCORD_TASKS_CHANNEL_SPORT/,
+    );
+    expect(() => loadEnv({ ...validEnv, DISCORD_APPLICATIONS_CHANNEL_ID: "12" })).toThrow(
+      /DISCORD_APPLICATIONS_CHANNEL_ID/,
+    );
+  });
 });

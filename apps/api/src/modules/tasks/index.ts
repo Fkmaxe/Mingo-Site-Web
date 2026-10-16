@@ -1,2 +1,2 @@
 export { createTasksRouter } from "./tasks.routes";
-export { listMyDueTasks, sendTaskReminders } from "./tasks.service";
+export { listLateTasks, listMyDueTasks, sendTaskReminders } from "./tasks.service";

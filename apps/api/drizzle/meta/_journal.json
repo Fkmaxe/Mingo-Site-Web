@@ -295,6 +295,13 @@
       "when": 1792091400496,
       "tag": "0041_drop_application_motivation",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792143855808,
+      "tag": "0042_discord_post",
+      "breakpoints": true
     }
   ]
 }

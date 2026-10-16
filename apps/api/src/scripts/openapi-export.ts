@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { createApp, OPENAPI_CONFIG } from "../app";
 import { createDb } from "../db/client";
+import { createDisabledDiscord } from "../lib/discord";
 import { createMemoryMailer } from "../lib/mailer";
 import { createDisabledPusher } from "../lib/push";
 import {
@@ -27,6 +28,7 @@ const app = createApp({
   receipts: createMemoryReceiptStore(),
   taskFiles: createMemoryDocumentStore(),
   applicationFiles: createMemoryDocumentStore(),
+  discord: createDisabledDiscord(),
 });
 const document = app.getOpenAPI31Document(OPENAPI_CONFIG);
 writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`);

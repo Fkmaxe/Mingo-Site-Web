@@ -64,6 +64,17 @@ Tester l'envoi des mails : `docker compose exec api node dist/mail-test.js toi@e
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
   ```
 
+## Bot Discord
+
+Le site poste ses nouvelles (événements publiés, candidatures, tâches de chaque pôle) sur le serveur Discord du BDE. Rien à lancer en plus : c'est l'API qui poste, avec le jeton du bot.
+
+1. Sur <https://discord.com/developers/applications> : **New Application** (« BDE Mingo »), onglet **Bot** : mettre l'avatar (logo du BDE), **Reset Token** et copier le jeton dans `DISCORD_BOT_TOKEN`. Aucun « intent » à activer : le bot ne lit rien.
+2. Inviter le bot sur le serveur (remplacer `ID_APPLICATION`, onglet **General Information**) :
+   `https://discord.com/oauth2/authorize?client_id=ID_APPLICATION&scope=bot&permissions=150528`
+   (voir les salons, envoyer des messages, intégrer des liens, mentionner les rôles).
+3. Dans Discord : **Paramètres utilisateur → Avancés → Mode développeur**, puis clic droit sur chaque salon (et sur le rôle à mentionner) → **Copier l'identifiant**, et remplir les `DISCORD_*` du `.env` (voir `.env.example`). Le bot doit pouvoir écrire dans chaque salon choisi (permissions du salon).
+4. Redémarrer l'API (`docker compose up -d`). Sans jeton, le bot est désactivé (`docker compose logs api` l'indique) ; un identifiant invalide empêche l'API de démarrer et le log dit lequel.
+
 ## Ce dossier est prêt pour Claude Code
 
 | Fichier | Rôle |

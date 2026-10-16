@@ -8,6 +8,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { AUTH_BASE_PATH, type AuthDeps, createAuth } from "./core/auth/auth";
 import { type AppEnv, loadContext } from "./core/context";
 import { errorBody, onError, onNotFound, throwOnValidationError } from "./core/errors";
+import type { Discord } from "./lib/discord";
 import type { Pusher } from "./lib/push";
 import type { DocumentStore, PhotoStore, ReceiptStore } from "./lib/storage";
 import { createAdminRouter } from "./modules/admin";
@@ -28,6 +29,8 @@ import { createOpenPointsRouter } from "./modules/open-points";
 import { createPartnersRouter } from "./modules/partners";
 import { createPolesRouter } from "./modules/poles";
 import { createNotifier, createPushRouter } from "./modules/push";
+// Subscribes the Discord announcements to the domain events.
+import "./modules/discord";
 import { createRegistrationsRouter, createTeamsRouter } from "./modules/registrations";
 import { createStaffRouter } from "./modules/staff";
 import { createStatsRouter } from "./modules/stats";
@@ -40,6 +43,7 @@ export type AppDeps = AuthDeps & {
   receipts: ReceiptStore;
   taskFiles: DocumentStore;
   applicationFiles: DocumentStore;
+  discord: Discord;
 };
 
 export const OPENAPI_CONFIG = {
@@ -95,6 +99,7 @@ export function createApp(deps: AppDeps) {
       mailer: deps.mailer,
       pusher: deps.pusher,
       notifier: createNotifier(db, deps.pusher),
+      discord: deps.discord,
       webOrigin: env.WEB_ORIGIN,
     }),
   );
