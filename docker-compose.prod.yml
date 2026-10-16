@@ -1,7 +1,10 @@
 # Production : un seul fichier, à lancer sur le serveur.
 #
-#   docker compose -f docker-compose.prod.yml up -d --build
-#   (ou COMPOSE_FILE=docker-compose.prod.yml dans .env, puis simplement `docker compose up -d --build`)
+#   docker compose -f docker-compose.prod.yml up -d
+#   (ou COMPOSE_FILE=docker-compose.prod.yml dans .env, puis simplement `docker compose up -d`)
+#
+# Mise à jour : `git pull && docker compose up -d`. Les images api et web sont reconstruites à
+# chaque `up` (pull_policy: build) et l'API applique les migrations en attente avant de démarrer.
 #
 # Le site (web) écoute sur WEB_BIND:WEB_PORT. La base et l'API ne sont jamais exposées.
 # - Reverse proxy sur une autre machine (Nginx Proxy Manager…) : WEB_BIND = IP de cette machine,
@@ -29,6 +32,9 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    # Rebuilt by every `docker compose up` (cached when nothing changed): after a `git pull`,
+    # the new code and its migrations, applied at the API's startup, are always taken.
+    pull_policy: build
     restart: unless-stopped
     env_file: .env
     environment:
@@ -46,6 +52,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    pull_policy: build
     restart: unless-stopped
     environment:
       NODE_ENV: production

@@ -30,6 +30,9 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    # Rebuilt by every `docker compose up` (cached when nothing changed): after a `git pull`,
+    # the new code and its migrations, applied at the API's startup, are always taken.
+    pull_policy: build
     env_file: .env
     restart: unless-stopped
     environment:
@@ -48,6 +51,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    pull_policy: build
     restart: unless-stopped
     env_file: .env
     environment:

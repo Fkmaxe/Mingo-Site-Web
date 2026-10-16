@@ -18,11 +18,11 @@ pnpm dev     # web http://localhost:3000 · api http://localhost:3001 · doc API
 
 ```bash
 cp .env.example .env                        # puis adapter SMTP_* si besoin
-docker compose --profile full up -d --build # db + mailpit + api + web
+docker compose --profile full up -d         # db + mailpit + api + web (images reconstruites)
 ```
 
 - Web : http://localhost:3000 · API : http://localhost:3001 (doc `/v1/docs` désactivée en production).
-- Les migrations sont appliquées au démarrage du conteneur API.
+- Les migrations sont appliquées au démarrage du conteneur API. Les images `api` et `web` sont reconstruites à chaque `up` (`pull_policy: build`), donc toujours à jour du code.
 - Données de démo (une seule fois, depuis ta machine) : `pnpm db:seed`.
 - Dans Docker, Mailpit s'appelle `mailpit` : pour l'utiliser, `SMTP_HOST=mailpit` et `SMTP_PORT=1025`. **Attention** : avec le SMTP réel dans `.env`, les tests manuels envoient de vrais mails aux comptes de démo.
 - `docker compose --profile full down` pour tout arrêter (le volume de la base est conservé).
@@ -58,7 +58,7 @@ Tester l'envoi des mails : `docker compose exec api node dist/mail-test.js toi@e
 
 - **Premier administrateur** : crée ton compte sur le site et confirme l'adresse, puis `docker compose exec api node dist/make-admin.js j.dupont@myskolae.fr` (`--revoke` pour retirer). Reconnecte-toi : Gestion → Administration permet de créer l'année scolaire, les pôles et de donner les rôles.
 - Migrations appliquées au démarrage de l'API. Ne **jamais** lancer `pnpm db:seed` en production.
-- Mise à jour : `git pull && docker compose up -d --build`. Arrêt : `docker compose down` (les données restent ; **jamais** `-v`, qui efface la base).
+- Mise à jour : `git pull && docker compose up -d`. Les images `api` et `web` sont reconstruites à chaque `up` (`pull_policy: build`, rapide quand rien n'a changé), puis l'API applique les migrations en attente **avant** de démarrer, toutes dans une seule transaction : si l'une échoue, aucune n'est appliquée, l'API ne démarre pas (`docker compose logs api` dit pourquoi) et le site reste arrêté plutôt que de tourner sur une base à moitié migrée. Certaines migrations suppriment d'anciennes colonnes après avoir recopié leurs données : avant une mise à jour importante, faire une sauvegarde à jour (`docker compose exec -T db pg_dump -Fc -U bde bde_mingo > backups/avant-maj.dump`). Chaque `up` redémarre `api` et `web` quelques secondes, même sans changement (Docker Desktop recalcule l'image à chaque construction). Arrêt : `docker compose down` (les données restent ; **jamais** `-v`, qui efface la base).
 - **Sauvegardes** : `backups/bde-AAAA-MM-JJ.dump` (base) et `backups/photos-AAAA-MM-JJ.tar.gz` (photos de l'inventaire) chaque jour, 14 jours gardés, à recopier hors du serveur. Restauration de la base :
   ```bash
   docker compose exec -T db pg_restore -U bde -d bde_mingo --clean --if-exists < backups/bde-AAAA-MM-JJ.dump
