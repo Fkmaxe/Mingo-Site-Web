@@ -1,8 +1,10 @@
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@bde/shared";
+import { Settings2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/brand";
+import { Button } from "@/components/ui/button";
 import { ApplicationCard } from "@/features/applications/application-card";
 import { APPLICATION_STATUS_LABELS } from "@/features/applications/labels";
 import { listApplications } from "@/features/applications/queries";
@@ -33,6 +35,14 @@ export default async function ApplicationsPage({
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Candidatures" breadcrumb={manageTrail()} />
+      {isBoard ? (
+        <Button asChild variant="outline" className="self-start">
+          <Link href="/manage/applications/settings">
+            <Settings2 aria-hidden />
+            Configurer le formulaire
+          </Link>
+        </Button>
+      ) : null}
       <nav
         aria-label="Statut"
         className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-sm"

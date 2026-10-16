@@ -26,6 +26,7 @@ const app = createApp({
   photos: createMemoryPhotoStore(),
   receipts: createMemoryReceiptStore(),
   taskFiles: createMemoryDocumentStore(),
+  applicationFiles: createMemoryDocumentStore(),
 });
 const document = app.getOpenAPI31Document(OPENAPI_CONFIG);
 writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`);

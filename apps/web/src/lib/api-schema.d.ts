@@ -5979,6 +5979,499 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/applications/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Formulaire de candidature de l'année */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApplicationForm"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateApplicationFormInput"];
+                };
+            };
+            responses: {
+                /** @description Formulaire enregistré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApplicationForm"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/application/documents/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query: {
+                    name: string;
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            /** @description Le fichier lui-même, 10 Mo au plus */
+            requestBody: {
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                    "image/webp": string;
+                    "application/pdf": string;
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation": string;
+                    "application/msword": string;
+                    "application/vnd.ms-excel": string;
+                    "application/vnd.ms-powerpoint": string;
+                    "text/plain": string;
+                    "text/csv": string;
+                };
+            };
+            responses: {
+                /** @description Document remis */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Application"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Document retiré */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Application"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/application/documents/{key}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ApplicationLinkInput"];
+                };
+            };
+            responses: {
+                /** @description Lien remis */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Application"];
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/applications/files/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Document de la candidature */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": string;
+                        "image/png": string;
+                        "image/webp": string;
+                        "application/pdf": string;
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                        "application/vnd.openxmlformats-officedocument.presentationml.presentation": string;
+                        "application/msword": string;
+                        "application/vnd.ms-excel": string;
+                        "application/vnd.ms-powerpoint": string;
+                        "text/plain": string;
+                        "text/csv": string;
+                    };
+                };
+                /** @description Données invalides */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas de session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Pas le droit */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Introuvable */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Déjà candidat, déjà membre ou candidature tranchée */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/applications": {
         parameters: {
             query?: never;
@@ -6156,12 +6649,18 @@ export interface paths {
                             id: string;
                             /** @enum {string} */
                             status: "new" | "interview" | "accepted" | "rejected";
-                            motivation: string;
-                            wishedPole: {
+                            wishes: {
                                 /** Format: uuid */
                                 id: string;
                                 name: string;
+                            }[];
+                            questions: components["schemas"]["CustomField"][];
+                            answers: {
+                                [key: string]: string | number | boolean | string[];
                             };
+                            documentRequirements: components["schemas"]["DocumentRequirement"][];
+                            documents: components["schemas"]["ApplicationDocument"][];
+                            missingDocuments: string[];
                             user: {
                                 /** Format: uuid */
                                 id: string;
@@ -11298,7 +11797,7 @@ export interface components {
         ApiError: {
             error: {
                 /** @enum {string} */
-                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "EVENT_HAS_LEAGUE_POINTS" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INITIATOR_NOT_MEMBER" | "TOO_MANY_ATTACHMENTS" | "TOO_MANY_ITEMS" | "INTERNAL_ERROR";
+                code: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "FORBIDDEN" | "DOMAIN_NOT_ALLOWED" | "NOT_FOUND" | "INVALID_STATUS_TRANSITION" | "ALREADY_REGISTERED" | "CAPACITY_BELOW_REGISTRATIONS" | "STAFF_SLOT_FULL" | "ALREADY_VOLUNTEERED" | "NOT_A_MEMBER" | "GRADE_LOCKED" | "ALREADY_APPLIED" | "ALREADY_MEMBER" | "ALREADY_EXISTS" | "NOT_AVAILABLE" | "ALREADY_REVERSED" | "TEAM_REQUIRED" | "NOT_TEAM_EVENT" | "TEAM_FULL" | "TEAM_NAME_TAKEN" | "TEAMS_LOCKED" | "REGISTRATION_CLOSED" | "DEADLINE_PASSED" | "ALREADY_CHECKED_IN" | "TICKET_NOT_VALID" | "RATE_LIMITED" | "MANUAL_ADJUSTMENT_REQUIRES_REASON" | "MEMBERS_HAVE_NO_OPEN_POINTS" | "NO_CURRENT_SCHOOL_YEAR" | "TOURNAMENT_EXISTS" | "INVALID_TOURNAMENT" | "BRACKET_EXISTS" | "POOLS_NOT_FINISHED" | "MATCH_LOCKED" | "MATCH_NOT_READY" | "DRAW_NOT_ALLOWED" | "NOT_A_LEAGUE_EVENT" | "EVENT_HAS_LEAGUE_POINTS" | "PLACE_OUT_OF_SCALE" | "NOT_A_PARTICIPANT" | "TRACK_NOT_OFFERED" | "INITIATOR_NOT_MEMBER" | "TOO_MANY_ATTACHMENTS" | "TOO_MANY_ITEMS" | "APPLICATIONS_CLOSED" | "INTERNAL_ERROR";
                 message: string;
                 details?: unknown;
             };
@@ -12099,17 +12598,58 @@ export interface components {
             userId: string;
             present: boolean;
         };
+        ApplicationForm: {
+            isOpen: boolean;
+            /** Format: date-time */
+            closesAt: string | null;
+            acceptingNow: boolean;
+            intro: string;
+            maxWishes: number;
+            allPolesRecruiting: boolean;
+            recruitingPoles: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            }[];
+            fields: components["schemas"]["CustomField"][];
+            documents: components["schemas"]["DocumentRequirement"][];
+        };
+        DocumentRequirement: {
+            key: string;
+            label: string;
+            description?: string;
+            required: boolean;
+            pdfOnly: boolean;
+            allowLink: boolean;
+        };
+        UpdateApplicationFormInput: {
+            isOpen: boolean;
+            /** Format: date-time */
+            closesAt: string | null;
+            intro: string;
+            maxWishes: number;
+            allPolesRecruiting: boolean;
+            recruitingPoleIds: string[];
+            fields: components["schemas"]["CustomField"][];
+            documents: components["schemas"]["DocumentRequirement"][];
+        };
         Application: {
             /** Format: uuid */
             id: string;
             /** @enum {string} */
             status: "new" | "interview" | "accepted" | "rejected";
-            motivation: string;
-            wishedPole: {
+            wishes: {
                 /** Format: uuid */
                 id: string;
                 name: string;
+            }[];
+            questions: components["schemas"]["CustomField"][];
+            answers: {
+                [key: string]: string | number | boolean | string[];
             };
+            documentRequirements: components["schemas"]["DocumentRequirement"][];
+            documents: components["schemas"]["ApplicationDocument"][];
+            missingDocuments: string[];
             user: {
                 /** Format: uuid */
                 id: string;
@@ -12120,10 +12660,26 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        ApplicationDocument: {
+            key: string;
+            /** @enum {string} */
+            kind: "file" | "link";
+            name: string;
+            url: string;
+            /** @enum {string|null} */
+            contentType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "application/msword" | "application/vnd.ms-excel" | "application/vnd.ms-powerpoint" | "text/plain" | "text/csv" | null;
+            sizeBytes: number | null;
+        };
+        ApplicationLinkInput: {
+            /** Format: uri */
+            url: string;
+        };
         CreateApplicationInput: {
-            /** Format: uuid */
-            wishedPoleId: string;
-            motivation: string;
+            wishedPoleIds: string[];
+            /** @default {} */
+            answers: {
+                [key: string]: unknown;
+            };
         };
         DecideApplicationInput: {
             /** @enum {string} */

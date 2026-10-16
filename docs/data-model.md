@@ -89,7 +89,11 @@ Solde points open d'un étudiant = `sum(delta) where status in ('validated','exp
 | `task_attachment` | task_id, file_name (unique, magasin `task-files`), original_name, content_type, size_bytes, uploaded_by | |
 | `meeting` | kind (`pole`, `general`, `board`, `leads`), pole_id (rempli seulement pour `pole`), title, starts_at, location, agenda, minutes, deleted_at |
 | `meeting_attendance` | meeting_id, user_id, marked_by — une ligne par présent, comptée dans la note |
-| `application` | user_id, school_year_id, wished_pole_id, motivation, status (`new`, `interview`, `accepted`, `rejected`) |
+| `application` | user_id, school_year_id, questions et document_requirements (copie du formulaire à l'envoi), answers (jsonb validé par les questions), status (`new`, `interview`, `accepted`, `rejected`) | unique (user_id, school_year_id) |
+| `application_wish` | application_id, pole_id, rank (1 = premier choix) | unique (application_id, rank), unique (application_id, pole_id) |
+| `application_document` | application_id, requirement_key, file_name (magasin `application-files`) **ou** link_url, original_name, content_type, size_bytes | unique (application_id, requirement_key) ; fichier xor lien |
+| `application_form` | school_year_id (unique), is_open, closes_at, intro, max_wishes (1 à 3), all_poles_recruiting, fields (jsonb), documents (jsonb), updated_by | un par année |
+| `application_form_pole` | form_id, pole_id | pôles qui recrutent quand tous ne recrutent pas |
 | `partner` | name, website, contact_name, contact_email, status (`prospect`, `contacted`, `negotiating`, `active`, `ended`), benefits, notes, owner_membership_id |
 | `treasury_transaction` | event_id (nullable), school_year_id, counterparty, initiator_user_id, kind (`debit`, `credit`, `other`, jamais modifié), other_label (ssi `other`), amount_cents (int signé, non nul, jamais modifié ; débit < 0, crédit > 0 hors annulation), occurred_on, comment, receipt_url (ancien lien, lecture seule), reversal_of_id (unique : écriture d'annulation), created_by |
 | `treasury_attachment` | transaction_id, file_name (unique, nom dans le stockage), original_name, content_type (photo ou PDF), size_bytes, uploaded_by — justificatifs, 10 par écriture |

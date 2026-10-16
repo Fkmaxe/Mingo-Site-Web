@@ -281,6 +281,20 @@
       "when": 1792084737280,
       "tag": "0039_calendar_and_task_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792091387832,
+      "tag": "0040_application_form",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792091400496,
+      "tag": "0041_drop_application_motivation",
+      "breakpoints": true
     }
   ]
 }

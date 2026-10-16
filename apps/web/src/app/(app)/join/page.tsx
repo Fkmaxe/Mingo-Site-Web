@@ -3,10 +3,11 @@ import { PageHeader } from "@/components/brand";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { ApplyForm } from "@/features/applications/apply-form";
 import { APPLICATION_STATUS_LABELS } from "@/features/applications/labels";
-import { getMyApplication } from "@/features/applications/queries";
+import { MyDocuments } from "@/features/applications/my-documents";
+import { getApplicationForm, getMyApplication } from "@/features/applications/queries";
 import { WithdrawButton } from "@/features/applications/withdraw-button";
-import { listPoles } from "@/features/events/queries";
 import { HOME } from "@/lib/breadcrumbs";
+import { formatDateTime } from "@/lib/paris-time";
 import { requireMe } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Rejoindre le BDE" };
@@ -30,7 +31,7 @@ export default async function JoinPage() {
       </Card>
     );
   }
-  const [application, poles] = await Promise.all([getMyApplication(), listPoles()]);
+  const [application, form] = await Promise.all([getMyApplication(), getApplicationForm()]);
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Rejoindre le BDE" breadcrumb={[HOME]} />
@@ -40,15 +41,38 @@ export default async function JoinPage() {
             Candidature : {APPLICATION_STATUS_LABELS[application.status].toLowerCase()}
           </CardTitle>
           <CardDescription>{STATUS_TEXT[application.status]}</CardDescription>
-          <p className="text-sm">Pôle souhaité : {application.wishedPole.name}</p>
+          <p className="text-sm">
+            {application.wishes.length > 1 ? "Pôles souhaités" : "Pôle souhaité"} :{" "}
+            {application.wishes.map((w) => w.name).join(", ")}
+          </p>
           {application.status === "new" ? <WithdrawButton /> : null}
         </Card>
-      ) : (
+      ) : null}
+      {application ? <MyDocuments application={application} /> : null}
+      {application ? null : (
         <>
-          <p className="text-muted-foreground text-sm">
-            Communication, sport, événementiel, partenariat : dis-nous où tu veux t'investir.
+          <p className="whitespace-pre-line text-muted-foreground text-sm">
+            {form.intro ||
+              "Communication, sport, événementiel, partenariat : dis-nous où tu veux t'investir."}
           </p>
-          <ApplyForm poles={poles} />
+          {form.acceptingNow ? (
+            <>
+              {form.closesAt ? (
+                <p className="text-sm">
+                  Candidatures ouvertes jusqu'au{" "}
+                  <span className="font-medium">{formatDateTime(form.closesAt)}</span>.
+                </p>
+              ) : null}
+              <ApplyForm form={form} />
+            </>
+          ) : (
+            <Card>
+              <CardTitle>Les candidatures sont fermées</CardTitle>
+              <CardDescription>
+                Reviens plus tard, ou suis les événements du BDE en attendant.
+              </CardDescription>
+            </Card>
+          )}
         </>
       )}
     </div>

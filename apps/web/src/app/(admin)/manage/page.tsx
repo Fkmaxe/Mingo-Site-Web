@@ -45,7 +45,7 @@ export default async function ManagePage() {
     {
       href: "/manage/applications",
       title: "Candidatures",
-      description: "Recrutement des nouveaux membres",
+      description: "Recrutement : candidatures, questions et documents demandés",
       icon: UserPlus,
       show: me.permissions.includes("members:manage"),
     },

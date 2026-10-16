@@ -7,6 +7,7 @@ export const SITE_HOME: Crumb = { label: "Accueil", href: "/" };
 export const MANAGE: Crumb = { label: "Gestion", href: "/manage" };
 export const MANAGE_EVENTS: Crumb = { label: "Événements", href: "/manage/events" };
 export const OPEN_POINTS: Crumb = { label: "Points open", href: "/manage/open-points" };
+export const APPLICATIONS: Crumb = { label: "Candidatures", href: "/manage/applications" };
 export const TREASURY: Crumb = { label: "Trésorerie", href: "/manage/treasury" };
 export const EVENTS: Crumb = { label: "Événements", href: "/events" };
 export const TICKETS: Crumb = { label: "Mes billets", href: "/tickets" };

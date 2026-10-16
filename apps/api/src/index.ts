@@ -28,7 +28,8 @@ if (!pusher.enabled) console.log("Notifications push désactivées (pas de clés
 const photos = createDiskPhotoStore(env.UPLOAD_DIR);
 const receipts = createDiskReceiptStore(join(env.UPLOAD_DIR, "receipts"));
 const taskFiles = createDiskDocumentStore(join(env.UPLOAD_DIR, "task-files"));
-const app = createApp({ env, db, mailer, pusher, photos, receipts, taskFiles });
+const applicationFiles = createDiskDocumentStore(join(env.UPLOAD_DIR, "application-files"));
+const app = createApp({ env, db, mailer, pusher, photos, receipts, taskFiles, applicationFiles });
 
 const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   console.log(`API BDE Mingo sur http://localhost:${info.port}`);

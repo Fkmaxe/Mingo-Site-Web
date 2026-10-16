@@ -24,6 +24,7 @@ export const testNotifier = createNotifier(getTestDb(), testPusher);
 export const testPhotos = createMemoryPhotoStore();
 export const testReceipts = createMemoryReceiptStore();
 export const testTaskFiles = createMemoryDocumentStore();
+export const testApplicationFiles = createMemoryDocumentStore();
 
 export function createTestApp(
   overrides: Partial<Omit<AppDeps, "mailer" | "pusher">> & {
@@ -39,6 +40,7 @@ export function createTestApp(
     photos: testPhotos,
     receipts: testReceipts,
     taskFiles: testTaskFiles,
+    applicationFiles: testApplicationFiles,
     ...overrides,
     mailer,
     pusher,

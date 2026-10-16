@@ -39,6 +39,7 @@ export type AppDeps = AuthDeps & {
   photos: PhotoStore;
   receipts: ReceiptStore;
   taskFiles: DocumentStore;
+  applicationFiles: DocumentStore;
 };
 
 export const OPENAPI_CONFIG = {
@@ -71,7 +72,9 @@ export function createApp(deps: AppDeps) {
     onError: (c) => tooLargeError(c),
   });
   app.use("*", (c, next) => {
-    if (/^\/v1\/tasks\/[^/]+\/attachments$/.test(c.req.path)) return documentLimit(c, next);
+    if (/^\/v1\/(tasks\/[^/]+\/attachments|me\/application\/documents\/[^/]+)$/.test(c.req.path)) {
+      return documentLimit(c, next);
+    }
     if (/^\/v1\/(inventory\/items\/[^/]+\/photo|me\/avatar)$/.test(c.req.path)) {
       return photoLimit(c, next);
     }
@@ -109,7 +112,7 @@ export function createApp(deps: AppDeps) {
   app.route("/v1", createTasksRouter(deps.taskFiles));
   app.route("/v1", createCalendarRouter());
   app.route("/v1", createMeetingsRouter());
-  app.route("/v1", createApplicationsRouter());
+  app.route("/v1", createApplicationsRouter(deps.applicationFiles));
   app.route("/v1", createMembersRouter());
   app.route("/v1", createPartnersRouter());
   app.route("/v1", createTreasuryRouter(deps.receipts));

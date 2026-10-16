@@ -1,5 +1,7 @@
 "use client";
 
+import { formatAnswer } from "@bde/shared";
+import { ExternalLink, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FormAlert } from "@/components/form-field";
@@ -12,10 +14,14 @@ import type { Application } from "./types";
 
 type Props = { application: Application; poles: { id: string; name: string }[] };
 
-/** Review card: interview, accept (in the wished pole or another one) or reject. */
+/**
+ * Review card: wishes, answers to the questions asked when they applied, documents; then
+ * interview, accept (in the first wish by default, or another pole) or reject.
+ */
 export function ApplicationCard({ application, poles }: Props) {
   const router = useRouter();
-  const [poleId, setPoleId] = useState(application.wishedPole.id);
+  const firstWish = application.wishes[0]?.id ?? poles[0]?.id ?? "";
+  const [poleId, setPoleId] = useState(firstWish);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const open = application.status === "new" || application.status === "interview";
@@ -42,9 +48,51 @@ export function ApplicationCard({ application, poles }: Props) {
         </span>
       </div>
       <p className="text-primary text-sm">
-        Souhaite : pôle {application.wishedPole.name} · {formatShortDay(application.createdAt)}
+        Souhaite : {application.wishes.map((w, i) => `${i + 1}. ${w.name}`).join(" · ") || "—"} ·{" "}
+        {formatShortDay(application.createdAt)}
       </p>
-      <p className="whitespace-pre-line text-sm">{application.motivation}</p>
+      {application.missingDocuments.length > 0 ? (
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-destructive text-sm">
+          Dossier incomplet : {application.missingDocuments.join(", ")}
+        </p>
+      ) : null}
+      <dl className="flex flex-col gap-3">
+        {application.questions.map((q) => {
+          const answer = formatAnswer(application.answers[q.key]);
+          return (
+            <div key={q.key} className="flex flex-col gap-0.5">
+              <dt className="font-medium text-muted-foreground text-xs">{q.label}</dt>
+              <dd className="whitespace-pre-line text-sm">{answer || "—"}</dd>
+            </div>
+          );
+        })}
+      </dl>
+      {application.documents.length > 0 ? (
+        <ul className="flex flex-col gap-1">
+          {application.documents.map((d) => {
+            const label =
+              application.documentRequirements.find((r) => r.key === d.key)?.label ?? d.key;
+            return (
+              <li key={d.key}>
+                <a
+                  href={d.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex min-h-11 items-center gap-2 text-sm hover:underline"
+                >
+                  {d.kind === "link" ? (
+                    <ExternalLink aria-hidden className="size-4 shrink-0 text-primary" />
+                  ) : (
+                    <FileText aria-hidden className="size-4 shrink-0 text-primary" />
+                  )}
+                  <span className="font-medium">{label}</span>
+                  <span className="truncate text-muted-foreground">{d.name}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
       {error ? <FormAlert tone="error">{error}</FormAlert> : null}
       {open ? (
         <div className="flex flex-col gap-2">
